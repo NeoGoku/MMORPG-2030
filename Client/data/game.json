@@ -1,0 +1,742 @@
+{
+  "version": 1,
+  "provisional": true,
+  "attributes": [
+    "strength",
+    "vitality",
+    "intelligence",
+    "wisdom",
+    "dexterity",
+    "agility",
+    "armor",
+    "resistance"
+  ],
+  "classes": {
+    "Dark Mage": {
+      "attribute": "intelligence",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Leerenblitz",
+          "kind": "damage",
+          "power": 2.0,
+          "range": 15,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Schattenwall",
+          "kind": "buff",
+          "power": 1.0,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Light Mage": {
+      "attribute": "wisdom",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Lichtstrahl",
+          "kind": "damage",
+          "power": 1.8,
+          "range": 14,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Erneuerung",
+          "kind": "heal",
+          "power": 30,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Archer": {
+      "attribute": "dexterity",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Kraftschuss",
+          "kind": "damage",
+          "power": 1.9,
+          "range": 18,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Fokus",
+          "kind": "buff",
+          "power": 1.0,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Shield Sword": {
+      "attribute": "strength",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Schildstoß",
+          "kind": "damage",
+          "power": 1.5,
+          "range": 3.2,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Deckung",
+          "kind": "buff",
+          "power": 1.0,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Dual Swords": {
+      "attribute": "agility",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Doppelschlag",
+          "kind": "damage",
+          "power": 2.2,
+          "range": 3.2,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Klingenfokus",
+          "kind": "buff",
+          "power": 1.0,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Healer": {
+      "attribute": "wisdom",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Sühne",
+          "kind": "damage",
+          "power": 1.6,
+          "range": 14,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Heilung",
+          "kind": "heal",
+          "power": 45,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Creature Summoner": {
+      "attribute": "intelligence",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Geisterblitz",
+          "kind": "damage",
+          "power": 1.7,
+          "range": 14,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Geisterbund",
+          "kind": "buff",
+          "power": 1.0,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    },
+    "Tank": {
+      "attribute": "vitality",
+      "skills": [
+        {
+          "id": "skill1",
+          "name": "Wuchtstoß",
+          "kind": "damage",
+          "power": 1.6,
+          "range": 3.2,
+          "cost": 10,
+          "cooldown": 3,
+          "enabled": true
+        },
+        {
+          "id": "skill2",
+          "name": "Festung",
+          "kind": "buff",
+          "power": 1.0,
+          "range": 0,
+          "cost": 15,
+          "cooldown": 10,
+          "enabled": true
+        },
+        {
+          "id": "skill3",
+          "name": "Slot 3 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill4",
+          "name": "Slot 4 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill5",
+          "name": "Slot 5 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        },
+        {
+          "id": "skill6",
+          "name": "Slot 6 · gesperrt",
+          "kind": "locked",
+          "power": 0,
+          "range": 0,
+          "cost": 0,
+          "cooldown": 0,
+          "enabled": false
+        }
+      ]
+    }
+  },
+  "items": {
+    "ore": {
+      "name": "Eisenerz",
+      "stack": 99,
+      "price": 2,
+      "rarity": "Normal"
+    },
+    "herb": {
+      "name": "Heilkraut",
+      "stack": 99,
+      "price": 2,
+      "rarity": "Normal"
+    },
+    "wood": {
+      "name": "Holz",
+      "stack": 99,
+      "price": 2,
+      "rarity": "Normal"
+    },
+    "scrap": {
+      "name": "Drohnenschrott",
+      "stack": 99,
+      "price": 1,
+      "rarity": "Normal"
+    },
+    "potion": {
+      "name": "Heiltrank",
+      "stack": 20,
+      "price": 8,
+      "rarity": "Normal",
+      "heal": 35
+    },
+    "iron_sword": {
+      "name": "Eisenwaffe",
+      "stack": 1,
+      "price": 25,
+      "rarity": "Uncommon",
+      "slot": "weapon",
+      "attack": 6
+    },
+    "guard_coat": {
+      "name": "Wachmantel",
+      "stack": 1,
+      "price": 20,
+      "rarity": "Normal",
+      "slot": "chest",
+      "defense": 3
+    }
+  },
+  "professions": [
+    "mining",
+    "herbalism",
+    "woodcutting",
+    "smithing",
+    "tailoring",
+    "alchemy",
+    "engineering",
+    "cooking",
+    "building",
+    "animal_breeding"
+  ],
+  "inventorySlots": 24,
+  "baseFarmCost": 100,
+  "farmGrowth": 2,
+  "recipes": {
+    "iron_sword": {
+      "name": "Eisenwaffe schmieden",
+      "profession": "smithing",
+      "inputs": {
+        "ore": 3
+      },
+      "output": "iron_sword",
+      "count": 1
+    },
+    "potion": {
+      "name": "Heiltrank brauen",
+      "profession": "alchemy",
+      "inputs": {
+        "herb": 2
+      },
+      "output": "potion",
+      "count": 1
+    }
+  },
+  "services": {
+    "merchant": {
+      "x": 8,
+      "z": 6
+    },
+    "workbench": {
+      "x": -8,
+      "z": 6
+    },
+    "teleporter": {
+      "x": 4,
+      "z": 6
+    },
+    "return": {
+      "x": 4,
+      "z": 38
+    }
+  },
+  "nodes": [
+    {
+      "id": "ore",
+      "name": "Erzader",
+      "profession": "mining",
+      "item": "ore",
+      "x": -8,
+      "z": -3
+    },
+    {
+      "id": "herb",
+      "name": "Heilkräuter",
+      "profession": "herbalism",
+      "item": "herb",
+      "x": 8,
+      "z": 24
+    },
+    {
+      "id": "wood",
+      "name": "Sammelholz",
+      "profession": "woodcutting",
+      "item": "wood",
+      "x": -8,
+      "z": 24
+    }
+  ],
+  "quests": [
+    {
+      "id": "herbs",
+      "name": "Kräuter für die Wache",
+      "type": "side",
+      "event": "gather",
+      "item": "herb",
+      "required": 3,
+      "prerequisite": "",
+      "coins": 12,
+      "exp": 15
+    },
+    {
+      "id": "class_training",
+      "name": "Beherrsche deine Klasse",
+      "type": "class",
+      "event": "skill",
+      "item": "",
+      "required": 2,
+      "prerequisite": "",
+      "coins": 10,
+      "exp": 20
+    },
+    {
+      "id": "artisan",
+      "name": "Erstes Handwerk",
+      "type": "profession",
+      "event": "craft",
+      "item": "",
+      "required": 1,
+      "prerequisite": "herbs",
+      "coins": 15,
+      "exp": 25
+    }
+  ],
+  "pet": {
+    "name": "Arkaner Funke",
+    "damage": 4,
+    "heal": 4,
+    "interval": 3,
+    "range": 10
+  },
+  "zones": [
+    {
+      "id": "gate",
+      "name": "Nordtor",
+      "minZ": -32,
+      "maxZ": 32
+    },
+    {
+      "id": "park",
+      "name": "Südpark",
+      "minZ": 32,
+      "maxZ": 56
+    }
+  ],
+  "rarities": [
+    "Normal",
+    "Uncommon",
+    "Rare",
+    "Epic",
+    "Legendary"
+  ],
+  "baseAttack": 14,
+  "baseHp": 100,
+  "vitalityHp": 8,
+  "baseMana": 100,
+  "wisdomMana": 3,
+  "manaRegen": 3,
+  "buffAttack": 5,
+  "buffDefense": 3,
+  "buffSeconds": 8,
+  "petDamage": 4,
+  "petHeal": 4,
+  "petInterval": 3,
+  "petRange": 10,
+  "petExpPerLevel": 50,
+  "levelExpBase": 100
+}

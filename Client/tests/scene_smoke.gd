@@ -23,6 +23,8 @@ func _run() -> void:
     root.add_child(scene)
     for i in range(8):
         await process_frame
+    if not check(scene.hud.skill_buttons.size()==6,"Six visible skill slots"):
+        return
     var viewport := root.get_visible_rect()
     for button in scene.hud.action_buttons:
         if not check(viewport.encloses(button.get_global_rect()), "Action button must be inside viewport: %s" % button.get_global_rect()):

@@ -85,17 +85,25 @@ jobs:
           set -euo pipefail
           mkdir -p logs
           dotnet build Server/MMORPG.Server.csproj --configuration Release
-          dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5080 > logs/server.log 2>&1 &
+          MMORPG_ALLOW_GUEST=true dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5080 > logs/server.log 2>&1 &
           server_pid=$!
-          trap 'kill "$server_pid"' EXIT
+          dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5081 > logs/auth-server.log 2>&1 &
+          auth_pid=$!
+          trap 'kill "$server_pid" "$auth_pid"' EXIT
           for attempt in {1..30}; do
             if curl -fsS http://127.0.0.1:5080/health; then break; fi
             sleep 1
           done
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:5081/health; then break; fi
+            sleep 1
+          done
           timeout 30s godot --headless --path Client --script res://tests/network_smoke.gd 2>&1 | tee logs/network.log
           timeout 30s godot --headless --path Client --script res://tests/gameplay_smoke.gd 2>&1 | tee logs/gameplay.log
+          timeout 30s godot --headless --path Client --script res://tests/m3_smoke.gd 2>&1 | tee logs/m3.log
           timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/scene_smoke.gd 2>&1 | tee logs/scene.log
           timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/online_scene_smoke.gd 2>&1 | tee logs/online-scene.log
+          timeout 60s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/m3_ui_smoke.gd 2>&1 | tee logs/m3-ui.log
       - name: Import and export
         shell: bash
         run: |

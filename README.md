@@ -42,3 +42,13 @@ godot --headless --path Client --script res://tests/network_smoke.gd
 ```
 
 [Architektur/Protokoll](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Asset-Herkunft](docs/ASSETS.md). Noch fehlen unter anderem Konten, Charaktererstellung, PostgreSQL-Persistenz, vollständige Klassen/Fertigkeiten und MMO-Skalierung. Der aktuelle Bezirk ersetzt diese GDD-Ziele nicht.
+
+## M3: Charaktere, Skills, Wirtschaft und Begleiter
+
+**Online** öffnet jetzt Anmeldung und drei Charakterplätze. Server-Root per HTTPS eingeben, registrieren/anmelden, Name und Klasse wählen, erstellen und spielen. Eine PostgreSQL-Konfiguration speichert Online-Fortschritt; ohne Datenbank steht deutlich **flüchtiger Testbetrieb**. Kein öffentlicher Server wurde eingerichtet. [Server-/Datenbankanleitung](docs/M3_OPERATIONS.md).
+
+**Charakter / Inventar** öffnet Attribute, Inventar/Ausrüstung, Questlog und Pet-Menü. Händler und Werkbank stehen rechts/links der Wache. In ihrer Nähe Interaktion wählen; Sammelstellen liegen bei den beschrifteten Markern. Erz zu einer Eisenwaffe schmieden, Kräuter zu Heiltränken verarbeiten, ausrüsten/handeln und Berufs-EXP für zusätzliche Statpunkte sammeln. Die Zusatzaufträge werden im Questlog geführt und beim Händler abgegeben. Das Portal führt zum Südpark und zurück.
+
+Sechs Skillknöpfe sind sichtbar (PC: 1–6); pro Klasse sind derzeit zwei tatsächlich nutzbar, vier gesperrt. Mana und Cooldowns gelten serverseitig. Das Pet-Menü aktiviert genau einen Funken in Kampf-, Heil- oder Beutemodus. Fortschritt, vollständige Klassen/alle Berufe, Gruppen/Chat und Streaming sind nicht pauschal fertig — [genaue Grenzen](docs/IMPLEMENTATION_STATUS.md).
+
+Im Fenster **Layout** lassen sich Joystick, Aktions- und Skillknöpfe einzeln verschieben und lokal speichern; **Standardpositionen** setzt sie zurück.

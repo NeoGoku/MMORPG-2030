@@ -11,7 +11,19 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mmorpg
+          POSTGRES_PASSWORD: ephemeral-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d mmorpg"
+          --health-interval 5s --health-retries 10
+    env:
+      MMORPG_TEST_DATABASE: Host=localhost;Port=5432;Database=mmorpg;Username=postgres;Password=ephemeral-ci-only
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -27,7 +39,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5080 > server.log 2>&1 &
+          MMORPG_ALLOW_GUEST=true dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5080 > server.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           for attempt in {1..30}; do
@@ -35,8 +47,22 @@ jobs:
             sleep 1
           done
           python tests/multiplayer.py
+      - name: Authenticated PostgreSQL reconnect integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          MMORPG_DATABASE="$MMORPG_TEST_DATABASE" dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5081 > auth-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:5081/health; then break; fi
+            sleep 1
+          done
+          python tests/accounts.py
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: server-log
-          path: server.log
+          path: |
+            server.log
+            auth-server.log

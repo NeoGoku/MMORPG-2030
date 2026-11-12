@@ -1,0 +1,53 @@
+using System.Numerics;
+using System.Text.Json;
+
+namespace MMORPG.Server;
+
+public sealed class GameRuleException(string message) : Exception(message);
+public sealed class SkillDef { public string Id {get;set;}="";public string Name {get;set;}=""; public string Kind {get;set;}="";public double Power {get;set;} public double Range {get;set;} public int Cost {get;set;} public double Cooldown {get;set;} public bool Enabled {get;set;} }
+public sealed class ClassDef { public string Attribute {get;set;}=""; public List<SkillDef> Skills {get;set;}=[]; }
+public sealed class ItemDef {public string Name {get;set;}="";public int Stack {get;set;}public int Price {get;set;}public string Rarity {get;set;}="Normal"; public string Slot {get;set;}="";public int Attack {get;set;}public int Defense {get;set;}public int Heal {get;set;} }
+public sealed class Recipe {public string Name {get;set;}="";public string Profession {get;set;}="";public Dictionary<string,int> Inputs {get;set;}=[];public string Output {get;set;}="";public int Count {get;set;} }
+public sealed class QuestDef {public string Id {get;set;}="";public string Name {get;set;}="";public string Type {get;set;}="";public string Event {get;set;}="";public string Item {get;set;}="";public string Prerequisite {get;set;}="";public int Required {get;set;}public int Coins {get;set;}public int Exp {get;set;} }
+public sealed class ResourceNode : Point {public string Id {get;set;}="";public string Name {get;set;}="";public string Profession {get;set;}="";public string Item {get;set;}="";}
+public sealed class GameCatalog
+{
+    public List<string> Attributes {get;set;}=[];public Dictionary<string,ClassDef> Classes {get;set;}=[]; public Dictionary<string,ItemDef> Items {get;set;}=[];
+    public Dictionary<string,Recipe> Recipes {get;set;}=[];public List<string> Professions {get;set;}=[];public List<ResourceNode> Nodes {get;set;}=[];public Dictionary<string,Point> Services {get;set;}=[];public List<QuestDef> Quests {get;set;}=[];
+    public int BaseAttack {get;set;}=14;public int BaseHp {get;set;}=100;public int VitalityHp {get;set;}=8;public int BaseMana {get;set;}=100;public int WisdomMana {get;set;}=3;public int ManaRegen {get;set;}=3;public int BuffAttack {get;set;}=5;public int BuffDefense {get;set;}=3;public int BuffSeconds {get;set;}=8;public int PetDamage {get;set;}=4;public int PetHeal {get;set;}=4;public int PetInterval {get;set;}=3;public int PetRange {get;set;}=10;public int PetExpPerLevel {get;set;}=50;public int LevelExpBase {get;set;}=100;
+    public int InventorySlots {get;set;}=24;public int BaseFarmCost {get;set;}=100;public int FarmGrowth {get;set;}=2;
+    public static GameCatalog Load(string path)=>JsonSerializer.Deserialize<GameCatalog>(File.ReadAllText(path),new JsonSerializerOptions{PropertyNameCaseInsensitive=true})!;
+}
+public sealed class PetState {public bool Active {get;set;} public string Mode {get;set;}="combat";public int Level {get;set;}=1;public int Exp {get;set;}public int Evolution {get;set;}public List<string> Parents {get;set;}=[];}
+public sealed class CharacterState
+{
+    public int Level {get;set;}=1;public int Exp {get;set;}public int StatPoints {get;set;}public int Coins {get;set;}=20;public int Scrap {get;set;}public int Kills {get;set;}public string Quest {get;set;}="available";
+    public int Hp {get;set;}=100;public Dictionary<string,double> Timers {get;set;}=[];public double BuffExpires {get;set;}
+    public double X {get;set;}=0;public double Z {get;set;}=10;public int Mana {get;set;}=100;public Dictionary<string,int> Attributes {get;set;}=[];
+    public Dictionary<string,int> Inventory {get;set;}=new(){{"potion",2}};public Dictionary<string,string> Equipment {get;set;}=[];
+    public Dictionary<string,int> Professions {get;set;}=[];public Dictionary<string,int> QuestProgress {get;set;}=[];public HashSet<string> ClaimedQuests {get;set;}=[];
+    public string FarmXp {get;set;}="0";public int FarmedPoints {get;set;}public PetState Pet {get;set;}=new();
+}
+public sealed class CharacterRecord
+{
+    public string Id {get;set;}=Guid.NewGuid().ToString("N");public string AccountId {get;set;}="";public int Slot {get;set;}public string Name {get;set;}="Reisender";public string ClassId {get;set;}="Shield Sword";
+    public string Appearance {get;set;}="default";public long Version {get;set;} public CharacterState State {get;set;}=new();
+}
+public static class CharacterRules
+{
+    public static CharacterRecord Clone(CharacterRecord c)=>JsonSerializer.Deserialize<CharacterRecord>(JsonSerializer.Serialize(c))!;
+    public static bool Allocate(CharacterState c,string attribute,GameCatalog g){if(c.StatPoints<1||!g.Attributes.Contains(attribute))return false;c.StatPoints--;c.Attributes[attribute]=checked(c.Attributes.GetValueOrDefault(attribute)+1);return true;}
+    public static BigInteger FarmCost(CharacterState c,GameCatalog g)=>g.BaseFarmCost*BigInteger.Pow(g.FarmGrowth,c.FarmedPoints);
+    public static bool FarmPoint(CharacterState c,GameCatalog g){var xp=BigInteger.Parse(c.FarmXp);var cost=FarmCost(c,g);if(xp<cost)return false;c.FarmXp=(xp-cost).ToString();c.FarmedPoints++;c.StatPoints++;return true;}
+    public static int Slots(CharacterState c,GameCatalog g)=>c.Inventory.Sum(i=>(i.Value+g.Items[i.Key].Stack-1)/g.Items[i.Key].Stack);
+    public static bool Add(CharacterState c,string item,int amount,GameCatalog g){if(!g.Items.ContainsKey(item)||amount<1)return false;var previous=c.Inventory.GetValueOrDefault(item);c.Inventory[item]=checked(previous+amount);if(Slots(c,g)>g.InventorySlots){if(previous==0)c.Inventory.Remove(item);else c.Inventory[item]=previous;return false;}return true;}
+    public static bool Buy(CharacterState c,string item,GameCatalog g){if(!g.Items.TryGetValue(item,out var d)||c.Coins<d.Price||!Add(c,item,1,g))return false;c.Coins-=d.Price;return true;}
+    public static bool Sell(CharacterState c,string item,GameCatalog g){if(!g.Items.TryGetValue(item,out var d)||c.Inventory.GetValueOrDefault(item)<1||c.Equipment.Values.Contains(item))return false;c.Inventory[item]--;if(c.Inventory[item]==0)c.Inventory.Remove(item);c.Coins=checked(c.Coins+Math.Max(1,d.Price/2));return true;}
+    public static bool Equip(CharacterState c,string item,GameCatalog g){if(c.Inventory.GetValueOrDefault(item)<1||!g.Items.TryGetValue(item,out var d)||d.Slot=="")return false;c.Equipment[d.Slot]=item;return true;}
+    public static bool Craft(CharacterState c,string recipe,GameCatalog g){if(!g.Recipes.TryGetValue(recipe,out var r)||r.Inputs.Any(i=>c.Inventory.GetValueOrDefault(i.Key)<i.Value))return false;var copy=new Dictionary<string,int>(c.Inventory);foreach(var i in r.Inputs){c.Inventory[i.Key]-=i.Value;if(c.Inventory[i.Key]==0)c.Inventory.Remove(i.Key);}if(!Add(c,r.Output,r.Count,g)){c.Inventory=copy;return false;}c.Professions[r.Profession]=c.Professions.GetValueOrDefault(r.Profession)+1;c.FarmXp=(BigInteger.Parse(c.FarmXp)+25).ToString();return true;}
+    public static int Attack(CharacterRecord c,GameCatalog g)=>g.BaseAttack+c.State.Attributes.GetValueOrDefault(g.Classes[c.ClassId].Attribute)+c.State.Equipment.Values.Sum(i=>g.Items[i].Attack);
+    public static int Defense(CharacterRecord c,GameCatalog g)=>c.State.Attributes.GetValueOrDefault("armor")+c.State.Equipment.Values.Sum(i=>g.Items[i].Defense);
+    public static int MaxHp(CharacterRecord c,GameCatalog g)=>g.BaseHp+c.State.Attributes.GetValueOrDefault("vitality")*g.VitalityHp;
+    public static void Progress(CharacterState c,string kind,string item,GameCatalog g){foreach(var q in g.Quests.Where(q=>q.Event==kind&&(q.Item==""||q.Item==item)&&!c.ClaimedQuests.Contains(q.Id)&&(q.Prerequisite==""||c.ClaimedQuests.Contains(q.Prerequisite))))c.QuestProgress[q.Id]=Math.Min(q.Required,c.QuestProgress.GetValueOrDefault(q.Id)+1);}
+    public static bool Claim(CharacterState c,string id,GameCatalog g){var q=g.Quests.FirstOrDefault(q=>q.Id==id);if(q is null||c.ClaimedQuests.Contains(id)||c.QuestProgress.GetValueOrDefault(id)<q.Required)return false;c.ClaimedQuests.Add(id);c.Coins+=q.Coins;c.Exp+=q.Exp;while(c.Level<100&&c.Exp>=c.Level*g.LevelExpBase){c.Exp-=c.Level*g.LevelExpBase;c.Level++;c.StatPoints++;}return true;}
+}

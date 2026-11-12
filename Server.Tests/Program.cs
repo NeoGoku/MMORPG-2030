@@ -59,3 +59,6 @@ Check(witnessedDeath&&witnessedDamage,"monster attacks actually damage and kill 
 Check(deathWorld.View(doomed).Players.Single().Hp>0&&deathWorld.View(doomed).Players.Single().Z>0,"monster damage, player death and safe respawn");
 world.Leave(a);Check(world.View(b).Players.Length==1,"disconnect removes visible player");
 Console.WriteLine("All authoritative gameplay scenarios passed.");
+
+M3Tests.Run();
+M3Regression.Run();

@@ -11,6 +11,9 @@ var leg_right: Node3D
 var sword_arm: Node3D
 var name_label: Label3D
 var hp_label: Label3D
+var skill_effect: MeshInstance3D
+var skill_time := 0.0
+var _skill_serial := 0
 var ring: MeshInstance3D
 var timer := 0.0
 var attack_time := 0.0
@@ -23,7 +26,10 @@ static var materials: Dictionary = {}
 
 func _ready() -> void:
     add_child(model)
-    if kind == "monster":
+    if kind == "pet":
+        _part(model,"spirit",SphereMesh.new(),Vector3(0,1.1,0),Vector3(.7,.9,.7),Color("82dccb"),true)
+        _part(model,"core",SphereMesh.new(),Vector3(0,1.1,-.3),Vector3(.2,.2,.2),Color("fff2aa"),true)
+    elif kind == "monster":
         _drone()
     else:
         _human()
@@ -40,6 +46,12 @@ func _ready() -> void:
     ring.position.y = .12
     ring.visible = kind == "npc"
     add_child(ring)
+    skill_effect = MeshInstance3D.new()
+    skill_effect.mesh = torus.duplicate()
+    skill_effect.material_override = _material(Color("82e5d4"),true)
+    skill_effect.position.y = .4
+    skill_effect.visible = false
+    add_child(skill_effect)
     if kind == "npc":
         _label("!", Vector3(0, 3.3, 0), Color("ffda7b"), 52)
 
@@ -124,6 +136,9 @@ func apply_state(state: Dictionary, selected: bool) -> void:
     if serial > _attack_serial:
         attack_time = .4
     _attack_serial = serial
+    var skill_serial: int = state.get("skillSerial",0)
+    if skill_serial>_skill_serial:skill_time=.6
+    _skill_serial=skill_serial
     serial = state.get("hurtSerial", 0)
     if serial > _hurt_serial and _hurt_serial >= 0:
         var number := _label("-%d" % state.get("lastDamage", 0), Vector3(0, 2.2, 0), Color("ffac7f"), 42)
@@ -133,13 +148,17 @@ func apply_state(state: Dictionary, selected: bool) -> void:
 
 func _process(delta: float) -> void:
     timer += delta
+    skill_time = maxf(0,skill_time-delta)
+    skill_effect.visible = skill_time>0
+    skill_effect.scale = Vector3.ONE*(1.0+(.6-skill_time)*3.0)
+    skill_effect.position.y = .4+(.6-skill_time)*2.0
     attack_time = maxf(0, attack_time-delta)
     hurt_time = maxf(0, hurt_time-delta)
     var movement := position.distance_to(target_position)
     position = position.lerp(target_position, minf(1, delta*16))
     model.rotation.y = lerp_angle(model.rotation.y, target_yaw, minf(1,delta*12))
     model.rotation.z = lerpf(model.rotation.z, PI/2 if dead else 0, minf(1,delta*8))
-    model.position.y = sin(timer*3)*.08 if kind == "monster" and not dead else 0
+    model.position.y = sin(timer*3)*.08 if kind in ["monster","pet"] and not dead else 0
     if leg_left:
         var stride := sin(timer*12)*.55 if movement > .03 and not dead else 0.0
         leg_left.rotation.x = stride

@@ -5,6 +5,8 @@ signal snapshot_received(players: Array)
 signal world_received(state: Dictionary)
 
 var player_id: String = ""
+var auth_ticket := ""
+var _auth_sent := false
 var direction := Vector2.ZERO
 var _socket: WebSocketPeer
 var _sequence := 0
@@ -37,6 +39,7 @@ func disconnect_from_server() -> void:
     _socket = null
     player_id = ""
     direction = Vector2.ZERO
+    _auth_sent = false
     _sequence = 0
     _elapsed = 0.0
     snapshot_received.emit([])
@@ -59,12 +62,16 @@ func _process(delta: float) -> void:
             return
     if state != WebSocketPeer.STATE_OPEN:
         return
+    if not _auth_sent and not auth_ticket.is_empty():
+        _socket.send_text(JSON.stringify({"type":"auth", "ticket":auth_ticket}))
+        _auth_sent = true
+        auth_ticket = ""
     while _socket.get_available_packet_count() > 0:
         var message = JSON.parse_string(_socket.get_packet().get_string_from_utf8())
         if not message is Dictionary:
             continue
         if message.get("type") == "welcome":
-            if message.get("version") != 2 or not message.get("id") is String:
+            if message.get("version") != 3 or not message.get("id") is String:
                 disconnect_from_server()
                 state_changed.emit("Incompatible server protocol")
                 return

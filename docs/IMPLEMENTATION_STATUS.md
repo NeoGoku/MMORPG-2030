@@ -1,33 +1,37 @@
-# Implementation status — Nordtor city slice
-Updated: 2026-11-12. GDD v1.1 remains authoritative; this is a small playable vertical slice, not a finished MMORPG.
+# Implementation status — M3 integration package
+Updated: 2026-11-12. Based on merged PR #2. GDD v1.1 remains binding; M3 is partial.
 
-## Implemented
-| Area | Actual scope |
-| --- | --- |
-| City | Original procedural 3D district, six solid buildings, roads/crosswalk, sidewalks, plaza, gate, lamps, trees, benches, skyline and directional lighting. Buildings have matching server/local collision footprints and camera collision bodies. No accessible interiors. |
-| Character/camera | Visible articulated sword/shield humanoid, walking/swing/death animation, third-person follow and right-side touch orbit/right-mouse drag. This appearance is not an implementation of all classes. |
-| Android controls | Analog left joystick, independent action touch, target cycle, attack toggle, NPC interaction and loot buttons. Focus loss releases movement. Camera and action UI are separate from the joystick. |
-| Immediate play | Explicit **local training** starts on launch without a server/account. One local player, three simulated enemies. No invented remote players. All progress is temporary. |
-| Online | Real Godot WebSocket connections to the .NET server; shared player positions/yaw/HP/levels/attack and hurt counters, shared monster positions/HP/deaths/respawns. Blue remote humanoids and green local character. Online requires a reachable user-hosted server. |
-| Combat | Three hostile security drones with patrol/chase/leash, range checks, stationary auto-attacks, player/monster HP, visible damage numbers, death and respawn. No PvP. Numbers are provisional slice balancing. |
-| Quest | Mira offers one three-drone hunt; kills count after acceptance, then return to NPC in range. One-time 60 EXP / 25 coin reward and heal. No branching story or quest catalogue. |
-| EXP/loot | 20 EXP per kill; level threshold 100 × current level, cap 100, one earned stat point per level (allocation UI pending). Personal nearby loot: 4 coins + 1 scrap per kill. Expiring drops, no duplicate pickup/reward. Coins/scrap are counters, not a full inventory/economy. |
-| Build delivery | Android debug APK, Windows EXE/PCK and single-thread Web GitHub Actions artifacts. Existing signing/SDK/texture/icon fixes preserved. No paid services or deployment. |
+## Playable integrations
+- Existing Nordtor third-person city, joystick/camera, Mira hunt, stationary auto-attacks, HP/damage/death/respawn, loot and multiplayer remain.
+- Three owned online character slots; nickname and eight fixed GDD classes. Character appearance uses the existing common humanoid preset. Three separate temporary training slots can select classes locally.
+- Eight configurable attributes; server allocation spends earned points and calculates class attack, vitality HP, wisdom mana/healing, armor/equipment defense and arcane resistance. Level cap 100 and one earned stat point per level remain.
+- Additional stat points: profession actions earn farm-EXP; server costs grow exponentially using arbitrary-precision integers. No real-money purchase or artificial stat-point cap. Local training uses ordinary numeric values and is not an authoritative progression store.
+- Touch layout menu moves joystick, action and skill controls in bounded 12-pixel steps, saves positions locally and restores defaults.
+- Six simultaneously visible skill buttons. **Two working skills per class**, with damage/heal/buff variants, mana and cooldowns; the other four positions are visibly locked. This is not the GDD's full 8–12 active skills per class. Summoner's starter buff does not implement a separate summon system.
+- Slot/stack-limited inventory (24 configurable slots), normal/uncommon starter items, weapon/chest equipment, visible derived values, healing potions, merchant buy/sell and atomic recipe material consumption.
+- Three gathering professions (ore/herbs/wood), two crafting professions (smithing/alchemy) and two recipes. Catalogue/state covers all ten GDD professions; the remaining five have no playable recipes/services yet.
+- Data-driven side/class/profession objectives and prerequisites, quest log and one-time NPC rewards. Miras original main hunt remains its tested legacy adapter; a general main-story/branching engine is incomplete.
+- One active following spirit pet with selectable combat assistance, periodic healing or personal-loot collection, EXP/levels and synchronized online position/mode. Combat assistance leaves final kill credit to the player. Parent/evolution fields are stored, but breeding/evolution are **not playable**.
+- Expanded continuous South Park/residential area, two added buildings, services/resource markers and a two-way teleporter. Zone metadata exists; actual world streaming/interest management is **not implemented**.
+- Local training remains instantly playable and clearly separate from accounts. Online displays real characters and pets; no simulated remote players.
 
-## Verification evidence
-- Deterministic .NET scenario program covers NPC distance/acceptance, persistent target selection between ticks, moving versus stationary attacks, collision, kill credit, personal/double loot, quest/reward once, level/stat-point progression, monster damage/death/player respawn and replay rejection.
-- Local Godot training scenario checks the same quest/combat/loot/progression loop and collision.
-- Real two-client WebSocket test covers movement limits, stale/replayed input, malformed/oversized/binary/fragmented messages, disconnect/reconnect, quest actions, shared attack/monster HP, personal state and ignored client reward spoof fields.
-- Two actual Godot clients exercise protocol v2 movement over the real server. A rendered main-scene test also verifies a real remote humanoid moves, disappears on disconnect and never silently becomes an offline substitute.
-- Rendered Godot/OpenGL scene test checks startup, visible humanoid and camera view, HUD buttons in viewport, analog touch, simultaneous joystick/action, neutral release and exactly one action despite touch-to-mouse emulation.
-- Exported Web scene loaded in Chromium; screenshots/runtime evidence and final CI build results are recorded in the PR. Scene tests use a real renderer because Godot 4.3's dummy renderer reports a primitive-mesh cleanup error, reproduced independently with a single capsule.
+## Accounts / persistence
+- Password-hashed accounts, expiring opaque sessions, account-owned slots, one-use WebSocket tickets, default-denied anonymous login, basic request limits and HTTPS-only remote account UI.
+- PostgreSQL 16 versioned migration and optimistic aggregate storage: character, EXP/points, inventory/equipment, quests/currency, HP/mana/cooldowns and pet state. Re-login/reconnect restores saved state; duplicate active joins and stale writes are rejected.
+- Economic/actions save atomically; simulation checkpoints every five seconds and disconnect saves. Crash may lose the latest checkpoint interval. Monsters/drops are ephemeral; no durable world persistence. One world-server process per DB only, DB work under world lock is not a scaled persistence architecture.
+- No DB setting means explicitly flagged RAM-only test mode. Reproducible Docker/Compose configuration supplied. No production server or external database booked; see [operations](M3_OPERATIONS.md).
 
-## Partial / untested / not implemented
-- Actual Android phone gameplay for this new build, multi-device crossplay, performance/battery/accessibility and native Windows runtime are not certified by cloud export success. Android APK has not been manually operated on a physical device here.
-- No accounts, three-slot character creation, reconnect identity or PostgreSQL persistence. Offline training and online progress are separate and lost on reset/disconnect/server restart.
-- No full eight-class skill/attribute system, stat allocation/reset, durable inventory, equipment or trading. A displayed earned stat point does not yet change attributes.
-- No full quests, NPC catalogue, professions, pets, housing, guilds, parties, economy, PvP, weather or seamless streaming. All GDD requirements remain in the roadmap.
-- No production auth/TLS deployment, spatial interest management, load-test evidence or 50–100-player capacity claim. The 100-session cap is only a resource limit.
-- Current art is original stylized placeholder geometry; semi-realistic final production art remains future work. No sound or imported character animations.
+## Evidence and limits
+- Existing city/gameplay/transport suites retained; new tests cover all eight starter class kits, mana/cooldown rejection, stats, inventory/crafting/equipment, account ownership and three slots.
+- Real PostgreSQL tests exercise migrations, password login, optimistic conflict rejection, aggregate roundtrip and authenticated reconnect. Regression cases cover detached snapshots, stale ticket/disconnect joins and skill-save rollback.
+- Rendered mobile tests cover six skill slots, joystick/action behavior and the account lobby → character creation → authenticated connection → visible pet → separate local slot.
+- CI/build results and download links are recorded in the PR. Actual physical Android testing of this new package and multi-device crossplay, performance/battery and Windows runtime qualification remain outstanding. Owner confirmed the prior PR #2 Android build works.
 
-M1: cloud exports established; physical device and crossplay qualification pending. M2: playable city/combat/quest/loot slice exists; persistence and character creation remain incomplete.
+## Explicitly still missing / partial
+- Parties, invitations, local/group chat and group loot/combat attribution: not implemented.
+- Full character appearance editor, full class skill trees/buffs/resistances, gear variety, generalized loot tables and all rarity tiers in actual drops: incomplete.
+- Full ten professions, workbench variety, broad main/side/class/profession quest content, repeatable profession/quest progression, separate summoner summons, pet breeding/evolution/offline training: incomplete.
+- Persistent housing/economy, auction house/trading, guilds, PvP, automation, weather, seamless world streaming, production operations and 50–100-player load validation: not implemented.
+- Production art/audio and extensive animation/equipment silhouettes: incomplete. Current original stylized assets remain provisional.
+
+No confirmed GDD feature is removed or declared complete based only on a data definition/menu. No paid services or production deployment.
