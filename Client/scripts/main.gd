@@ -43,7 +43,7 @@ func _build_ui() -> void:
     var controls := HBoxContainer.new()
     controls.position = Vector2(20, 620)
     layer.add_child(controls)
-    var labels := ["←", "↑", "↓", "→"]
+    var labels := ["Left", "Up", "Down", "Right"]
     for label in labels:
         var button := Button.new()
         button.text = label

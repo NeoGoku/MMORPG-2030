@@ -49,6 +49,9 @@ jobs:
           java-version: '17'
       - uses: android-actions/setup-android@v3
         if: matrix.target == 'Android'
+        with:
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: false
       - name: Configure Android SDK and ephemeral debug signing
         if: matrix.target == 'Android'
         shell: bash

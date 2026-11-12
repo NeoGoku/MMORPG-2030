@@ -10,10 +10,12 @@ Updated: 2026-11-12
 - Godot 4.3 scene import and short headless client startup passed.
 - Windows debug EXE/PCK exported locally with Godot 4.3. Web single-thread export verified locally after installing matching templates.
 
-## Implemented; validation pending
-- Android, Windows, Web export pipelines: PR/main triggers, strict artifact outputs, error-log checks and failure diagnostics. Android SDK/Java/debug-signing setup included.
+## Cloud export and interactive validation
+- Windows/Web CI exports and the server CI integration passed in [run 43174302980](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43174302980) and [run 43174303139](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43174303139).
+- Android first CI run exposed removed SDK package `tools` in setup action defaults; configuration now explicitly requests `platform-tools`. APK verification follows in the PR.
+- Chromium loaded the exported single-thread Web client without JavaScript/console errors. No physical device checks yet.
 - Godot endpoint/status UI, interpolated avatars, camera follow, keyboard and touch arrow controls. Interactive device/browser checks pending.
-- Local Windows/Web export results and GitHub Actions evidence are recorded in the PR after execution.
+- Further CI evidence and downloadable artifacts are linked from the PR; this file preserves the evidence available when committed.
 
 ## Not implemented / not validated
 - PostgreSQL persistence, accounts, character creation and slots, NPC, monster, combat, quest, loot and XP.
