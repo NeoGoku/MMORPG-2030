@@ -18,3 +18,8 @@ Milestone completion requires implemented code and verifiable build/runtime evid
 M0: source foundation and scene-load check implemented. Export pipelines now include Android setup and PR checks; export evidence tracked in PR/status.
 M1: pending successful cloud artifacts and real Android, Windows and browser runtime checks. Keep Godot provisional.
 M2: ephemeral two-player movement foundation verified with real WebSocket and Godot clients. Next: PostgreSQL-backed accounts/character slots, city content, NPC/monster, combat, quest, loot and XP. No persistence or production hosting yet.
+
+## Nordtor slice (2026-11-12)
+M2 now has a playable temporary district: third-person humanoid, Android analog/multi-touch controls, buildings/roads, NPC hunt quest, hostile drone AI, tab-target stationary auto-attacks, HP/damage/death/respawn, personal loot and XP/level rewards. The same district is immediately playable in explicit local training and shared through a real authoritative online server. Current art is original procedural placeholder art.
+
+Next M2 work: accounts and three character slots, PostgreSQL-backed progression/inventory, deliberate reconnect identity, full combat/class foundations and physical-device/crossplay qualification. Current quest and balance values are slice proposals; no GDD features are dropped. M2 remains partial until persistence and character creation are implemented.

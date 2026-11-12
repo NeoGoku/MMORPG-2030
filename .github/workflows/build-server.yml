@@ -2,10 +2,10 @@ name: Server build
 on:
   workflow_dispatch:
   pull_request:
-    paths: ['Server/**', 'tests/**', '.github/workflows/build-server.yml']
+    paths: ['Server/**', 'Server.Tests/**', 'Client/data/**', 'tests/**', '.github/workflows/build-server.yml']
   push:
     branches: [main]
-    paths: ['Server/**', 'tests/**', '.github/workflows/build-server.yml']
+    paths: ['Server/**', 'Server.Tests/**', 'Client/data/**', 'tests/**', '.github/workflows/build-server.yml']
 permissions:
   contents: read
 jobs:
@@ -22,6 +22,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r tests/requirements.txt
       - run: dotnet build Server/MMORPG.Server.csproj --configuration Release
+      - run: dotnet run --project Server.Tests --configuration Release -- Client/data/district.json
       - name: Real WebSocket integration
         shell: bash
         run: |

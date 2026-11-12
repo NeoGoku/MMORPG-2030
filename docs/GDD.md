@@ -1,5 +1,5 @@
 # MMORPG-2030 — Game Design Document v1.1
-Status: ratified concept, not yet implemented. Preserve these requirements; unresolved mechanics remain TBD.
+Status: ratified concept. Implementation is partial and tracked in docs/IMPLEMENTATION_STATUS.md; the current city slice does not replace or finalize these requirements. Unresolved mechanics remain TBD.
 
 ## Vision
 3D third-person semi-realistic MMORPG set in an alternate 2030 where magic is publicly known. Several large cities in a seamless open world. Shared persistent world without channels, initial 50–100 concurrent players. Android APK, Windows and browser crossplay.
