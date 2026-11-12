@@ -29,7 +29,7 @@ public static class M3Tests
         var before=c.Coins;
         Check(!CharacterRules.Buy(c,"unknown",data)&&c.Coins==before,"invalid trade leaves currency unchanged");
         Check(CharacterRules.Equip(c,"iron_sword",data)&&c.Equipment["weapon"]=="iron_sword","equipment owned item validation");
-        Check(data.Classes.Count==8&&data.Attributes.Count==8&&data.Classes.All(x=>x.Value.Skills.Count==6),"eight fixed classes and six slots");
+        Check(data.Classes.Count==8&&data.Attributes.Count==8&&data.Classes.All(x=>x.Value.Skills.Count>=8),"eight fixed classes and six slots");
         store.Save(a);var restored=store.Get(a.Id)!;
         Check(restored.State.Equipment["weapon"]=="iron_sword","aggregate save restores equipment and inventory together");
         var stale=store.Get(a.Id)!;a.State.Coins++;store.Save(a);

@@ -1,54 +1,39 @@
-# MMORPG-2030 · Nordtor
+# MMORPG-2030 — Nordtor
 
-Ein spielbarer kleiner 3D-Stadtbezirk auf Basis des [GDD v1.1](docs/GDD.md). [Tatsächlicher Funktionsumfang und Grenzen](docs/IMPLEMENTATION_STATUS.md).
+Spielbarer 3D-Stadtbezirk für Android, Windows und Browser, entwickelt mit Godot 4.3 und einem autoritativen .NET-8-Server. GDD v1.1 bleibt verbindlich; das Projekt ist ein wachsender MMORPG-Ausschnitt, kein fertiges MMO.
 
-## APK spielen — ohne PC oder Server
+## Sofort spielen
 
-Unter **Actions → Client exports → erfolgreicher Lauf → Artifacts** `MMORPG-Android-debug` herunterladen, ZIP entpacken und APK installieren. Jeder Build verwendet einen neuen Debug-Schlüssel; bei Signaturkonflikt die alte APK deinstallieren. Die APK startet sofort im ausdrücklich markierten **lokalen Training**. Der Fortschritt ist temporär und wird nicht gespeichert.
+Die APK startet im ausdrücklich **temporären lokalen Training**, ohne Hosting. Mit linkem Joystick bewegen, rechts im freien Bildbereich Kamera drehen. **Sprechen** bei Mira nimmt den Drohnenauftrag an. **Ziel** wechselt Gegner, **Angriff** schaltet stationären Auto-Angriff um; Bewegung unterbricht normale Schläge. Persönliche Beute aufsammeln und bei Mira abgeben. HP, Schaden, Tod und sichere Wiederbelebung sind spielbar.
 
-1. Mit dem linken Joystick zur goldenen Stadtwache **Mira** gehen. In ihrer Nähe **SPRECHEN** tippen: Auftrag annehmen.
-2. Durch das Tor in den Nordhof gehen. **ZIEL** wählt/wechselt eine lebende Drohne; der goldene Ring und die Ziel-HP zeigen die Auswahl.
-3. In Schlagweite gehen, stehen bleiben und **ANGRIFF AUTO** einschalten. Bewegung unterbricht normale Schläge. Die Drohnen greifen zurück; HP und Schadenszahlen sind sichtbar. Erneutes Tippen stoppt den Auto-Angriff.
-4. Zur goldenen Beutekiste gehen und **BEUTE** tippen. Drei Drohnen besiegen, dann bei Mira den Auftrag abgeben: EXP und Münzen erhalten. Drohnen erscheinen erneut; besiegte Spieler werden bei der Wache wiederbelebt.
+PC: WASD/Pfeile, Tab Zielwechsel, Leertaste Auto-Angriff, E sprechen, F Beute, 1–6 Skills, rechte Maustaste ziehen für Kamera. Joystick und Aktionen unterstützen mehrere Finger. Unter **Charakter / Inventar → Layout** Touchpositionen anpassen, lokal speichern oder zurücksetzen.
 
-Rechts im freien Bildbereich wischen dreht/neigt die Third-Person-Kamera. Joystick und Aktionsknöpfe unterstützen verschiedene Finger. PC: WASD/Pfeile, Tab zum Zielwechsel, Leertaste für Auto-Angriff, E zum Sprechen, F für Beute, rechte Maustaste ziehen für Kamera.
+## Online und M4-Systeme
 
-## Echte Mitspieler
+**Online** öffnet Registrierung/Anmeldung. Erreichbaren HTTPS-Server-Root eingeben, eigenen Charakterplatz (drei pro Account), Namen und eine der acht Klassen wählen, erstellen und spielen. Passender v4-Server erforderlich. PostgreSQL speichert Fortschritt/Identität; ohne DB steht ausdrücklich **flüchtiger Testbetrieb**. Lokales Training wird nicht hochgeladen. Kein öffentlicher Server wurde gebucht oder bereitgestellt. [Betrieb und Datenbank](docs/M3_OPERATIONS.md).
 
-**Online** öffnen, erreichbare Serveradresse (`ws://…/ws` bzw. `wss://…/ws`) eingeben und verbinden. Zwei Clients am selben Server teilen Spieler, Drohnen, HP, Angriffe und Tode; andere Spieler sind blau markiert. Questfortschritt und Beute sind persönlich. Es gibt keinen vorinstallierten öffentlichen Server. Training und Online-Fortschritt sind getrennt und temporär; eine Verbindung erschafft einen neuen Charakter ohne Konto.
+- **Gruppe / Chat / Handel**: Spieler auswählen, einladen/Einladung annehmen, Leitung übertragen oder Gruppe verlassen. Bis zehn Mitglieder; nahe Gruppenmitglieder teilen Kill-EXP und erhalten eigene Beute. Lokal-, Privat- und Gruppenchat. Direkter Handel innerhalb 5 m über Item/Menge/Münzen und zwei Bestätigungen; geänderte Angebote müssen neu bestätigt werden. Diese Funktionen benötigen echte Online-Mitspieler.
+- **Skills**: acht funktionierende aktive Skills je Klasse, sechs gleichzeitig sichtbare, frei belegbare Plätze. Zwei Starter-Skills ab Stufe 1; weitere ab 2/3/5/8/12/16. Mana, Cooldown, Reichweite und Statuswirkungen berechnet der Server. Heiler heilen Gruppen, Tanks spotten, Beschwörer rufen separate zeitweilige Kreaturen.
+- **Inventar**: Attribute/Ausrüstung, Händler rechts und Werkbank links der Wache, drei Sammelstellen und Rezepte für alle zehn Berufe. Berufs-EXP/Level, Questlog und Zusatzaufträge. Neue Produkte umfassen Mantel, Linse, Essen, Stuhl, Pet-Ei/Futter und Evolutionssplitter. Der Stuhl ist noch kein platzierbares Housing-Möbel.
+- **Pet**: ein aktiver Begleiter mit Kampf/Heil/Tank/Buff/Beute/Sammelmodus, Tasche und bis zehn eigenen Pets. Ei ausbrüten, zwei erwachsene Pets ab Stufe 2 mit Futter kreuzen, ab Stufe 5 per Splitter entwickeln. Inaktives Pet mit Futter an der Werkbank fünf Minuten trainieren, auch offline; Ertrag einmalig. Details und Zutaten stehen im Menü.
+- **Automatik**: bewusst am sicheren Stadtrand starten (z. B. nahe 0,3). Begrenzter Radius und maximal 60 Sekunden Kampf, Zielsuche/Skills/Tränke/Beute und Rückkehr bei Grenzen. Manuelle Bewegung stoppt sofort; blockierter Rückweg stoppt ohne Teleport. Kein Offline-Farmen.
+- Klassen haben unterschiedliche ursprüngliche geometrische Silhouetten. Tag/Nacht, Regen/Nebel und entfernungsabhängige Sichtbarkeit ergänzen die bestehende Stadt/Südpark. Wetter wirkt derzeit optisch.
 
-Server kostenlos in einer bestehenden Cloud-Entwicklungsumgebung mit .NET 8 starten:
+Lokales Training unterstützt Klassen-/Wirtschafts-/Pet-/Farmregeln temporär; es simuliert keine anderen Spieler. Online-Gruppenmitgliedschaft überlebt eine kurze Wiederverbindung im selben Serverprozess, nicht dessen Neustart. Charakterfortschritt benötigt die konfigurierte Datenbank.
 
-```sh
-dotnet run --project Server --urls http://0.0.0.0:5080
-```
+## Cloud-Builds und Prüfung
 
-Die Telefon-App benötigt einen vom Telefon erreichbaren Host; `127.0.0.1` auf dem Telefon zeigt auf das Telefon selbst. HTTPS-Browserseiten benötigen einen genehmigten TLS-Endpunkt mit `wss://`. Es wird hier kein Hosting gebucht und nichts produktiv bereitgestellt. Der Entwicklungsserver hat noch keine Anmeldung oder dauerhafte Speicherung.
-
-## Cloud-Builds und Nachweise
-
-Ein PR oder **Actions → Client exports → Run workflow** erstellt `MMORPG-Android-debug`, `MMORPG-Windows` und `MMORPG-Web` (14 Tage). Windows benötigt EXE und PCK zusammen; den kompletten Web-Ordner per HTTP(S) bereitstellen. Alle Schritte sind in der Cloud möglich. Server- und Client-CI führen die passenden Szenario-, Netzwerk- und gerenderten Eingabeprüfungen aus.
-
-Entwicklungsprüfungen mit Godot 4.3 / .NET 8:
+PR-Checks oder **Actions → Client exports → Run workflow** erzeugen `MMORPG-Android-debug`, `MMORPG-Windows` und `MMORPG-Web` als ZIP-Artefakte für 14 Tage. Downloadlinks und tatsächliche CI-Ergebnisse stehen im PR. APK aus dem Android-ZIP installieren; wegen temporärer Debug-Signatur kann eine Neuinstallation nötig sein. Windows EXE/PCK zusammen entpacken, kompletten Web-Ordner über HTTP(S) ausliefern. Der Besitzer benötigt keinen lokalen Entwicklungs-PC.
 
 ```sh
 dotnet run --project Server.Tests --configuration Release -- Client/data/district.json
-godot --headless --path Client --script res://tests/gameplay_smoke.gd
+godot --headless --path Client --script res://tests/m4_smoke.gd
+# Gerenderte Stadt-/Touchprüfung unter Linux:
 xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/scene_smoke.gd
-# Mit laufendem Server auf 127.0.0.1:5080:
-python -m pip install -r tests/requirements.txt
-python tests/multiplayer.py
-godot --headless --path Client --script res://tests/network_smoke.gd
 ```
 
-[Architektur/Protokoll](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Asset-Herkunft](docs/ASSETS.md). Noch fehlen unter anderem Konten, Charaktererstellung, PostgreSQL-Persistenz, vollständige Klassen/Fertigkeiten und MMO-Skalierung. Der aktuelle Bezirk ersetzt diese GDD-Ziele nicht.
+CI ergänzt echte PostgreSQL-, HTTP/WebSocket- und gerenderte Account-/Skill-/Chat-/Pet-UI-Integration. Physische Android-Abnahme dieses M4-Pakets, Windows-Runtime, Geräte-Crossplay und Last-/Batterieprüfung bleiben offen.
 
-## M3: Charaktere, Skills, Wirtschaft und Begleiter
+[Genauer Funktionsstand und Grenzen](docs/IMPLEMENTATION_STATUS.md) · [GDD](docs/GDD.md) · [Architektur/Protokoll](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Asset-Herkunft](docs/ASSETS.md).
 
-**Online** öffnet jetzt Anmeldung und drei Charakterplätze. Server-Root per HTTPS eingeben, registrieren/anmelden, Name und Klasse wählen, erstellen und spielen. Eine PostgreSQL-Konfiguration speichert Online-Fortschritt; ohne Datenbank steht deutlich **flüchtiger Testbetrieb**. Kein öffentlicher Server wurde eingerichtet. [Server-/Datenbankanleitung](docs/M3_OPERATIONS.md).
-
-**Charakter / Inventar** öffnet Attribute, Inventar/Ausrüstung, Questlog und Pet-Menü. Händler und Werkbank stehen rechts/links der Wache. In ihrer Nähe Interaktion wählen; Sammelstellen liegen bei den beschrifteten Markern. Erz zu einer Eisenwaffe schmieden, Kräuter zu Heiltränken verarbeiten, ausrüsten/handeln und Berufs-EXP für zusätzliche Statpunkte sammeln. Die Zusatzaufträge werden im Questlog geführt und beim Händler abgegeben. Das Portal führt zum Südpark und zurück.
-
-Sechs Skillknöpfe sind sichtbar (PC: 1–6); pro Klasse sind derzeit zwei tatsächlich nutzbar, vier gesperrt. Mana und Cooldowns gelten serverseitig. Das Pet-Menü aktiviert genau einen Funken in Kampf-, Heil- oder Beutemodus. Fortschritt, vollständige Klassen/alle Berufe, Gruppen/Chat und Streaming sind nicht pauschal fertig — [genaue Grenzen](docs/IMPLEMENTATION_STATUS.md).
-
-Im Fenster **Layout** lassen sich Joystick, Aktions- und Skillknöpfe einzeln verschieben und lokal speichern; **Standardpositionen** setzt sie zurück.
+Housing/Innenräume/Möbelplatzierung, Gilden/PvP, Reparaturen/Verkaufsstände/Auktionshaus, neue Dungeon-/Bossregionen, vollständiges Welt-Streaming und Produktionsskalierung sind noch nicht implementiert. Eigene prozedurale Assets; keine kostenpflichtigen Dienste.

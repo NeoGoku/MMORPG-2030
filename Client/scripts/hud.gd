@@ -15,6 +15,7 @@ var hp: ProgressBar
 var xp: ProgressBar
 var player_title: Label
 var hp_text: Label
+var weather_label: Label
 var mode_label: Label
 var quest: Label
 var message: Label
@@ -44,8 +45,8 @@ func _ready() -> void:
     mode_label = _text(profile, "LOKALES TRAINING · NICHT GESPEICHERT", Vector2(18, 95), 12, Color("b5cac6"))
     var district := _text(self, "N O R D T O R", Vector2(0, 24), 28)
     _anchor(district, Control.PRESET_TOP_RIGHT, Vector2(-262, 24))
-    var subtitle := _text(self, "STADTWACHE  /  SEKTOR 03", Vector2.ZERO, 13, Color("b6d7cf"))
-    _anchor(subtitle, Control.PRESET_TOP_RIGHT, Vector2(-262, 62))
+    weather_label = _text(self, "STADTWACHE  /  SEKTOR 03", Vector2.ZERO, 13, Color("b6d7cf"))
+    _anchor(weather_label, Control.PRESET_TOP_RIGHT, Vector2(-262, 62))
     var online := _button(self, "Online", Rect2(0, 0, 124, 42), "online")
     _anchor(online, Control.PRESET_TOP_RIGHT, Vector2(-148, 90))
     online.pressed.connect(func(): online_panel.visible = not online_panel.visible)
@@ -88,7 +89,7 @@ func _ready() -> void:
     var menu_button := _button(self,"Charakter / Inventar",Rect2(22,152,240,44),"online")
     menu_button.pressed.connect(func(): if character_menu: character_menu.visible = not character_menu.visible)
     for i in range(6):
-        var button := _button(self,"Skill %d"%(i+1),Rect2(268+i*88,636,84,48),"skill:skill%d"%(i+1))
+        var button := _button(self,"Skill %d"%(i+1),Rect2(268+i*88,636,84,48),"slot:%d"%i)
         button.clip_text = true
         button.add_theme_font_size_override("font_size",13)
         skill_buttons.append(button)
@@ -221,6 +222,7 @@ func _connection_panel() -> void:
 func update_state(state: Dictionary, player: Dictionary, online: bool) -> void:
     if player.is_empty():
         return
+    weather_label.text=("SÜDPARK" if player.z>32 else "NORDTOR")+" / "+str(state.get("environment",{}).get("weather","klar"))
     var info: Dictionary = state.self
     if info.get("character") is Dictionary:
         var character: Dictionary = info.character

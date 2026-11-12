@@ -2,6 +2,9 @@ extends Node3D
 
 # All city assets are authored here from original geometry; grouped into material batches.
 var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
+var scene_environment: Environment
+var sky_colors: ProceduralSkyMaterial
+var rain: CPUParticles3D
 var batches: Dictionary = {}
 var materials: Dictionary = {}
 
@@ -82,6 +85,27 @@ func _ready() -> void:
     environment.tonemap_white = 6.0
     environment_node.environment = environment
     add_child(environment_node)
+    scene_environment=environment
+    sky_colors=sky_material
+    rain=CPUParticles3D.new()
+    rain.amount=96
+    rain.lifetime=1.5
+    rain.emitting=false
+    rain.emission_shape=CPUParticles3D.EMISSION_SHAPE_BOX
+    rain.emission_box_extents=Vector3(12,.5,12)
+    rain.direction=Vector3.DOWN
+    rain.spread=4
+    rain.gravity=Vector3(0,-16,0)
+    rain.initial_velocity_min=8
+    rain.initial_velocity_max=12
+    var streak:=BoxMesh.new()
+    streak.size=Vector3(.025,.6,.025)
+    rain.mesh=streak
+    var water:=StandardMaterial3D.new()
+    water.albedo_color=Color(.6,.8,.95,.5)
+    water.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+    rain.material_override=water
+    add_child(rain)
 
 func _building(b: Dictionary, index: int) -> void:
     var colors := [Color("b3aa93"), Color("999d91"), Color("9cabaa")]
@@ -145,3 +169,20 @@ func _flush() -> void:
         instance.material_override = materials[key]
         add_child(instance)
     batches.clear()
+
+func apply_environment(state: Dictionary,focus: Vector3) -> void:
+    if not scene_environment:return
+    var phase: float=state.get("phase",0)
+    var daylight:=maxf(0,cos(phase*TAU))
+    var weather: String=state.get("weather","klar")
+    var light: DirectionalLight3D=get_parent().get_node("DirectionalLight3D")
+    light.light_energy=.12+daylight*.9
+    light.rotation_degrees=Vector3(-10-daylight*50,phase*360-28,0)
+    scene_environment.ambient_light_energy=.24+daylight*.22
+    sky_colors.sky_top_color=Color("132337").lerp(Color("52879d"),daylight)
+    if weather=="Regen":sky_colors.sky_top_color=sky_colors.sky_top_color.darkened(.35)
+    scene_environment.fog_enabled=weather!="klar"
+    scene_environment.fog_density=.018 if weather=="Nebel" else .006
+    scene_environment.fog_light_color=Color("7f9a9e")
+    rain.position=focus+Vector3(0,12,0)
+    rain.emitting=weather=="Regen"

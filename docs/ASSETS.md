@@ -9,3 +9,5 @@ All new visible assets were authored for this repository using Godot primitive m
 - Godot engine primitives, shaders and built-in font are supplied by Godot. Engine and bundled third-party notices remain governed by the Godot distribution; see https://godotengine.org/license/ and https://github.com/godotengine/godot/blob/4.3-stable/COPYRIGHT.txt.
 
 These are economical stylized slice assets. Semi-realistic final art, sound and production animation remain pending. This provenance note does not introduce or change a repository-wide license.
+
+M4 adds original procedural robes/staff/focus, bow/quiver, second blade, shield/helmet silhouettes, summon/pet variants, day/night light/fog and primitive particle rain in the same scripts. No third-party model, texture or audio is introduced. These remain stylized code-authored assets, not final production character rigs.

@@ -32,7 +32,7 @@ public static class Session
             }
             if(id is null){using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(1));await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation,"Authentication required or character already connected",deadline.Token);return;}
             using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-            await Send(socket, new { type = "welcome", version = 3, id, tickRate = 20 }, lifetime.Token);
+            await Send(socket, new { type = "welcome", version = 4, id, tickRate = 20 }, lifetime.Token);
             var receive = Receive(socket, world, id, lifetime.Token);
             var send = Snapshots(socket, world, id, lifetime.Token);
             await Task.WhenAny(receive, send);
@@ -100,7 +100,7 @@ public static class Session
             else if (type.GetString() == "action")
             {
                 if (!root.TryGetProperty("kind", out var kind) || kind.ValueKind != JsonValueKind.String ||
-                    kind.GetString() is not ("target" or "attack" or "interact" or "loot" or "stat" or "farm_stat" or "buy" or "sell" or "equip" or "craft" or "gather" or "claim" or "use" or "pet" or "skill" or "teleport"))
+                    kind.GetString() is not ("target" or "attack" or "interact" or "loot" or "stat" or "farm_stat" or "buy" or "sell" or "equip" or "craft" or "gather" or "claim" or "use" or "pet" or "skill" or "teleport" or "slot" or "party_invite" or "party_accept" or "party_leave" or "party_kick" or "party_promote" or "chat_local" or "chat_party" or "chat_private" or "trade_open" or "trade_offer" or "trade_confirm" or "trade_cancel" or "pet_hatch" or "pet_breed" or "pet_evolve" or "pet_train" or "pet_select" or "pet_take" or "farm_start" or "farm_stop"))
                     throw new InvalidDataException("Invalid action");
                 var target = "";
                 if (root.TryGetProperty("target", out var value))
@@ -108,7 +108,12 @@ public static class Session
                     if (value.ValueKind != JsonValueKind.String || value.GetString()!.Length > 64) throw new InvalidDataException("Invalid target");
                     target = value.GetString()!;
                 }
-                world.Act(id, sequence, kind.GetString()!, target);
+                var text="";
+                if(root.TryGetProperty("text",out var content)){
+                    if(content.ValueKind!=JsonValueKind.String||content.GetString()!.Length>256)throw new InvalidDataException("Invalid text");
+                    text=content.GetString()!;
+                }
+                world.Act(id, sequence, kind.GetString()!, target,text);
             }
             else throw new InvalidDataException("Unknown type");
         }

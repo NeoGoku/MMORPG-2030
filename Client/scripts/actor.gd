@@ -1,6 +1,7 @@
 extends Node3D
 
 var kind := "player"
+var class_id := "Shield Sword"
 var tint := Color("39cbb3")
 var display_name := "Reisender"
 var target_position := Vector3.ZERO
@@ -76,12 +77,29 @@ func _human() -> void:
     sword_arm.position = Vector3(.48, 1.65, 0)
     model.add_child(sword_arm)
     _part(sword_arm, "arm", CapsuleMesh.new(), Vector3(0, -.3, 0), Vector3(.22, .35, .22), tint)
-    _part(sword_arm, "grip", BoxMesh.new(), Vector3(0, -.7, -.1), Vector3(.11, .25, .12), Color("6e5540"))
-    _part(sword_arm, "guard", BoxMesh.new(), Vector3(0, -.58, -.12), Vector3(.42, .10, .18), Color("d8bc7c"))
-    _part(sword_arm, "blade", BoxMesh.new(), Vector3(0, -.9, -.43), Vector3(.13, .85, .11), Color("c3e0dc"))
-    _part(model, "left_arm", CapsuleMesh.new(), Vector3(-.48, 1.32, 0), Vector3(.22, .35, .22), tint)
-    _part(model, "shield", BoxMesh.new(), Vector3(-.65, 1.18, -.10), Vector3(.13, .75, .58), Color("bca16a"))
-    _part(model, "shield_core", BoxMesh.new(), Vector3(-.73, 1.18, -.10), Vector3(.05, .48, .32), tint)
+    var magic:=class_id in ["Dark Mage","Light Mage","Healer","Creature Summoner"] and kind=="player"
+    if magic:
+        var robe:=CylinderMesh.new()
+        robe.top_radius=.35;robe.bottom_radius=.6;robe.height=1.0
+        _part(model,"robe",robe,Vector3(0,.85,.04),Vector3.ONE,tint.darkened(.15))
+        _part(sword_arm,"staff",CylinderMesh.new(),Vector3(0,-.1,-.25),Vector3(.12,.9,.12),Color("725f48"))
+        _part(sword_arm,"focus",SphereMesh.new(),Vector3(0,.78,-.25),Vector3(.35,.35,.35),Color("9edcd4"),true)
+        if class_id=="Dark Mage":_part(model,"hood",SphereMesh.new(),Vector3(0,2.22,.09),Vector3(.6,.4,.55),Color("493b65"))
+        if class_id=="Healer":_part(model,"crest",BoxMesh.new(),Vector3(0,1.5,-.24),Vector3(.15,.3,.04),Color("ffe0a2"),true)
+    elif class_id=="Archer" and kind=="player":
+        var bow:=TorusMesh.new();bow.inner_radius=.35;bow.outer_radius=.41
+        _part(sword_arm,"bow",bow,Vector3(0,-.3,-.25),Vector3(.18,1.3,.8),Color("b89b65"))
+        sword_arm.get_node("bow").rotation.z=PI/2
+        _part(model,"quiver",CylinderMesh.new(),Vector3(.2,1.4,.4),Vector3(.25,.55,.25),Color("6c5344"))
+    else:
+        _part(sword_arm,"grip",BoxMesh.new(),Vector3(0,-.7,-.1),Vector3(.11,.25,.12),Color("6e5540"))
+        _part(sword_arm,"blade",BoxMesh.new(),Vector3(0,-.9,-.43),Vector3(.13,.85,.11),Color("c3e0dc"))
+    _part(model,"left_arm",CapsuleMesh.new(),Vector3(-.48,1.32,0),Vector3(.22,.35,.22),tint)
+    if class_id=="Dual Swords" and kind=="player":
+        _part(model,"second_blade",BoxMesh.new(),Vector3(-.48,.7,-.4),Vector3(.13,.9,.11),Color("c3e0dc"))
+    elif not magic and class_id!="Archer":
+        _part(model,"shield",BoxMesh.new(),Vector3(-.65,1.18,-.10),Vector3(.13,1.05 if class_id=="Tank" else .75,.7),Color("bca16a"))
+        if class_id=="Tank":_part(model,"helmet",BoxMesh.new(),Vector3(0,2.25,.02),Vector3(.58,.25,.53),Color("6b8492"))
 
 func _drone() -> void:
     _part(model, "core", SphereMesh.new(), Vector3(0, 1.0, 0), Vector3(1.15, .7, .9), Color("92694e"))
@@ -147,6 +165,12 @@ func apply_state(state: Dictionary, selected: bool) -> void:
     _hurt_serial = serial
 
 func _process(delta: float) -> void:
+    var camera:=get_viewport().get_camera_3d()
+    if camera:
+        var distance:=global_position.distance_to(camera.global_position)
+        model.visible=distance<60
+        name_label.visible=distance<28 and not dead
+        hp_label.visible=distance<28 and not dead
     timer += delta
     skill_time = maxf(0,skill_time-delta)
     skill_effect.visible = skill_time>0
@@ -163,7 +187,7 @@ func _process(delta: float) -> void:
         var stride := sin(timer*12)*.55 if movement > .03 and not dead else 0.0
         leg_left.rotation.x = stride
         leg_right.rotation.x = -stride
-        sword_arm.rotation.x = -sin(attack_time/.4*PI)*1.8
+        sword_arm.rotation.x = -sin(attack_time/.4*PI)*(1.0 if class_id in ["Archer","Dark Mage","Light Mage","Healer","Creature Summoner"] else 1.8)
         sword_arm.rotation.z = -sin(attack_time/.4*PI)*.8
     if kind == "monster":
         model.rotation.x = sin(attack_time/.4*PI)*.35

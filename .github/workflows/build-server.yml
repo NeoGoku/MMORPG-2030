@@ -59,6 +59,7 @@ jobs:
             sleep 1
           done
           python tests/accounts.py
+          python tests/social.py
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

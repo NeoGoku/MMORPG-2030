@@ -92,6 +92,7 @@ func act(kind: String, target: String = "") -> void:
 func step(dt: float, direction: Vector2) -> void:
     time += dt
     tick += 1
+    direction=m3.farm_direction(dt,direction)
     if player.hp <= 0:
         if time >= player.respawn:
             player.hp = player.maxHp
@@ -112,7 +113,7 @@ func step(dt: float, direction: Vector2) -> void:
             var m: Dictionary = target_monster
             if not moving and _distance(player, m) <= rules.attackRange and time >= player.nextAttack:
                 player.yaw = atan2(player.x - m.x, player.z - m.z)
-                player.nextAttack = time + rules.attackSeconds
+                player.nextAttack = time + rules.attackSeconds/(1.4 if m3.effects.get("haste",0)>0 else 1.0)
                 player.attackSerial += 1
                 m.hp = maxi(0, int(m.hp - m3.attack()))
                 m.hurtSerial += 1
@@ -148,13 +149,23 @@ func step(dt: float, direction: Vector2) -> void:
             continue
         var distance := _distance(player, m)
         var home_distance := Vector2(player.x - m.homeX, player.z - m.homeZ).length()
-        if player.hp > 0 and distance < rules.aggroRange and home_distance < 12:
+        if player.hp > 0 and (distance < rules.aggroRange or m.get("aggro",0)>0) and home_distance < 18:
             if distance > m.reach:
-                _move(m, (player.x - m.x) / distance * m.speed * dt, (player.z - m.z) / distance * m.speed * dt)
+                _move(m, (player.x - m.x) / distance * m.speed * dt*(.5 if m.get("slow",0)>0 else 1.0), (player.z - m.z) / distance * m.speed * dt*(.5 if m.get("slow",0)>0 else 1.0))
             elif time >= m.nextAttack:
                 m.nextAttack = time + rules.monsterAttackSeconds
                 m.attackSerial += 1
-                player.hp = maxi(0, int(player.hp - maxi(1,int(rules.monsterDamage)-m3.defense()-(int(m3.attributes.resistance) if m.damageType=="arcane" else 0)-(int(m3.catalog.buffDefense) if m3.buff>0 else 0))))
+                var incoming: int = maxi(1,int(rules.monsterDamage)-m3.defense()-(int(m3.attributes.resistance) if m.damageType=="arcane" else 0)-(int(m3.catalog.buffDefense) if m3.buff>0 else 0))
+                var absorbed := false
+                for summon in m3.summons:
+                    if summon.kind=="golem" and summon.hp>0:summon.hp=maxi(0,summon.hp-incoming);absorbed=true;break
+                if not absorbed and m3.pet.active and m3.pet.mode=="tank" and m3.pet.hp>0:
+                    m3.pet.hp=maxi(0,m3.pet.hp-incoming)
+                    if m3.pet.hp==0:m3.pet.recoveryUntil=Time.get_unix_time_from_system()+15
+                    absorbed=true
+                if not absorbed:
+                    player.hp=maxi(0,player.hp-incoming)
+                    if m.damageType=="arcane":m3.effects.weaken=4.0
                 player.hurtSerial += 1
                 player.lastDamage = rules.monsterDamage
                 if player.hp == 0:
@@ -178,9 +189,11 @@ func step(dt: float, direction: Vector2) -> void:
 func snapshot() -> Dictionary:
     var p: Dictionary = player.duplicate(true)
     p.dead = p.hp <= 0
+    p.classId=m3.class_id
+    p.name=m3.nickname
     var enemies: Array = monsters.duplicate(true)
     for m in enemies:
         m.dead = m.hp <= 0
-    return {"pets":m3.pets(), "type": "snapshot", "tick": tick, "players": [p], "monsters": enemies, "loot": drops.duplicate(true),
+    return {"environment":{"phase":fmod(time,m3.catalog.daySeconds)/m3.catalog.daySeconds,"weather":["klar","Regen","Nebel"][int(time/m3.catalog.weatherSeconds)%3]},"summons":m3.summons.duplicate(true),"pets":m3.pets(), "type": "snapshot", "tick": tick, "players": [p], "monsters": enemies, "loot": drops.duplicate(true),
         "self": {"quest": p.quest, "kills": p.kills, "exp": p.exp, "level": p.level, "statPoints": p.statPoints,
         "coins": p.coins, "scrap": p.scrap, "message": p.message, "character":m3.view()}}
