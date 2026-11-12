@@ -12,7 +12,7 @@ Updated: 2026-11-12
 
 ## Cloud export and interactive validation
 - Windows/Web CI exports and the server CI integration passed in [run 43174302980](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43174302980) and [run 43174303139](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43174303139).
-- Android first CI run exposed removed SDK package `tools` in setup action defaults; configuration now explicitly requests `platform-tools`. The following export exposed Godot 4.3's required ETC2/ASTC texture import setting (confirmed against the engine validation source); it is now enabled. APK verification follows in the PR.
+- Android first CI run exposed removed SDK package `tools` in setup action defaults; configuration now explicitly requests `platform-tools`. The following export exposed Godot 4.3's required ETC2/ASTC texture import setting (confirmed against the engine validation source); it is now enabled. The next run built, signed and verified an APK, but the strict log gate caught a missing project icon; an explicit SVG icon is now configured. Final clean export evidence follows in the PR.
 - Chromium loaded the exported single-thread Web client without JavaScript/console errors. No physical device checks yet.
 - Godot endpoint/status UI, interpolated avatars, camera follow, keyboard and touch arrow controls. Interactive device/browser checks pending.
 - Further CI evidence and downloadable artifacts are linked from the PR; this file preserves the evidence available when committed.
