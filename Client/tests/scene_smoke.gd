@@ -9,6 +9,12 @@ func check(value: bool, text: String) -> bool:
         quit(1)
     return value
 
+func send_input(event: InputEvent) -> void:
+    # Input may buffer events until frame end. Each sample must have its own object;
+    # never mutate the queued press into a release on faster CI rendering loops.
+    Input.parse_input_event(event.duplicate())
+    Input.flush_buffered_events()
+
 func _run() -> void:
     var packed = load("res://scenes/main.tscn") as PackedScene
     var scene = packed.instantiate() if packed else null
@@ -35,7 +41,7 @@ func _run() -> void:
     down.pressed = true
     down.position = joystick.get_global_rect().get_center() + Vector2(40, -20)
     var initial_x: float = scene.practice.player.x
-    Input.parse_input_event(down)
+    send_input(down)
     for i in range(18):
         await physics_frame
     if not check(scene.practice.player.x > initial_x + .05, "Analog joystick actually moves the character"):
@@ -48,26 +54,26 @@ func _run() -> void:
     action.position = scene.hud.interact_button.get_global_rect().get_center()
     var taps := [0]
     scene.hud.action_requested.connect(func(_kind: String): taps[0] += 1)
-    Input.parse_input_event(action)
+    send_input(action)
     await process_frame
     if not check(joystick.pointer == 0, "Action touch preserves movement finger"):
         return
     action.pressed = false
-    Input.parse_input_event(action)
+    send_input(action)
     await process_frame
     if not check(taps[0] == 1, "Multi-touch action fires exactly once"):
         return
     down.pressed = false
-    Input.parse_input_event(down)
+    send_input(down)
     await process_frame
     if not check(joystick.direction == Vector2.ZERO, "Joystick releases to neutral"):
         return
     action.index = 0
     action.pressed = true
-    Input.parse_input_event(action)
+    send_input(action)
     await process_frame
     action.pressed = false
-    Input.parse_input_event(action)
+    send_input(action)
     await process_frame
     if not check(taps[0] == 2, "Single-touch action not duplicated by mouse emulation"):
         return
