@@ -13,3 +13,8 @@ Multiple cities, spatial streaming, non-instanced dungeons, physical housing, gu
 Cross-platform optimization, content production, server security, PvP normalization, operations and release.
 
 Milestone completion requires implemented code and verifiable build/runtime evidence; not merely files or plans.
+
+## Current milestone boundaries (2026-11-12)
+M0: source foundation and scene-load check implemented. Export pipelines now include Android setup and PR checks; export evidence tracked in PR/status.
+M1: pending successful cloud artifacts and real Android, Windows and browser runtime checks. Keep Godot provisional.
+M2: ephemeral two-player movement foundation verified with real WebSocket and Godot clients. Next: PostgreSQL-backed accounts/character slots, city content, NPC/monster, combat, quest, loot and XP. No persistence or production hosting yet.

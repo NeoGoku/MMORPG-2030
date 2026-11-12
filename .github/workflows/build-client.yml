@@ -1,48 +1,112 @@
 name: Client exports
 on:
   workflow_dispatch:
+  pull_request:
+    paths: ['Client/**', '.github/workflows/build-client.yml']
   push:
-    paths:
-      - 'Client/**'
-      - '.github/workflows/build-client.yml'
-
+    branches: [main]
+    paths: ['Client/**', '.github/workflows/build-client.yml']
+permissions:
+  contents: read
+concurrency:
+  group: client-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   export:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        target: [Android, Windows Desktop, Web]
+        include:
+          - target: Android
+            artifact: Android-debug
+            output: MMORPG-Android-debug.apk
+          - target: Windows Desktop
+            artifact: Windows
+            output: MMORPG-Windows.exe
+          - target: Web
+            artifact: Web
+            output: index.html
     steps:
       - uses: actions/checkout@v4
-      - name: Install Godot 4.3 and export templates
+      - name: Install Godot and matching templates
         shell: bash
         run: |
           set -euo pipefail
-          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
-          unzip -q Godot_v4.3-stable_linux.x86_64.zip
-          sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          curl -fsSL --retry 3 https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+          mv "$RUNNER_TEMP/godot/Godot_v4.3-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          curl -fsSL --retry 3 https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -o "$RUNNER_TEMP/templates.tpz"
+          unzip -q "$RUNNER_TEMP/templates.tpz" -d "$RUNNER_TEMP/templates"
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
-          unzip -q Godot_v4.3-stable_export_templates.tpz
-          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
-      - name: Prepare export
-        run: mkdir -p artifacts
-      - name: Export
+          mv "$RUNNER_TEMP/templates/templates/"* ~/.local/share/godot/export_templates/4.3.stable/
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'Android'
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        if: matrix.target == 'Android'
+        with:
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: false
+      - name: Configure Android SDK and ephemeral debug signing
+        if: matrix.target == 'Android'
         shell: bash
         run: |
           set -euo pipefail
-          case "${{ matrix.target }}" in
-            Android) output="../artifacts/MMORPG-Android-debug.apk" ;;
-            "Windows Desktop") output="../artifacts/MMORPG-Windows.exe" ;;
-            Web) output="../artifacts/index.html" ;;
-          esac
-          cd Client
-          godot --headless --editor --quit
-          godot --headless --export-debug "${{ matrix.target }}" "$output"
-      - uses: actions/upload-artifact@v4
-        if: always()
+          sdkmanager 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0'
+          keytool -genkeypair -keystore "$RUNNER_TEMP/debug.keystore" -storepass android -keypass android -alias androiddebugkey -dname 'CN=Android Debug,O=Android,C=US' -keyalg RSA -keysize 2048 -validity 10000
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-4.3.tres <<SETTINGS
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "$RUNNER_TEMP/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          SETTINGS
+      - uses: actions/setup-dotnet@v4
+        if: matrix.target == 'Web'
         with:
-          name: MMORPG-${{ matrix.target }}
+          dotnet-version: '8.0.x'
+      - name: Godot transport integration
+        if: matrix.target == 'Web'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          dotnet build Server/MMORPG.Server.csproj --configuration Release
+          dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5080 > logs/server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:5080/health; then break; fi
+            sleep 1
+          done
+          godot --headless --path Client --script res://tests/network_smoke.gd 2>&1 | tee logs/network.log
+      - name: Import, validate scene and export
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts logs
+          godot --headless --path Client --editor --quit 2>&1 | tee logs/import.log
+          godot --headless --path Client --script res://tests/scene_smoke.gd 2>&1 | tee logs/scene.log
+          godot --headless --path Client --export-debug '${{ matrix.target }}' '../artifacts/${{ matrix.output }}' 2>&1 | tee logs/export.log
+          if grep -E '(^| )((SCRIPT )?ERROR:|Parse Error:)' logs/*.log; then exit 1; fi
+          test -s 'artifacts/${{ matrix.output }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MMORPG-${{ matrix.artifact }}
           path: artifacts/
-          if-no-files-found: warn
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs-${{ matrix.artifact }}
+          path: logs/
+          retention-days: 7

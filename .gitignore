@@ -18,3 +18,5 @@ dist/
 *.jks
 *.p12
 secrets/
+# Task scratch
+work/
