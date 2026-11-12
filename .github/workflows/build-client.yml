@@ -1,0 +1,48 @@
+name: Client exports
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Client/**'
+      - '.github/workflows/build-client.yml'
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [Android, Windows Desktop, Web]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.3 and export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q Godot_v4.3-stable_linux.x86_64.zip
+          sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip -q Godot_v4.3-stable_export_templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
+      - name: Prepare export
+        run: mkdir -p artifacts
+      - name: Export
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ matrix.target }}" in
+            Android) output="../artifacts/MMORPG-Android-debug.apk" ;;
+            "Windows Desktop") output="../artifacts/MMORPG-Windows.exe" ;;
+            Web) output="../artifacts/index.html" ;;
+          esac
+          cd Client
+          godot --headless --editor --quit
+          godot --headless --export-debug "${{ matrix.target }}" "$output"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MMORPG-${{ matrix.target }}
+          path: artifacts/
+          if-no-files-found: warn
