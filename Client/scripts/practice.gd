@@ -1,6 +1,8 @@
 extends Node
 
 # Explicit local training; no simulated remote players. Uses the server's district/rules.
+const Progression = preload("res://scripts/progression.gd")
+var m3
 var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
 var rules: Dictionary = data.rules
 var player: Dictionary
@@ -18,8 +20,12 @@ func _init() -> void:
         "message": "Sprich mit Mira bei der Stadtwache. Geh zum goldenen Zeichen."}
     for spawn in data.monsters:
         monsters.append({"id": spawn.id, "name": spawn.name, "x": spawn.x, "z": spawn.z,
-            "homeX": spawn.x, "homeZ": spawn.z, "hp": rules.monsterHp, "maxHp": rules.monsterHp,
+            "homeX": spawn.x, "homeZ": spawn.z,"reach":spawn.get("reach",2),"speed":spawn.get("speed",1.8),"damageType":spawn.get("damageType","physical"), "hp": rules.monsterHp, "maxHp": rules.monsterHp,
             "attackSerial": 0, "hurtSerial": 0, "lastDamage": 0, "nextAttack": 0.0, "respawn": 0.0})
+
+    m3 = Progression.new(self)
+    player.hp = m3.catalog.baseHp
+    player.maxHp = m3.catalog.baseHp
 
 func _distance(a: Dictionary, b: Dictionary) -> float:
     return Vector2(a.x - b.x, a.z - b.z).length()
@@ -40,14 +46,15 @@ func _move(entity: Dictionary, dx: float, dz: float) -> void:
 
 func _exp(amount: int) -> void:
     player.exp += amount
-    while player.level < 100 and player.exp >= player.level * 100:
-        player.exp -= player.level * 100
+    while player.level < 100 and player.exp >= player.level * m3.catalog.levelExpBase:
+        player.exp -= player.level * m3.catalog.levelExpBase
         player.level += 1
         player.statPoints += 1
 
 func act(kind: String, target: String = "") -> void:
     if player.hp <= 0:
         return
+    if m3.action(kind,target): return
     match kind:
         "target":
             player.target = ""
@@ -68,13 +75,13 @@ func act(kind: String, target: String = "") -> void:
                 player.quest = "complete"
                 player.coins += rules.questCoins
                 _exp(int(rules.questExp))
-                player.hp = rules.playerHp
+                player.hp = player.maxHp
                 player.message = "Mira: Nordtor ist sicherer. Danke! +60 EXP, +25 Münzen."
             else:
                 player.message = "Mira: Gute Arbeit!" if player.quest == "complete" else "Mira: Noch %d Drohnen im Nordhof." % (rules.questKills - player.kills)
         "loot":
             for drop in drops:
-                if (target.is_empty() or target == drop.id) and _distance(player, drop) <= 3:
+                if (target.is_empty() or target == drop.id) and _distance(player, drop) <= 3 and m3.add("scrap",1):
                     player.coins += rules.lootCoins
                     player.scrap += rules.lootScrap
                     player.message = "Beute: +4 Münzen, +1 Drohnenschrott."
@@ -87,7 +94,7 @@ func step(dt: float, direction: Vector2) -> void:
     tick += 1
     if player.hp <= 0:
         if time >= player.respawn:
-            player.hp = rules.playerHp
+            player.hp = player.maxHp
             player.x = data.spawn.x
             player.z = data.spawn.z
             player.message = "An der Stadtwache wiederbelebt."
@@ -107,13 +114,14 @@ func step(dt: float, direction: Vector2) -> void:
                 player.yaw = atan2(player.x - m.x, player.z - m.z)
                 player.nextAttack = time + rules.attackSeconds
                 player.attackSerial += 1
-                m.hp = maxi(0, int(m.hp - rules.playerDamage))
+                m.hp = maxi(0, int(m.hp - m3.attack()))
                 m.hurtSerial += 1
-                m.lastDamage = rules.playerDamage
+                m.lastDamage = m3.attack()
                 if m.hp == 0:
                     m.respawn = time + rules.monsterRespawnSeconds
                     player.attacking = false
                     _exp(int(rules.killExp))
+                    m3.reward_pet()
                     if player.quest == "active":
                         player.kills += 1
                         if player.kills >= rules.questKills:
@@ -129,7 +137,7 @@ func step(dt: float, direction: Vector2) -> void:
             if m.hp > 0 and _distance(player, m) < 8:
                 safe = false
         if safe and tick % 20 == 0:
-            player.hp = mini(int(rules.playerHp), int(player.hp + 5))
+            player.hp = mini(int(player.maxHp), int(player.hp + 5))
     for i in range(monsters.size()):
         var m: Dictionary = monsters[i]
         if m.hp <= 0:
@@ -141,12 +149,12 @@ func step(dt: float, direction: Vector2) -> void:
         var distance := _distance(player, m)
         var home_distance := Vector2(player.x - m.homeX, player.z - m.homeZ).length()
         if player.hp > 0 and distance < rules.aggroRange and home_distance < 12:
-            if distance > 2:
-                _move(m, (player.x - m.x) / distance * rules.monsterSpeed * dt, (player.z - m.z) / distance * rules.monsterSpeed * dt)
+            if distance > m.reach:
+                _move(m, (player.x - m.x) / distance * m.speed * dt, (player.z - m.z) / distance * m.speed * dt)
             elif time >= m.nextAttack:
                 m.nextAttack = time + rules.monsterAttackSeconds
                 m.attackSerial += 1
-                player.hp = maxi(0, int(player.hp - rules.monsterDamage))
+                player.hp = maxi(0, int(player.hp - maxi(1,int(rules.monsterDamage)-m3.defense()-(int(m3.attributes.resistance) if m.damageType=="arcane" else 0)-(int(m3.catalog.buffDefense) if m3.buff>0 else 0))))
                 player.hurtSerial += 1
                 player.lastDamage = rules.monsterDamage
                 if player.hp == 0:
@@ -165,12 +173,14 @@ func step(dt: float, direction: Vector2) -> void:
         if drop.expires < time:
             drops.erase(drop)
 
+    m3.tick(dt)
+
 func snapshot() -> Dictionary:
     var p: Dictionary = player.duplicate(true)
     p.dead = p.hp <= 0
     var enemies: Array = monsters.duplicate(true)
     for m in enemies:
         m.dead = m.hp <= 0
-    return {"type": "snapshot", "tick": tick, "players": [p], "monsters": enemies, "loot": drops.duplicate(true),
+    return {"pets":m3.pets(), "type": "snapshot", "tick": tick, "players": [p], "monsters": enemies, "loot": drops.duplicate(true),
         "self": {"quest": p.quest, "kills": p.kills, "exp": p.exp, "level": p.level, "statPoints": p.statPoints,
-        "coins": p.coins, "scrap": p.scrap, "message": p.message}}
+        "coins": p.coins, "scrap": p.scrap, "message": p.message, "character":m3.view()}}

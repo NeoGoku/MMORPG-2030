@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace MMORPG.Server;
 
-public sealed class Point { public double X { get; set; } public double Z { get; set; } }
+public class Point { public double X { get; set; } public double Z { get; set; } }
 public sealed class Building
 {
     public double X { get; set; } public double Z { get; set; }
@@ -11,6 +11,7 @@ public sealed class Building
 public sealed class Spawn
 {
     public string Id { get; set; } = ""; public string Name { get; set; } = "";
+    public string DamageType {get;set;}="physical";public double Reach {get;set;}=2;public double Speed {get;set;}=1.8;
     public double X { get; set; } public double Z { get; set; }
 }
 public sealed class Rules

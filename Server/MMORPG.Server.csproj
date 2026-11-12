@@ -5,4 +5,5 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup><Content Include="../Client/data/district.json" Link="district.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><PackageReference Include="Npgsql" Version="8.0.8" /><Content Include="../Client/data/game.json" Link="game.json" CopyToOutputDirectory="PreserveNewest"/><Content Include="Migrations/*.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

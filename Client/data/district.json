@@ -1,24 +1,126 @@
 {
-  "name": "Nordtor", "bounds": 32,
-  "spawn": {"x": 0, "z": 10},
-  "npc": {"id": "warden", "name": "Mira · Stadtwache", "x": -3, "z": 6},
+  "name": "Nordtor",
+  "bounds": 56,
+  "spawn": {
+    "x": 0,
+    "z": 10
+  },
+  "npc": {
+    "id": "warden",
+    "name": "Mira · Stadtwache",
+    "x": -3,
+    "z": 6
+  },
   "buildings": [
-    {"x": -18, "z": 13, "width": 12, "depth": 12, "height": 10, "name": "WERKSTATT"},
-    {"x": 18, "z": 13, "width": 12, "depth": 12, "height": 14, "name": "HABITAT 03"},
-    {"x": -21, "z": -6, "width": 8, "depth": 14, "height": 16, "name": "ARKANUM"},
-    {"x": 21, "z": -6, "width": 8, "depth": 14, "height": 11, "name": "TRANSIT"},
-    {"x": -19, "z": -24, "width": 14, "depth": 8, "height": 9, "name": "DEPOT"},
-    {"x": 19, "z": -24, "width": 14, "depth": 8, "height": 17, "name": "SEKTOR 7"}
+    {
+      "x": -18,
+      "z": 13,
+      "width": 12,
+      "depth": 12,
+      "height": 10,
+      "name": "WERKSTATT"
+    },
+    {
+      "x": 18,
+      "z": 13,
+      "width": 12,
+      "depth": 12,
+      "height": 14,
+      "name": "HABITAT 03"
+    },
+    {
+      "x": -21,
+      "z": -6,
+      "width": 8,
+      "depth": 14,
+      "height": 16,
+      "name": "ARKANUM"
+    },
+    {
+      "x": 21,
+      "z": -6,
+      "width": 8,
+      "depth": 14,
+      "height": 11,
+      "name": "TRANSIT"
+    },
+    {
+      "x": -19,
+      "z": -24,
+      "width": 14,
+      "depth": 8,
+      "height": 9,
+      "name": "DEPOT"
+    },
+    {
+      "x": 19,
+      "z": -24,
+      "width": 14,
+      "depth": 8,
+      "height": 17,
+      "name": "SEKTOR 7"
+    },
+    {
+      "x": -18,
+      "z": 44,
+      "width": 12,
+      "depth": 12,
+      "height": 12,
+      "name": "WOHNQUARTIER"
+    },
+    {
+      "x": 18,
+      "z": 44,
+      "width": 12,
+      "depth": 12,
+      "height": 12,
+      "name": "ALCHEMIE"
+    }
   ],
   "monsters": [
-    {"id": "drone-1", "name": "Defekte Wachdrohne", "x": -7, "z": -9},
-    {"id": "drone-2", "name": "Defekte Wachdrohne", "x": 0, "z": -15},
-    {"id": "drone-3", "name": "Defekte Wachdrohne", "x": 7, "z": -9}
+    {
+      "id": "drone-1",
+      "name": "Defekte Wachdrohne",
+      "x": -7,
+      "z": -9
+    },
+    {
+      "id": "drone-2",
+      "name": "Arkane Wachdrohne",
+      "x": 0,
+      "z": -15,
+      "damageType": "arcane",
+      "reach": 5,
+      "speed": 1.2
+    },
+    {
+      "id": "drone-3",
+      "name": "Sturmdrohne",
+      "x": 7,
+      "z": -9,
+      "damageType": "physical",
+      "reach": 2,
+      "speed": 2.6
+    }
   ],
-  "rules": {"speed": 5, "playerHp": 100, "monsterHp": 42, "playerDamage": 14,
-    "monsterDamage": 7, "attackSeconds": 0.8, "monsterAttackSeconds": 1.2,
-    "attackRange": 3.2, "aggroRange": 8, "monsterSpeed": 1.8,
-    "monsterRespawnSeconds": 12, "playerRespawnSeconds": 4,
-    "killExp": 20, "questKills": 3, "questExp": 60, "questCoins": 25,
-    "lootCoins": 4, "lootScrap": 1}
+  "rules": {
+    "speed": 5,
+    "playerHp": 100,
+    "monsterHp": 42,
+    "playerDamage": 14,
+    "monsterDamage": 7,
+    "attackSeconds": 0.8,
+    "monsterAttackSeconds": 1.2,
+    "attackRange": 3.2,
+    "aggroRange": 8,
+    "monsterSpeed": 1.8,
+    "monsterRespawnSeconds": 12,
+    "playerRespawnSeconds": 4,
+    "killExp": 20,
+    "questKills": 3,
+    "questExp": 60,
+    "questCoins": 25,
+    "lootCoins": 4,
+    "lootScrap": 1
+  }
 }

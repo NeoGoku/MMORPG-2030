@@ -5,20 +5,34 @@ namespace MMORPG.Server;
 
 public static class Session
 {
-    public static async Task Run(HttpContext context, World world)
+    public static async Task Run(HttpContext context, World world, AccountService auth, bool allowGuest)
     {
         if (!context.WebSockets.IsWebSocketRequest)
         {
             context.Response.StatusCode = 400;
             return;
         }
-        var id = world.Join();
-        if (id is null) { context.Response.StatusCode = 503; return; }
+        string? id = null;
+        using var socket = await context.WebSockets.AcceptWebSocketAsync();
         try
         {
-            using var socket = await context.WebSockets.AcceptWebSocketAsync();
+            if(allowGuest) id=world.Join();
+            else {
+                using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var bytes=new byte[4096];
+                try {
+                    var first=await socket.ReceiveAsync(bytes.AsMemory(),deadline.Token);
+                    if(first.MessageType!=WebSocketMessageType.Text||!first.EndOfMessage)return;
+                    using var packet=JsonDocument.Parse(bytes.AsMemory(0,first.Count));
+                    if(packet.RootElement.TryGetProperty("ticket",out var ticket)&&ticket.ValueKind==JsonValueKind.String) {
+                        var record=auth.ConsumeTicket(ticket.GetString()!);
+                        if(record is not null)id=world.JoinCharacter(record);
+                    }
+                } catch(Exception e) when(e is JsonException or OperationCanceledException or WebSocketException){return;}
+            }
+            if(id is null){using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(1));await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation,"Authentication required or character already connected",deadline.Token);return;}
             using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-            await Send(socket, new { type = "welcome", version = 2, id, tickRate = 20 }, lifetime.Token);
+            await Send(socket, new { type = "welcome", version = 3, id, tickRate = 20 }, lifetime.Token);
             var receive = Receive(socket, world, id, lifetime.Token);
             var send = Snapshots(socket, world, id, lifetime.Token);
             await Task.WhenAny(receive, send);
@@ -33,7 +47,7 @@ public static class Session
                 catch (Exception e) when (e is OperationCanceledException or WebSocketException) { }
             }
         }
-        finally { world.Leave(id); }
+        finally { if(id is not null) world.Leave(id); }
     }
 
     private static async Task Send(WebSocket socket, object value, CancellationToken token)
@@ -86,7 +100,7 @@ public static class Session
             else if (type.GetString() == "action")
             {
                 if (!root.TryGetProperty("kind", out var kind) || kind.ValueKind != JsonValueKind.String ||
-                    kind.GetString() is not ("target" or "attack" or "interact" or "loot"))
+                    kind.GetString() is not ("target" or "attack" or "interact" or "loot" or "stat" or "farm_stat" or "buy" or "sell" or "equip" or "craft" or "gather" or "claim" or "use" or "pet" or "skill" or "teleport"))
                     throw new InvalidDataException("Invalid action");
                 var target = "";
                 if (root.TryGetProperty("target", out var value))

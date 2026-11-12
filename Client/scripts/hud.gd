@@ -7,6 +7,10 @@ signal practice_requested
 const Joystick = preload("res://scripts/joystick.gd")
 const TouchAction = preload("res://scripts/touch_action.gd")
 var joystick = Joystick.new()
+var skill_buttons: Array[Button] = []
+var layout_controls: Dictionary = {}
+var layout_defaults: Dictionary = {}
+var character_menu
 var hp: ProgressBar
 var xp: ProgressBar
 var player_title: Label
@@ -75,12 +79,33 @@ func _ready() -> void:
     loot_button = _button(self, "BEUTE\nF", Rect2(0,0,104,62), "loot")
     _bottom_right(loot_button, Vector2(-282,-212))
     var message_panel := _panel(Rect2(0,0,570,90))
-    _anchor(message_panel, Control.PRESET_BOTTOM_LEFT, Vector2(268,-168))
+    _anchor(message_panel, Control.PRESET_BOTTOM_LEFT, Vector2(268,-270))
     message = _text(message_panel, "", Vector2(16,12), 18, Color("f0e8d1"))
     message.size = Vector2(538, 68)
     message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     message_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
     _connection_panel()
+    var menu_button := _button(self,"Charakter / Inventar",Rect2(22,152,240,44),"online")
+    menu_button.pressed.connect(func(): if character_menu: character_menu.visible = not character_menu.visible)
+    for i in range(6):
+        var button := _button(self,"Skill %d"%(i+1),Rect2(268+i*88,636,84,48),"skill:skill%d"%(i+1))
+        button.clip_text = true
+        button.add_theme_font_size_override("font_size",13)
+        skill_buttons.append(button)
+    layout_controls = {"attack":attack_button,"target":target_button,"interact":interact_button,"loot":loot_button,"joystick":joystick}
+    for i in range(6): layout_controls["skill%d"%(i+1)] = skill_buttons[i]
+    var saved_layout := ConfigFile.new()
+    saved_layout.load("user://touch_layout.cfg")
+    for key in layout_controls:
+        var control: Control = layout_controls[key]
+        layout_defaults[key] = Vector2(control.offset_left,control.offset_top)
+        var offset = saved_layout.get_value("positions",key,layout_defaults[key])
+        if offset is Vector2:
+            var dimensions := control.size
+            control.offset_left = offset.x
+            control.offset_top = offset.y
+            control.offset_right = offset.x+dimensions.x
+            control.offset_bottom = offset.y+dimensions.y
 
 func _anchor(control: Control, preset: int, offset: Vector2) -> void:
     var dimensions := control.size
@@ -197,13 +222,21 @@ func update_state(state: Dictionary, player: Dictionary, online: bool) -> void:
     if player.is_empty():
         return
     var info: Dictionary = state.self
-    player_title.text = "Reisender  /  Stufe %d" % info.level
+    if info.get("character") is Dictionary:
+        var character: Dictionary = info.character
+        if character_menu: character_menu.update_info(character)
+        for i in range(mini(6,character.skills.size())):
+            var skill: Dictionary = character.skills[i]
+            skill_buttons[i].text = "%d %s\n%s"%[i+1,skill.name.left(11),("%.1fs"%skill.cooldown) if skill.cooldown>0 else ("%d Mana"%skill.cost)]
+            skill_buttons[i].disabled = not skill.enabled or skill.cooldown>0 or character.mana<skill.cost
+        player_title.text = "%s / St. %d"%[character.name.left(14),info.level]
+    if not info.get("character") is Dictionary: player_title.text = "Reisender  /  Stufe %d" % info.level
     hp.max_value = player.maxHp
     hp.value = player.hp
     hp_text.text = "%d / %d HP" % [player.hp, player.maxHp]
     xp.max_value = info.level*100
     xp.value = info.exp
-    mode_label.text = "ONLINE · %d SPIELER · TEMPORÄR" % state.players.size() if online else "LOKALES TRAINING · NICHT GESPEICHERT"
+    mode_label.text = (("ONLINE · %d SPIELER · POSTGRESQL" if info.get("character",{}).get("persistent",false) else "ONLINE · %d SPIELER · FLÜCHTIG") % state.players.size()) if online else "LOKALES TRAINING · NICHT GESPEICHERT"
     var progress: String = info.quest
     match progress:
         "available": objective.text = "Sprich mit Mira bei der Stadtwache. [E]"
@@ -230,3 +263,26 @@ func update_state(state: Dictionary, player: Dictionary, online: bool) -> void:
 func _process(delta: float) -> void:
     _message_time -= delta
     message.modulate.a = 1.0 if _message_time > 0 else .5
+
+func move_layout(command: String) -> void:
+    if command=="reset":
+        for key in layout_controls:
+            var control: Control = layout_controls[key]
+            var dimensions := control.size
+            control.offset_left = layout_defaults[key].x
+            control.offset_top = layout_defaults[key].y
+            control.offset_right = control.offset_left+dimensions.x
+            control.offset_bottom = control.offset_top+dimensions.y
+    else:
+        var key := command.get_slice("|",0)
+        var directions := {"left":Vector2(-12,0),"right":Vector2(12,0),"up":Vector2(0,-12),"down":Vector2(0,12)}
+        var direction := command.get_slice("|",1)
+        if not layout_controls.has(key) or not directions.has(direction):return
+        var control: Control = layout_controls[key]
+        var next: Vector2 = control.position+directions[direction]
+        var view := get_viewport_rect().size
+        control.position = Vector2(clampf(next.x,0,view.x-control.size.x),clampf(next.y,0,view.y-control.size.y))
+    var saved := ConfigFile.new()
+    for key in layout_controls:
+        saved.set_value("positions",key,Vector2(layout_controls[key].offset_left,layout_controls[key].offset_top))
+    saved.save("user://touch_layout.cfg")

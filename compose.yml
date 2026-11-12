@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mmorpg
+      POSTGRES_USER: mmorpg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in an untracked .env file}
+    volumes:
+      - mmorpg-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mmorpg -d mmorpg"]
+      interval: 5s
+      retries: 10
+  server:
+    build:
+      context: .
+      dockerfile: Server/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:5080
+      MMORPG_DATABASE: Host=db;Database=mmorpg;Username=mmorpg;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      MMORPG_WEB_ORIGINS: ${MMORPG_WEB_ORIGINS:-http://localhost:8080}
+    ports:
+      - "127.0.0.1:5080:5080"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  mmorpg-data:

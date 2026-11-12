@@ -30,3 +30,6 @@ Free game, no real-money shop, premium currency or paid convenience. All cosmeti
 
 ## Technical intent
 Android-first touch controls, landscape, customizable joystick and skill UI; Windows keyboard/mouse; browser performance adaptations. Server-authoritative security, streaming, persistence. Engine not irrevocably selected; Godot 4/GDScript is the current candidate.
+
+## Implementation note — M3 package (2026-11-12)
+The current M3 implementation is partial; see IMPLEMENTATION_STATUS.md. Attribute names/formulas, exponential costs, class starter skills and all balance constants in `Client/data/game.json` are configurable **proposals**, not newly ratified game rules. Two active starter skills plus four locked visible positions do not fulfill the final class skill count. The shared character appearance, initial professions/pet and lack of groups/streaming remain explicit gaps. All v1.1 requirements above stay binding.
