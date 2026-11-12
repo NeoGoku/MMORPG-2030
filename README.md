@@ -1,33 +1,44 @@
-# MMORPG-2030
+# MMORPG-2030 · Nordtor
 
-Android-first 3D MMORPG foundation. Game direction: [GDD](docs/GDD.md). Actual progress and limitations: [implementation status](docs/IMPLEMENTATION_STATUS.md).
+Ein spielbarer kleiner 3D-Stadtbezirk auf Basis des [GDD v1.1](docs/GDD.md). [Tatsächlicher Funktionsumfang und Grenzen](docs/IMPLEMENTATION_STATUS.md).
 
-## Cloud builds from Android
-Open a pull request or run **Actions → Client exports → Run workflow**. Open the completed run and download `MMORPG-Android-debug`, `MMORPG-Windows` or `MMORPG-Web` under Artifacts. Android contains a debug APK; Windows requires both EXE and PCK in the same folder; serve the complete Web folder over HTTP(S). Artifact retention is 14 days. New Android CI builds use a new debug key, so uninstalling the old APK may be required. These are test builds, not store-signed releases.
+## APK spielen — ohne PC oder Server
 
-**Server build** compiles the backend and runs a real two-client transport test. All development/builds can run in the cloud; a local PC is not required.
+Unter **Actions → Client exports → erfolgreicher Lauf → Artifacts** `MMORPG-Android-debug` herunterladen, ZIP entpacken und APK installieren. Jeder Build verwendet einen neuen Debug-Schlüssel; bei Signaturkonflikt die alte APK deinstallieren. Die APK startet sofort im ausdrücklich markierten **lokalen Training**. Der Fortschritt ist temporär und wird nicht gespeichert.
 
-## Connect two players
-Start the server in a cloud development environment with .NET 8:
+1. Mit dem linken Joystick zur goldenen Stadtwache **Mira** gehen. In ihrer Nähe **SPRECHEN** tippen: Auftrag annehmen.
+2. Durch das Tor in den Nordhof gehen. **ZIEL** wählt/wechselt eine lebende Drohne; der goldene Ring und die Ziel-HP zeigen die Auswahl.
+3. In Schlagweite gehen, stehen bleiben und **ANGRIFF AUTO** einschalten. Bewegung unterbricht normale Schläge. Die Drohnen greifen zurück; HP und Schadenszahlen sind sichtbar. Erneutes Tippen stoppt den Auto-Angriff.
+4. Zur goldenen Beutekiste gehen und **BEUTE** tippen. Drei Drohnen besiegen, dann bei Mira den Auftrag abgeben: EXP und Münzen erhalten. Drohnen erscheinen erneut; besiegte Spieler werden bei der Wache wiederbelebt.
+
+Rechts im freien Bildbereich wischen dreht/neigt die Third-Person-Kamera. Joystick und Aktionsknöpfe unterstützen verschiedene Finger. PC: WASD/Pfeile, Tab zum Zielwechsel, Leertaste für Auto-Angriff, E zum Sprechen, F für Beute, rechte Maustaste ziehen für Kamera.
+
+## Echte Mitspieler
+
+**Online** öffnen, erreichbare Serveradresse (`ws://…/ws` bzw. `wss://…/ws`) eingeben und verbinden. Zwei Clients am selben Server teilen Spieler, Drohnen, HP, Angriffe und Tode; andere Spieler sind blau markiert. Questfortschritt und Beute sind persönlich. Es gibt keinen vorinstallierten öffentlichen Server. Training und Online-Fortschritt sind getrennt und temporär; eine Verbindung erschafft einen neuen Charakter ohne Konto.
+
+Server kostenlos in einer bestehenden Cloud-Entwicklungsumgebung mit .NET 8 starten:
 
 ```sh
 dotnet run --project Server --urls http://0.0.0.0:5080
 ```
 
-Run the Godot 4.3 project or an exported client. Enter the reachable server endpoint (`ws://127.0.0.1:5080/ws` only when client and server share a machine), then Connect. On a phone, use a server hostname reachable from that phone. HTTPS browser clients require `wss://…/ws` through an approved TLS endpoint. No public server is provisioned by this repository.
+Die Telefon-App benötigt einen vom Telefon erreichbaren Host; `127.0.0.1` auf dem Telefon zeigt auf das Telefon selbst. HTTPS-Browserseiten benötigen einen genehmigten TLS-Endpunkt mit `wss://`. Es wird hier kein Hosting gebucht und nichts produktiv bereitgestellt. Der Entwicklungsserver hat noch keine Anmeldung oder dauerhafte Speicherung.
 
-Use WASD/arrows or the on-screen directional buttons. Each connection gets a temporary capsule; another connection can see it move. Reconnect creates a new identity. There are no accounts, persistence or combat yet. The unauthenticated server is for controlled development testing.
+## Cloud-Builds und Nachweise
 
-## Focused checks
+Ein PR oder **Actions → Client exports → Run workflow** erstellt `MMORPG-Android-debug`, `MMORPG-Windows` und `MMORPG-Web` (14 Tage). Windows benötigt EXE und PCK zusammen; den kompletten Web-Ordner per HTTP(S) bereitstellen. Alle Schritte sind in der Cloud möglich. Server- und Client-CI führen die passenden Szenario-, Netzwerk- und gerenderten Eingabeprüfungen aus.
+
+Entwicklungsprüfungen mit Godot 4.3 / .NET 8:
 
 ```sh
-godot --headless --path Client --editor --quit
-godot --headless --path Client --script res://tests/scene_smoke.gd
-dotnet build Server/MMORPG.Server.csproj --configuration Release
-# With server running on 127.0.0.1:5080:
+dotnet run --project Server.Tests --configuration Release -- Client/data/district.json
+godot --headless --path Client --script res://tests/gameplay_smoke.gd
+xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/scene_smoke.gd
+# Mit laufendem Server auf 127.0.0.1:5080:
 python -m pip install -r tests/requirements.txt
 python tests/multiplayer.py
 godot --headless --path Client --script res://tests/network_smoke.gd
 ```
 
-Protocol and security boundaries: [architecture](docs/ARCHITECTURE.md). No paid hosting or production deployment is configured.
+[Architektur/Protokoll](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Asset-Herkunft](docs/ASSETS.md). Noch fehlen unter anderem Konten, Charaktererstellung, PostgreSQL-Persistenz, vollständige Klassen/Fertigkeiten und MMO-Skalierung. Der aktuelle Bezirk ersetzt diese GDD-Ziele nicht.

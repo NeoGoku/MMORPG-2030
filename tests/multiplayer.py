@@ -18,7 +18,7 @@ async def main():
     async with websockets.connect(URL) as a, websockets.connect(URL) as b:
         wa, wb = json.loads(await a.recv()), json.loads(await b.recv())
         assert wa['type'] == wb['type'] == 'welcome'
-        assert wa['version'] == 1 and wa['id'] != wb['id']
+        assert wa['version'] == 2 and wa['id'] != wb['id']
         aid, bid = wa['id'], wb['id']
         initial = await snapshot(b, lambda s: len(s['players']) == 2)
         origin = next(p for p in initial['players'] if p['id'] == aid)
@@ -58,4 +58,45 @@ async def main():
         await snapshot(fresh, lambda s: len(s['players']) == 1)
     print('PASS: two clients, authoritative speed, stale-input stop, disconnect, invalid/oversized input, reconnect')
 
-asyncio.run(main())
+async def gameplay_transport():
+    async with websockets.connect(URL) as hero, websockets.connect(URL) as observer:
+        identity = json.loads(await hero.recv())['id']
+        observer_id = json.loads(await observer.recv())['id']
+        seq = 0
+        async def action(kind, target=''):
+            nonlocal seq
+            seq += 1
+            await hero.send(json.dumps(dict(type='action', seq=seq, kind=kind, target=target, coins=999999, hp=999)))
+        async def go(x,z):
+            nonlocal seq
+            for _ in range(220):
+                state = await snapshot(hero, lambda s: True)
+                p = next(p for p in state['players'] if p['id']==identity)
+                dx,dz=x-p['x'],z-p['z']
+                seq += 1
+                if math.hypot(dx,dz)<.2:
+                    await hero.send(json.dumps(dict(type='input',seq=seq,x=0,z=0)))
+                    return state
+                await hero.send(json.dumps(dict(type='input',seq=seq,x=dx,z=dz)))
+            raise AssertionError('Unable to reach '+str((x,z)))
+        await go(-3,7)
+        await action('interact')
+        accepted=await snapshot(hero,lambda s:s['self']['quest']=='active')
+        assert accepted['self']['coins']==0
+        await go(-6,-6)
+        await action('target','drone-1')
+        selection=await snapshot(hero,lambda s:any(p['id']==identity and p['target']=='drone-1' for p in s['players']))
+        await snapshot(hero,lambda s:s['tick']>selection['tick']+3)
+        await action('attack')
+        hurt=await snapshot(hero,lambda s:any(m['id']=='drone-1' and m['hp']<m['maxHp'] for m in s['monsters']))
+        seen=await snapshot(observer,lambda s:any(p['id']==identity and p['attackSerial']>0 for p in s['players']))
+        assert any(m['id']=='drone-1' and m['hp']<m['maxHp'] for m in seen['monsters'])
+        assert seen['self']['quest']=='available' and seen['self']['coins']==0
+        assert all('coins' not in p for p in seen['players']), 'private progression leaked'
+        print('PASS: real two-player quest/action/combat/HP replication, private state and reward spoof rejection')
+
+async def run():
+    await main()
+    await gameplay_transport()
+
+asyncio.run(run())

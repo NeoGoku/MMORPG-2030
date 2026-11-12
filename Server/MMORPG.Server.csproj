@@ -4,4 +4,5 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup><Content Include="../Client/data/district.json" Link="district.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

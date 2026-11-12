@@ -2,6 +2,7 @@ extends Node
 
 signal state_changed(message: String)
 signal snapshot_received(players: Array)
+signal world_received(state: Dictionary)
 
 var player_id: String = ""
 var direction := Vector2.ZERO
@@ -63,7 +64,7 @@ func _process(delta: float) -> void:
         if not message is Dictionary:
             continue
         if message.get("type") == "welcome":
-            if message.get("version") != 1 or not message.get("id") is String:
+            if message.get("version") != 2 or not message.get("id") is String:
                 disconnect_from_server()
                 state_changed.emit("Incompatible server protocol")
                 return
@@ -71,6 +72,7 @@ func _process(delta: float) -> void:
             state_changed.emit("Connected — WASD, arrows or touch to move")
         elif message.get("type") == "snapshot" and message.get("players") is Array:
             snapshot_received.emit(message.players)
+            world_received.emit(message)
     if player_id.is_empty():
         return
     _elapsed += delta
@@ -81,3 +83,11 @@ func _process(delta: float) -> void:
         if _socket.send_text(JSON.stringify({"type": "input", "seq": _sequence, "x": input.x, "z": input.y})) != OK:
             disconnect_from_server()
             state_changed.emit("Send failed; reconnect to try again")
+
+func action(kind: String, target: String = "") -> void:
+    if not _socket or player_id.is_empty() or _socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+        return
+    _sequence += 1
+    if _socket.send_text(JSON.stringify({"type": "action", "seq": _sequence, "kind": kind, "target": target})) != OK:
+        disconnect_from_server()
+        state_changed.emit("Send failed; reconnect to try again")

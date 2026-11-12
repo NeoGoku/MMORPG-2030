@@ -18,9 +18,9 @@ public static class Session
         {
             using var socket = await context.WebSockets.AcceptWebSocketAsync();
             using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-            await Send(socket, new { type = "welcome", version = 1, id, tickRate = 20 }, lifetime.Token);
+            await Send(socket, new { type = "welcome", version = 2, id, tickRate = 20 }, lifetime.Token);
             var receive = Receive(socket, world, id, lifetime.Token);
-            var send = Snapshots(socket, world, lifetime.Token);
+            var send = Snapshots(socket, world, id, lifetime.Token);
             await Task.WhenAny(receive, send);
             lifetime.Cancel();
             try { await Task.WhenAll(receive, send); }
@@ -40,13 +40,13 @@ public static class Session
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
         timeout.CancelAfter(TimeSpan.FromSeconds(3));
-        await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(value).AsMemory(), WebSocketMessageType.Text, true, timeout.Token);
+        await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(value, new JsonSerializerOptions(JsonSerializerDefaults.Web)).AsMemory(), WebSocketMessageType.Text, true, timeout.Token);
     }
 
-    private static async Task Snapshots(WebSocket socket, World world, CancellationToken token)
+    private static async Task Snapshots(WebSocket socket, World world, string id, CancellationToken token)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
-        while (await timer.WaitForNextTickAsync(token)) await Send(socket, world.Snapshot(), token);
+        while (await timer.WaitForNextTickAsync(token)) await Send(socket, world.View(id), token);
     }
 
     private static async Task Receive(WebSocket socket, World world, string id, CancellationToken token)
@@ -73,12 +73,30 @@ public static class Session
             using var doc = JsonDocument.Parse(buffer.AsMemory(0, used));
             var root = doc.RootElement;
             if (root.ValueKind != JsonValueKind.Object ||
-                !root.TryGetProperty("type", out var type) || type.ValueKind != JsonValueKind.String || type.GetString() != "input" ||
-                !root.TryGetProperty("seq", out var seq) || seq.ValueKind != JsonValueKind.Number || !seq.TryGetInt64(out var sequence) || sequence < 0 ||
-                !root.TryGetProperty("x", out var x) || x.ValueKind != JsonValueKind.Number || !x.TryGetDouble(out var dx) || !double.IsFinite(dx) || Math.Abs(dx) > 1000 ||
-                !root.TryGetProperty("z", out var z) || z.ValueKind != JsonValueKind.Number || !z.TryGetDouble(out var dz) || !double.IsFinite(dz) || Math.Abs(dz) > 1000)
-                throw new InvalidDataException("Invalid input");
-            world.Input(id, sequence, dx, dz);
+                !root.TryGetProperty("type", out var type) || type.ValueKind != JsonValueKind.String ||
+                !root.TryGetProperty("seq", out var seq) || seq.ValueKind != JsonValueKind.Number || !seq.TryGetInt64(out var sequence) || sequence < 0)
+                throw new InvalidDataException("Invalid envelope");
+            if (type.GetString() == "input")
+            {
+                if (!root.TryGetProperty("x", out var x) || x.ValueKind != JsonValueKind.Number || !x.TryGetDouble(out var dx) || !double.IsFinite(dx) || Math.Abs(dx) > 1000 ||
+                    !root.TryGetProperty("z", out var z) || z.ValueKind != JsonValueKind.Number || !z.TryGetDouble(out var dz) || !double.IsFinite(dz) || Math.Abs(dz) > 1000)
+                    throw new InvalidDataException("Invalid direction");
+                world.Input(id, sequence, dx, dz);
+            }
+            else if (type.GetString() == "action")
+            {
+                if (!root.TryGetProperty("kind", out var kind) || kind.ValueKind != JsonValueKind.String ||
+                    kind.GetString() is not ("target" or "attack" or "interact" or "loot"))
+                    throw new InvalidDataException("Invalid action");
+                var target = "";
+                if (root.TryGetProperty("target", out var value))
+                {
+                    if (value.ValueKind != JsonValueKind.String || value.GetString()!.Length > 64) throw new InvalidDataException("Invalid target");
+                    target = value.GetString()!;
+                }
+                world.Act(id, sequence, kind.GetString()!, target);
+            }
+            else throw new InvalidDataException("Unknown type");
         }
     }
 }
