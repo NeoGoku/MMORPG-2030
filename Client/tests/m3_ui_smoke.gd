@@ -40,6 +40,32 @@ func run() -> void:
     scene.menu.show()
     scene.menu._rebuild()
     if not check(scene.hud.skill_buttons.size()==6,"Six mobile skill buttons"):return
+    scene.menu.tab="Skills"
+    scene.menu._rebuild()
+    if not check(scene.menu.info.skillbook.size()==8,"Eight real server skillbook entries reach touch menu"):return
+    var picker=scene.menu.content.get_child(1)
+    picker.select(5)
+    scene.menu.content.get_child(3).pressed.emit()
+    for i in range(100):
+        if scene.world.self.character.skills[5].id=="skill1":break
+        await physics_frame
+    if not check(scene.world.self.character.skills[5].id=="skill1","Touch skill binding reaches authoritative six-slot bar"):return
+    scene.menu.tab="Pet";scene.menu._rebuild()
+    if not check(scene.menu.content.get_child_count()>15,"Pet management controls render from owned pet state"):return
+    scene.menu.tab="Automatik";scene.menu._rebuild()
+    if not check(not scene.menu.info.automation.active,"Opening automation menu does not start farming"):return
+    scene.menu.hide()
+    scene.social_panel.show();scene.social_panel.tab="Chat";scene.social_panel._show_tab()
+    scene.social_panel.channel.select(0);scene.social_panel.message.text="M4 UI Nachricht"
+    scene.social_panel.get_node("SendChat").pressed.emit()
+    for i in range(150):
+        if scene.social_panel.history.text.contains("M4 UI Nachricht"):break
+        await physics_frame
+    if not check(scene.social_panel.history.text.contains("M4 UI Nachricht"),"Touch chat sends and displays real server message"):return
+    scene.social_panel.tab="Handel";scene.social_panel._show_tab()
+    if not check(scene.social_panel.offer_item.item_count>0 and scene.social_panel.trade_box.visible,"Trade inventory and confirmation controls render"):return
+    scene.social_panel.hide()
+    scene.menu.tab="Skills";scene.menu.show();scene.menu._rebuild()
     await RenderingServer.frame_post_draw
     if not OS.get_environment("M3_SCREENSHOT").is_empty():root.get_texture().get_image().save_png(OS.get_environment("M3_SCREENSHOT"))
     scene.menu.hide()
@@ -47,5 +73,5 @@ func run() -> void:
     if not check(not scene.online and scene.practice.m3.class_id=="Archer","Separate local slot/class switch preserves offline play"):return
     scene.queue_free()
     await process_frame
-    print("PASS: account lobby, owned character slot/class, auth ticket, rendered pet and local slot separation")
+    print("PASS: account lobby, owned character slot/class, auth ticket, rendered pet, M4 skill binding/chat/trade UI and local slot separation")
     quit()

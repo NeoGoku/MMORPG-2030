@@ -14,15 +14,19 @@ Cross-platform optimization, content production, server security, PvP normalizat
 
 Milestone completion requires implemented code and verifiable build/runtime evidence; not merely files or plans.
 
-## Current milestone boundaries (2026-11-12)
-M0: source foundation and scene-load check implemented. Export pipelines now include Android setup and PR checks; export evidence tracked in PR/status.
-M1: pending successful cloud artifacts and real Android, Windows and browser runtime checks. Keep Godot provisional.
-M2: ephemeral two-player movement foundation verified with real WebSocket and Godot clients. Next: PostgreSQL-backed accounts/character slots, city content, NPC/monster, combat, quest, loot and XP. No persistence or production hosting yet.
+## Current boundaries (2026-11-12, M4 package)
+M0 foundation and M1 export pipelines exist; earlier packages produced APK/Windows/Web artifacts and PR #2 APK was owner-tested. New M4 device/runtime qualification remains open. Godot is still provisional until cross-platform acceptance.
 
-## Nordtor slice (2026-11-12)
-M2 now has a playable temporary district: third-person humanoid, Android analog/multi-touch controls, buildings/roads, NPC hunt quest, hostile drone AI, tab-target stationary auto-attacks, HP/damage/death/respawn, personal loot and XP/level rewards. The same district is immediately playable in explicit local training and shared through a real authoritative online server. Current art is original procedural placeholder art.
+M2 city gameplay and persistent account/character reconnect are implemented; hosting, device crossplay and production scaling remain open. M3 core systems are expanded with real ten-player groups/chat, shared rewards, eight skills per class/six bindings, all ten professions, direct atomic trade, pet lifecycle and guarded farming. M4 adds entity distance filtering and visual day/night/weather; these do not complete world streaming.
 
-Next M2 work: accounts and three character slots, PostgreSQL-backed progression/inventory, deliberate reconnect identity, full combat/class foundations and physical-device/crossplay qualification. Current quest and balance values are slice proposals; no GDD features are dropped. M2 remains partial until persistence and character creation are implemented.
+This package is stacked on unmerged PR #3 to preserve its verified M3 source. Exact evidence and platform artifacts are recorded in its PR and [status](IMPLEMENTATION_STATUS.md).
 
-## M3 package handoff (2026-11-12)
-Integrated identity/three character slots, PostgreSQL saves/reconnect, eight class starter kits, eight allocated attributes, six-slot HUD, equipment/inventory/trade/gather/craft and initial quest/pet progression. See implementation status for exact limits. Next coherent work: queued durable persistence and multi-process character leases; full appearance/skills and profession content; group invitations/chat with personal attribution; real spatial streaming. Preserve all later GDD milestones. Physical Android qualification must precede declaring this package device-ready.
+Next coherent integrations, still required by GDD:
+- Durable/queued persistence and multi-process character leases; scale/outage/load qualification.
+- Shared-world building interiors, ownership/storage/rent/permissions and persisted furniture placement.
+- Direct trade expansion into transactional stalls/auction escrow, repair/durability and fuller profession/loot content.
+- New region/dungeon/worldboss/quest chains, level-gated teleporters and actual asynchronous world streaming.
+- Guilds/permissions/storage/quests and designated-zone normalized PvP.
+- Full appearance editor, semi-realistic rigs/audio, Android performance/battery and Windows/browser/crossplay acceptance.
+
+No later GDD feature is dropped. Housing, guilds, PvP and dungeon/boss remain unimplemented rather than placeholder menus.

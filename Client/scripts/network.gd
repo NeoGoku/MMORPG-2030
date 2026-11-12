@@ -71,7 +71,7 @@ func _process(delta: float) -> void:
         if not message is Dictionary:
             continue
         if message.get("type") == "welcome":
-            if message.get("version") != 3 or not message.get("id") is String:
+            if message.get("version") != 4 or not message.get("id") is String:
                 disconnect_from_server()
                 state_changed.emit("Incompatible server protocol")
                 return
@@ -91,10 +91,10 @@ func _process(delta: float) -> void:
             disconnect_from_server()
             state_changed.emit("Send failed; reconnect to try again")
 
-func action(kind: String, target: String = "") -> void:
+func action(kind: String, target: String = "", text: String = "") -> void:
     if not _socket or player_id.is_empty() or _socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
         return
     _sequence += 1
-    if _socket.send_text(JSON.stringify({"type": "action", "seq": _sequence, "kind": kind, "target": target})) != OK:
+    if _socket.send_text(JSON.stringify({"type": "action", "seq": _sequence, "kind": kind, "target": target,"text":text})) != OK:
         disconnect_from_server()
         state_changed.emit("Send failed; reconnect to try again")

@@ -3,6 +3,9 @@ extends Node3D
 const Network = preload("res://scripts/network.gd")
 const Practice = preload("res://scripts/practice.gd")
 const Actor = preload("res://scripts/actor.gd")
+const SocialPanel = preload("res://scripts/social_panel.gd")
+var social_panel = SocialPanel.new()
+var summon_nodes: Dictionary = {}
 const Lobby = preload("res://scripts/lobby.gd")
 const CharacterMenu = preload("res://scripts/character_menu.gd")
 var menu = CharacterMenu.new()
@@ -43,6 +46,10 @@ func _ready() -> void:
     hud.add_child(menu)
     hud.character_menu = menu
     menu.intent.connect(_intent)
+    hud.add_child(social_panel)
+    social_panel.intent.connect(_social_intent)
+    var social_button=hud._button(hud,"Gruppe / Chat / Handel",Rect2(22,206,240,44),"online")
+    social_button.pressed.connect(func():social_panel.visible=not social_panel.visible;social_panel._refresh_view())
     hud.online_panel.queue_free()
     hud.online_panel = lobby
     hud.add_child(lobby)
@@ -105,7 +112,7 @@ func _network_status(message: String) -> void:
             local_id = network.player_id
 
 func _clear_dynamic() -> void:
-    for collection in [avatars, monsters, loot_nodes, pet_nodes]:
+    for collection in [avatars, monsters, loot_nodes, pet_nodes,summon_nodes]:
         for node in collection.values():
             node.queue_free()
         collection.clear()
@@ -113,7 +120,7 @@ func _clear_dynamic() -> void:
 
 func _physics_process(delta: float) -> void:
     var input := Vector2.ZERO
-    if not hud.online_panel.visible and not menu.visible:
+    if not hud.online_panel.visible and not menu.visible and not social_panel.visible:
         input = hud.joystick.direction
         input += Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
     if not DisplayServer.window_is_focused():
@@ -150,6 +157,9 @@ func _receive_world(state: Dictionary) -> void:
     _sync_actors(state.monsters, monsters, "monster", selected)
     _sync_loot(state.loot)
     _sync_pets(state.get("pets",[]))
+    _sync_summons(state.get("summons",[]))
+    social_panel.update_state(state,online)
+    if not local_player.is_empty():$City.apply_environment(state.get("environment",{}),Vector3(local_player.x,0,local_player.z))
     hud.update_state(state,local_player,online)
     if not local_player.is_empty():
         var nearby := Vector2(local_player.x-practice.data.npc.x,local_player.z-practice.data.npc.z).length() <= 3
@@ -163,6 +173,7 @@ func _sync_actors(states: Array, nodes: Dictionary, kind: String, selected: Stri
         if not nodes.has(state.id):
             var actor = Actor.new()
             actor.kind = kind
+            actor.class_id=state.get("classId",practice.m3.class_id if state.id==local_id else "Shield Sword")
             actor.tint = Color("58cdb3") if state.id == local_id else Color("719ed4")
             actor.display_name = ("Du · "+state.get("name","Reisender")) if state.id == local_id else (state.get("name","Reisender "+state.id.substr(0,4)) if kind == "player" else "Wachdrohne · St. 1")
             actor.position = Vector3(state.x,.18,state.z)
@@ -199,8 +210,8 @@ func _sync_loot(drops: Array) -> void:
 func _action(kind: String) -> void:
     if local_player.is_empty() or hud.online_panel.visible:
         return
-    if kind.begins_with("skill:"):
-        _intent("skill",kind.get_slice(":",1))
+    if kind.begins_with("slot:"):
+        _cast_slot(int(kind.get_slice(":",1)))
         return
     var target_id := ""
     if kind == "interact":
@@ -238,13 +249,13 @@ func _action(kind: String) -> void:
         _receive_world(practice.snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and not event.echo and not hud.online_panel.visible and not menu.visible:
+    if event is InputEventKey and event.pressed and not event.echo and not hud.online_panel.visible and not menu.visible and not social_panel.visible:
         match event.physical_keycode:
             KEY_TAB: _action("target"); get_viewport().set_input_as_handled()
             KEY_SPACE: _action("attack")
             KEY_E: _action("interact")
             KEY_F: _action("loot")
-            KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6: _intent("skill","skill%d"%(event.physical_keycode-KEY_1+1))
+            KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6: _cast_slot(event.physical_keycode-KEY_1)
     if event is InputEventScreenTouch:
         if event.pressed and event.position.x > get_viewport().get_visible_rect().size.x*.4 and camera_touch == -1:
             camera_touch = event.index
@@ -272,7 +283,7 @@ func _intent(kind: String,target_id: String) -> void:
 
 func _select_local(slot: int,nickname: String,class_id: String) -> void:
     if not online:
-        local_slots[local_slot] = {"player":practice.player.duplicate(true),"classId":practice.m3.class_id,"name":practice.m3.nickname,"stats":practice.m3.attributes.duplicate(),"inventory":practice.m3.inventory.duplicate(),"equipment":practice.m3.equipment.duplicate(),"professions":practice.m3.professions.duplicate(),"quests":practice.m3.quest_progress.duplicate(),"claimed":practice.m3.claimed.duplicate(),"pet":practice.m3.pet.duplicate(true),"farmXp":practice.m3.farm_xp,"farmed":practice.m3.farmed}
+        local_slots[local_slot] = {"player":practice.player.duplicate(true),"classId":practice.m3.class_id,"name":practice.m3.nickname,"stats":practice.m3.attributes.duplicate(),"inventory":practice.m3.inventory.duplicate(),"equipment":practice.m3.equipment.duplicate(),"professions":practice.m3.professions.duplicate(),"quests":practice.m3.quest_progress.duplicate(),"claimed":practice.m3.claimed.duplicate(),"pet":practice.m3.pet.duplicate(true),"farmXp":practice.m3.farm_xp,"farmed":practice.m3.farmed,"ownedPets":practice.m3.owned_pets.duplicate(true),"skillbar":practice.m3.skill_bar.duplicate()}
     _start_practice()
     local_slot = slot
     if local_slots.has(slot):
@@ -289,6 +300,8 @@ func _select_local(slot: int,nickname: String,class_id: String) -> void:
         practice.m3.pet = saved.pet.duplicate(true)
         practice.m3.farm_xp = saved.farmXp
         practice.m3.farmed = saved.farmed
+        practice.m3.owned_pets=saved.get("ownedPets",[]).duplicate(true)
+        practice.m3.skill_bar=saved.get("skillbar",practice.m3.skill_bar).duplicate()
     else:
         practice.m3.class_id = class_id
         practice.m3.nickname = nickname
@@ -307,7 +320,8 @@ func _sync_pets(states: Array) -> void:
             pet_nodes[pet.owner] = node
         var actor = pet_nodes[pet.owner]
         actor.target_position = Vector3(pet.x,.2,pet.z)
-        actor.hp_label.text = "St. %d · %s"%[pet.level,pet.mode]
+        actor.scale=Vector3.ONE*(1+pet.get("evolution",0)*.15)
+        actor.hp_label.text = "St. %d · %s · %d HP"%[pet.level,pet.mode,pet.get("hp",100)]
     for key in pet_nodes.keys():
         if not seen.has(key):pet_nodes[key].queue_free();pet_nodes.erase(key)
 
@@ -340,3 +354,29 @@ func _services() -> void:
         label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
         label.position = Vector3(node.x,1.8,node.z)
         add_child(label)
+
+func _cast_slot(index: int) -> void:
+    var character: Dictionary=world.get("self",{}).get("character",{})
+    if index>=0 and index<character.get("skills",[]).size():_intent("skill",character.skills[index].id)
+
+func _social_intent(kind: String,target: String,text: String) -> void:
+    if online:network.action(kind,target,text)
+    else:hud.message.text="Diese Aktion benötigt echte Mitspieler auf einem Online-Server."
+
+func _sync_summons(states: Array) -> void:
+    if states==null:states=[]
+    var seen: Dictionary={}
+    for state in states:
+        seen[state.owner]=true
+        if not summon_nodes.has(state.owner):
+            var actor=Actor.new()
+            actor.kind="monster" if state.kind=="wolf" else ("pet" if state.kind=="wisp" else "npc")
+            actor.tint=Color("b69de1")
+            actor.display_name="Beschwörung · "+state.kind
+            actor.position=Vector3(state.x,.2,state.z)
+            add_child(actor)
+            summon_nodes[state.owner]=actor
+        summon_nodes[state.owner].target_position=Vector3(state.x,.2,state.z)
+        summon_nodes[state.owner].hp_label.text="%d HP · %.0fs"%[state.hp,state.remaining]
+    for key in summon_nodes.keys():
+        if not seen.has(key):summon_nodes[key].queue_free();summon_nodes.erase(key)

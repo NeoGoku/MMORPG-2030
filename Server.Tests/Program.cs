@@ -62,3 +62,6 @@ Console.WriteLine("All authoritative gameplay scenarios passed.");
 
 M3Tests.Run();
 M3Regression.Run();
+M4Tests.Run();
+M4PetTests.Run();
+M4ReviewTests.Run();

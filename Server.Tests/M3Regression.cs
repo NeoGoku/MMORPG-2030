@@ -31,6 +31,7 @@ public static class M3Regression
     private sealed class FailingStore:IGameStore
     {
         private readonly MemoryGameStore inner=new();public bool Fail;public bool Durable=>false;
-        public AccountRecord? Account(string u)=>inner.Account(u);public void Register(AccountRecord a)=>inner.Register(a);public List<CharacterRecord> List(string a)=>inner.List(a);public CharacterRecord? Get(string id)=>inner.Get(id);public void Create(CharacterRecord c)=>inner.Create(c);public void Save(CharacterRecord c){if(Fail)throw new GameRuleException("Simulated failure");inner.Save(c);}
+        public AccountRecord? Account(string u)=>inner.Account(u);public void Register(AccountRecord a)=>inner.Register(a);public List<CharacterRecord> List(string a)=>inner.List(a);public CharacterRecord? Get(string id)=>inner.Get(id);public void Create(CharacterRecord c)=>inner.Create(c);public void SaveBatch(IReadOnlyList<CharacterRecord> c){if(Fail)throw new GameRuleException("Simulated failure");inner.SaveBatch(c);}
+        public void Save(CharacterRecord c){if(Fail)throw new GameRuleException("Simulated failure");inner.Save(c);}
     }
 }

@@ -26,7 +26,7 @@ async def main():
     uri=BASE.replace('http','ws',1)+'/ws'
     async with websockets.connect(uri) as ws:
         await ws.send(json.dumps(dict(type='auth',ticket=ticket)))
-        welcome=json.loads(await ws.recv());assert welcome['version']==3 and welcome['id']==a['id']
+        welcome=json.loads(await ws.recv());assert welcome['version']==4 and welcome['id']==a['id']
         s=await snap(ws,lambda s:True)
         assert s['self']['character']['classId']=='Dark Mage'
         await ws.send(json.dumps(dict(type='action',seq=1,kind='pet',target='heal')))

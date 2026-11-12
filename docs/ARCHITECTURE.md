@@ -1,40 +1,29 @@
-# Architecture v0.3 — Nordtor city slice
+# Architecture v0.5 — integrated Nordtor slice
 
-Godot 4.3/GDScript Compatibility client and .NET 8 server. JSON WebSocket protocol **v2** intentionally requires matching clients/server. PostgreSQL remains planned; sessions and progression are not persisted. No production deployment or paid service is configured.
+Godot 4.3/GDScript Compatibility client, standalone .NET 8 authoritative server, optional PostgreSQL 16. Matching JSON WebSocket protocol **v4** required. No production deployment or paid service.
 
-## Modules and shared data
-- `Client/data/district.json`: single source for bounds, building footprints, player/NPC/monster spawns and provisional combat/quest constants. Explicitly included in Godot exports and copied into server build output.
-- `Server/District.cs`: typed data and walkability. `World.cs`: locked, server-owned state and deterministic `Step(dt)`; hosted service advances 20 ticks/second. `Session.cs`: bounded transport and intent parsing.
-- `Client/scripts/practice.gd`: explicit local training simulation using the same district/rules and snapshot shape. No fabricated other players. This keeps an APK playable without hosting; it is never trusted by an online server.
-- `network.gd`: WebSocket lifecycle and v2 intents. `main.gd`: switches session modes and synchronizes presentation. `city.gd`: original batched geometry/camera collision. `actor.gd`: humanoid/drone presentation and damage numbers. `hud.gd`, `joystick.gd`, `touch_action.gd`: Android-first inputs and status.
+## Modules and shared rules
+`Client/data/district.json` contains walkability/spawns/combat constants; `game.json` contains classes/skills/items/recipes/quests/professions and provisional balance. Both are exported/copied with builds. Server `World` advances at 20 ticks/sec under a lock. `Characters.cs`, `PetRules.cs`, `World.Progression.cs`, `World.Effects.cs`, `World.Social.cs`, `World.Trade.cs` and `World.Farming.cs` implement integrated character, combat, pets, social/economic and automation behavior. Account/ticket ownership lives in `Accounts.cs`/`Session.cs`; `Persistence/GameStore.cs` owns versioned storage.
 
-Local and server simulation are separate implementations. Scenario tests cover matching core rules; full numeric lockstep parity is not claimed. Balance edits belong in the shared JSON. Invalid JSON is a startup error, not a runtime player input.
+Client `main.gd` switches explicit practice/online modes and reconciles entity presentation. `practice.gd`/`progression.gd` implement temporary local training; no fabricated peers, account uploads or silent substitution of server rewards. `lobby.gd`, `character_menu.gd`, `social_panel.gd`, `hud.gd` and touch controls expose actual server intents. Client/server are separate simulations: targeted cases cover shared behaviors, full numerical lockstep parity is not claimed.
 
-## Authoritative gameplay
-Only the server mutates online HP, damage, kills, quest, XP, levels, currency and loot. Clients submit direction and action intents, never outcomes. Direction is finite, bounded and normalized; stale input expires after 250 ms. Server movement slides along expanded building rectangles and world bounds.
+## Authority and integration
+Only the server mutates online outcomes. Input contains direction/actions, never damage/items/rewards. Bounded normalized directions, sequence rejection, expiring input, building collision, target/range/cooldown/resource and ownership checks remain. Normal attacks require stationary movement. Monster AI, death/respawn, quest and personal loot remain shared simulation. Death EXP penalty is still an unresolved GDD amount and not applied by this slice.
 
-A valid target remains selected while idle. Normal attacks execute only when stationary, in range, target alive and cooldown elapsed. Monsters patrol, chase the closest living player within aggro/home leash, return/heal when disengaged, die and respawn. Players have HP and a timed safe respawn; this slice applies **no death EXP penalty**, pending the GDD's unresolved amount. This is a temporary test rule, not a GDD change.
+`RewardKill` serves normal attacks, skills, status damage and summons. The killer's eligible nearby group shares one EXP pool, receives individual drops and quest credit. Pets/summons have distinct server-owned entities/state. Taunt, DoT, HoT, slow, armor break and buffs expire on server time; directional skills use collision-aware movement.
 
-Last-hit kill credit grants 20 EXP and one personal drop. Only its owning session can collect nearby loot; pickup atomically removes it. No groups/party kill sharing yet. Mira's three-kill quest counts after acceptance and grants the turn-in reward once. Disconnect destroys owned loot and session progression. Safe-side recovery and all balance constants are provisional.
+Trade clones both participants, revalidates offers, and commits both revisions with `SaveBatch` before updating live state. Manual skills affecting group rewards also save their participants atomically and roll back combat/loot/character changes on storage failure. Routine simulation uses the existing five-second checkpoint/disconnect boundary. Groups/chat/summons/drops are runtime state; pet training uses a persisted UTC deadline.
 
-## Protocol v2
-Welcome: `{"type":"welcome","version":2,"id":"server-id","tickRate":20}`.
+## Protocol v4
+Welcome: `{"type":"welcome","version":4,"id":"character-id","tickRate":20}`.
 Movement: `{"type":"input","seq":1,"x":0,"z":-1}`.
-Action: `{"type":"action","seq":2,"kind":"target","target":"drone-1"}`.
-Kinds: `target`, `attack` (toggle), `interact` (Mira), `loot` (specified owned drop or nearest own nearby drop).
+Action: `{"type":"action","seq":2,"kind":"chat_private","target":"character-id","text":"Hallo"}`.
 
-Input and actions share one increasing non-negative 64-bit sequence per connection; duplicate/stale commands are ignored. Action targets are strings up to 64 characters; unknown kinds/types and malformed numeric inputs close the session. Extra outcome fields (e.g. coins/damage) have no effect.
+Input/actions share an increasing nonnegative 64-bit sequence. Target is at most 64 characters; optional text at most 256 (chat further limited to 240, strips control characters). Full accepted kind list is in `Session.cs`; it includes combat, progression, social, trade, pet and farming intents. Malformed/unknown messages close the connection. Existing 4096-byte text limit, 60 messages/sec, inactivity/send deadlines and 100-session ceiling are transport guards, not capacity evidence.
 
-Snapshots contain `type`, `tick`, `players`, `monsters`, `loot`, `self`. Public player states include id/x/z/yaw/HP/maxHP/level/target/attacking/dead and attack/hurt serials/lastDamage. Monster states include id/name/x/z/HP/maxHP/dead and attack/hurt counters. Only the receiver's own drops and quest/XP/stat-point/coin/scrap/message state are sent. Counters trigger presentation effects and may coalesce under network delay; they are not a reliable combat-event log.
+Snapshots include own `self`, distance-filtered `players`, `monsters`, personal `loot`, `pets`, `summons`, plus shared `environment` and recipient-specific `social`. Social includes party roster/HP, pending invites, authorized chat history, own trade and public online ID/name/level list; distant coordinates are omitted by entity interest filtering. Event counters can coalesce and are not a reliable combat event log. Interest filtering is not world asset streaming: static city geometry is still loaded together.
 
-Each connection has one receive and one independent bounded send loop. 4096-byte text-message limit (fragmentation supported), 60 messages/second, 10-second input inactivity and 3-second send deadlines; 100 concurrent session cap. This cap is not load-test evidence. Slow peers cannot block the world tick. All players currently receive the full small district state; spatial interest management is future work.
+## Operations and platforms
+See [operations](M3_OPERATIONS.md) for registration/tickets, migrations, TLS/origins and durability limits. Online requires a reachable configured server; practice is immediately playable without one. One server process per DB; DB operations under world lock remain a scaling limitation.
 
-## Platform and operations boundary
-APK starts in clearly labelled temporary local training. Online opens a configurable endpoint; failed/disconnected online sessions stay offline from the server and never silently substitute training rewards. The remembered endpoint is a local preference, not a credential. HTTPS browser builds require WSS. Public deployment requires auth, TLS, origin/abuse policy, monitoring and persistence; the unauthenticated development server is not production-ready.
-
-CI creates debug APK, Windows EXE/PCK and Web artifacts for 14 days. Android uses Java 17, SDK 34/build-tools 34.0.0 and an ephemeral debug key; updating a prior APK may require uninstalling it. Rendered scene/input tests run under Xvfb/OpenGL, while simulation/transport tests are headless. No automatic deployments or paid hosting.
-
-## M3 evolution — protocol v3
-`game.json` adds provisional class/skill/attribute/item/recipe/quest/service definitions shared by local practice and server. `Characters.cs` owns character rules; `World.Progression.cs` integrates intents, cooldowns, pets and transaction snapshots. `Accounts.cs` and `Persistence/GameStore.cs` implement account/session ownership and versioned PostgreSQL aggregates. Online anonymous joins are disabled by default; explicit guest mode exists only for old regression tests. See M3_OPERATIONS.md for protocol, migration and durability boundaries.
-
-Client modules `lobby.gd`, `character_menu.gd` and `progression.gd` connect account/slot selection, six visible skill positions, attributes, inventory/crafting, quest log and pet modes to the existing city. Local training remains a separate non-authoritative implementation; it is not automatically uploaded to online accounts. Newly added service markers and South Park are continuous world content, not instances/channels. Zone metadata is preparation, not streaming.
+CI builds debug APK, Windows EXE/PCK and Web artifacts for 14 days; no deployment. Android uses Java 17/SDK 34 and ephemeral debug signing, so reinstall may be required. Software-rendered scene/touch/UI checks supplement simulation/HTTP/WebSocket/PostgreSQL tests; they do not replace physical Android, Windows runtime or 50–100-player qualification. Exact implemented/partial/missing scope is in [status](IMPLEMENTATION_STATUS.md).

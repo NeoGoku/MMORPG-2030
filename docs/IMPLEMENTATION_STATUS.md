@@ -1,37 +1,34 @@
-# Implementation status — M3 integration package
-Updated: 2026-11-12. Based on merged PR #2. GDD v1.1 remains binding; M3 is partial.
+# Implementation status — M4 integration package
+Updated: 2026-11-12. Based on open PR #3 (M3), without dropping its changes. GDD v1.1 remains binding. M4 is **partial**, not a finished MMO.
 
 ## Playable integrations
-- Existing Nordtor third-person city, joystick/camera, Mira hunt, stationary auto-attacks, HP/damage/death/respawn, loot and multiplayer remain.
-- Three owned online character slots; nickname and eight fixed GDD classes. Character appearance uses the existing common humanoid preset. Three separate temporary training slots can select classes locally.
-- Eight configurable attributes; server allocation spends earned points and calculates class attack, vitality HP, wisdom mana/healing, armor/equipment defense and arcane resistance. Level cap 100 and one earned stat point per level remain.
-- Additional stat points: profession actions earn farm-EXP; server costs grow exponentially using arbitrary-precision integers. No real-money purchase or artificial stat-point cap. Local training uses ordinary numeric values and is not an authoritative progression store.
-- Touch layout menu moves joystick, action and skill controls in bounded 12-pixel steps, saves positions locally and restores defaults.
-- Six simultaneously visible skill buttons. **Two working skills per class**, with damage/heal/buff variants, mana and cooldowns; the other four positions are visibly locked. This is not the GDD's full 8–12 active skills per class. Summoner's starter buff does not implement a separate summon system.
-- Slot/stack-limited inventory (24 configurable slots), normal/uncommon starter items, weapon/chest equipment, visible derived values, healing potions, merchant buy/sell and atomic recipe material consumption.
-- Three gathering professions (ore/herbs/wood), two crafting professions (smithing/alchemy) and two recipes. Catalogue/state covers all ten GDD professions; the remaining five have no playable recipes/services yet.
-- Data-driven side/class/profession objectives and prerequisites, quest log and one-time NPC rewards. Miras original main hunt remains its tested legacy adapter; a general main-story/branching engine is incomplete.
-- One active following spirit pet with selectable combat assistance, periodic healing or personal-loot collection, EXP/levels and synchronized online position/mode. Combat assistance leaves final kill credit to the player. Parent/evolution fields are stored, but breeding/evolution are **not playable**.
-- Expanded continuous South Park/residential area, two added buildings, services/resource markers and a two-way teleporter. Zone metadata exists; actual world streaming/interest management is **not implemented**.
-- Local training remains instantly playable and clearly separate from accounts. Online displays real characters and pets; no simulated remote players.
+- Preserved Nordtor/South Park third-person city, Android joystick and camera, NPC hunt/side objectives, stationary auto-attack, monsters, HP/damage/death/respawn, loot/EXP, accounts/three owned slots, attributes, equipment, inventory, merchant and layout editor.
+- Online groups up to ten: invitation/acceptance, roster with HP/online status, leader transfer, removal and leave. Local, private and group chat have server-selected recipients and rate limits. Nearby group members share the conserved kill EXP pool, receive quest kill credit and separate personal drops. All operate through real account connections and a touch window.
+- Eight functional active skills for each of eight classes (64), with level unlocks, mana and cooldowns. Six configurable equipped slots; the skill book can bind any class skill, but casting remains level-gated. Damage/AoE, heals/group heals, timed buffs/HoT, poison/slow/armor break, hard taunt, cleanse, directional movement and separate wolf/wisp/golem summons have real server behavior. Starter two are available at level 1; later skills unlock at levels 2/3/5/8/12/16. Visuals are simple procedural class silhouettes and shared cast effects, not 64 bespoke animations.
+- All ten professions now have actual gathering or crafting: mining, herbalism, woodcutting, smithing, tailoring, alchemy, engineering, cooking, building/furniture and animal breeding. Three resource nodes and a shared workbench; profession EXP/levels. New outputs include coat, lens, food, chair, egg/feed and evolution catalyst. Chair is an inventory item, **not placeable furniture**. Normal/Uncommon/Rare outputs exist; a complete rarity/drop economy does not.
+- Direct authenticated player trade within 5 m, item/count and coin offers, independent confirmations, changed offers clear both confirmations. Ownership, equipment, capacity, range and funds are rechecked before atomic two-character storage. Disconnect, expiry and cancellation transfer nothing. No auction house or stalls.
+- Up to ten owned pets with stable identity, levels/EXP, breeding with inherited parental traits, three evolution stages, inventory and management. One selected companion has combat/heal/tank/buff/loot/gather/off modes; temporary summons are separate entities. Inactive pets can consume feed to train for five real minutes, including offline; completion grants bounded EXP once. Breeding needs two level-2 adults and feed; evolution needs level 5 and a crafted catalyst. Tank pets absorb damage and recover after defeat. Gather pets respect node cooldowns and their bag capacity.
+- Explicit guarded autofarm: safe-edge start, radius cap, target acquisition, normal attack/damage skill, own loot, potions, collision steering and breadcrumb return. Low HP/mana, full inventory, inactivity, time/radius limits trigger return. Manual movement/action stops it. Combat phase is capped by simulated **and real** time; blocked return stops without teleportation. No offline farming or durable farming session.
+- Shared visual day/night and clear/rain/fog cycle; primitive rain and lighting. Distance-filtered entity snapshots, distant actor/nameplate hiding. These are **not** async world-asset streaming or gameplay weather modifiers.
+- Class silhouettes now include robes/staves, bow/quiver, dual blades and tank shield/helmet with simple procedural motion; original authored geometry only. Final semi-realistic art/audio remain open.
 
-## Accounts / persistence
-- Password-hashed accounts, expiring opaque sessions, account-owned slots, one-use WebSocket tickets, default-denied anonymous login, basic request limits and HTTPS-only remote account UI.
-- PostgreSQL 16 versioned migration and optimistic aggregate storage: character, EXP/points, inventory/equipment, quests/currency, HP/mana/cooldowns and pet state. Re-login/reconnect restores saved state; duplicate active joins and stale writes are rejected.
-- Economic/actions save atomically; simulation checkpoints every five seconds and disconnect saves. Crash may lose the latest checkpoint interval. Monsters/drops are ephemeral; no durable world persistence. One world-server process per DB only, DB work under world lock is not a scaled persistence architecture.
-- No DB setting means explicitly flagged RAM-only test mode. Reproducible Docker/Compose configuration supplied. No production server or external database booked; see [operations](M3_OPERATIONS.md).
+## Persistence and operational limits
+- Password-hashed accounts, account-owned character slots, expiring opaque sessions and one-use WebSocket tickets remain. Matching client/server protocol **v4** required. Reconnect restores saved character identity; parties retain offline membership for 120 simulated seconds within the same process, with leadership transfer. Parties/chat/invitations do not survive server restart; no automatic client retry is claimed.
+- PostgreSQL JSONB aggregates store skills, professions, pets/traits/training, inventory/equipment, progression, HP/mana/cooldowns. Legacy M3 pets normalize to stable IDs and owned lists. Existing small profession counters become initial EXP without retroactive rescaling. No destructive schema migration required.
+- Direct trade and manual skill group rewards use a multi-aggregate transaction and optimistic revisions; stale second-row writes roll back the entire batch. Simulation checkpoints remain every five seconds plus orderly disconnect. Crash may lose that interval; monsters/drops/summons/party/world state are ephemeral.
+- One authoritative server process per database. Synchronous DB work under world lock remains an outage/performance bottleneck; no 50–100-player qualification. Without DB, UI explicitly marks RAM-only test mode. No public hosting, production deployment or paid services.
 
-## Evidence and limits
-- Existing city/gameplay/transport suites retained; new tests cover all eight starter class kits, mana/cooldown rejection, stats, inventory/crafting/equipment, account ownership and three slots.
-- Real PostgreSQL tests exercise migrations, password login, optimistic conflict rejection, aggregate roundtrip and authenticated reconnect. Regression cases cover detached snapshots, stale ticket/disconnect joins and skill-save rollback.
-- Rendered mobile tests cover six skill slots, joystick/action behavior and the account lobby → character creation → authenticated connection → visible pet → separate local slot.
-- CI/build results and download links are recorded in the PR. Actual physical Android testing of this new package and multi-device crossplay, performance/battery and Windows runtime qualification remain outstanding. Owner confirmed the prior PR #2 Android build works.
+## Verification and actual qualification
+- Original gameplay, account/ownership, reconnect and persistence regressions retained. M4 cases cover group limit/permissions/chat privacy/rewards, all 64 skill resource effects, two-confirm trade and no repeat transfer, real PostgreSQL multi-row rollback, pet breeding/inheritance/evolution/training once, bounded automation, distance interest and directional movement/hard-taunt regressions.
+- Real HTTP/account/WebSocket integration with three clients exercises groups, chat privacy, trade and shared kill rewards. Local Godot cases check all class skill kinds and pet/farm rules. Rendered UI checks cover account creation/connection, pet, skill binding, chat send/history, trade controls and separate local practice.
+- Final CI/build results and Android APK/Windows/Web download links belong in the PR. Actual physical-device testing of this M4 package, Windows runtime, multi-device crossplay, battery/performance and production/load/security qualification remain outstanding. Owner confirmed the earlier PR #2 APK starts; that does not qualify this package.
 
-## Explicitly still missing / partial
-- Parties, invitations, local/group chat and group loot/combat attribution: not implemented.
-- Full character appearance editor, full class skill trees/buffs/resistances, gear variety, generalized loot tables and all rarity tiers in actual drops: incomplete.
-- Full ten professions, workbench variety, broad main/side/class/profession quest content, repeatable profession/quest progression, separate summoner summons, pet breeding/evolution/offline training: incomplete.
-- Persistent housing/economy, auction house/trading, guilds, PvP, automation, weather, seamless world streaming, production operations and 50–100-player load validation: not implemented.
-- Production art/audio and extensive animation/equipment silhouettes: incomplete. Current original stylized assets remain provisional.
+## Explicitly unimplemented / incomplete
+- Housing ownership/entry/interiors/rent/storage/permissions/furniture placement and persistence; craftable chair does not implement housing.
+- Additional districts/monster regions, open-world dungeon, worldboss mechanics, new quest chains and level-gated teleporters; existing content is preserved.
+- Repairs, durability, player stalls, auction house/escrow market and pet trading. Direct trade is the implemented player economy extension.
+- Guild creation/ranks/quests/storage/wars/houses; PvP zones/normalization/combat. No PvP damage is enabled.
+- Full appearance editor, production animation rigs/audio, all rarity tiers in drops, broad profession/quest content and permanent world streaming.
+- Durable groups/world state, queued persistence, multi-process leases, production operations and scale qualification.
 
-No confirmed GDD feature is removed or declared complete based only on a data definition/menu. No paid services or production deployment.
+No confirmed GDD feature is removed or declared complete from a menu/data definition alone.

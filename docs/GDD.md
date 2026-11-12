@@ -33,3 +33,6 @@ Android-first touch controls, landscape, customizable joystick and skill UI; Win
 
 ## Implementation note — M3 package (2026-11-12)
 The current M3 implementation is partial; see IMPLEMENTATION_STATUS.md. Attribute names/formulas, exponential costs, class starter skills and all balance constants in `Client/data/game.json` are configurable **proposals**, not newly ratified game rules. Two active starter skills plus four locked visible positions do not fulfill the final class skill count. The shared character appearance, initial professions/pet and lack of groups/streaming remain explicit gaps. All v1.1 requirements above stay binding.
+
+## M4 implementation note (2026-11-12; not a GDD amendment)
+Groups/chat, eight actual class skills/six bindings, ten usable profession paths, direct trade, pet breeding/evolution/offline training and guarded farming are integrated in the city slice. Entity distance filtering and visual weather/day-night exist; housing, guilds/PvP, auction/stalls/repairs, dungeon/worldboss and asset streaming remain open. Skill unlocks (1/1/2/3/5/8/12/16), profession levels/rewards, group sharing radius, pet/farm timers and effects are provisional configurable implementation values, not ratified final balance. Weather gameplay effects are still pending. See IMPLEMENTATION_STATUS.md for actual scope.

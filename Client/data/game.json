@@ -23,7 +23,11 @@
           "range": 15,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -33,47 +37,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Fluch",
+          "kind": "dot",
+          "power": 0.6,
+          "range": 16,
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Schattenstoß",
+          "kind": "aoe",
+          "power": 1.4,
+          "range": 14,
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Lebensraub",
+          "kind": "drain",
+          "power": 1.5,
+          "range": 14,
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
+          "name": "Frostmal",
+          "kind": "slow",
+          "power": 0.8,
+          "range": 16,
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Schattenschritt",
+          "kind": "blink",
           "power": 0,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill8",
+          "name": "Finsternova",
+          "kind": "aoe",
+          "power": 2.5,
+          "range": 14,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -88,7 +140,11 @@
           "range": 14,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -98,47 +154,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Gruppenlicht",
+          "kind": "party_heal",
+          "power": 25,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Sonnenkreis",
+          "kind": "aoe",
+          "power": 1.5,
+          "range": 14,
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Lichtschutz",
+          "kind": "party_buff",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
+          "name": "Reinigung",
+          "kind": "cleanse",
           "power": 0,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Lebenslicht",
+          "kind": "hot",
+          "power": 1,
+          "range": 0,
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill8",
+          "name": "Morgenstern",
+          "kind": "aoe",
+          "power": 2.4,
+          "range": 14,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -153,7 +257,11 @@
           "range": 18,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -163,47 +271,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Durchschuss",
+          "kind": "damage",
+          "power": 2.5,
+          "range": 20,
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Dornenfalle",
+          "kind": "aoe",
+          "power": 1.3,
+          "range": 14,
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Giftpfeil",
+          "kind": "dot",
+          "power": 0.7,
+          "range": 18,
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
+          "name": "Ausweichen",
+          "kind": "haste",
+          "power": 1,
+          "range": 0,
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Rücksprung",
+          "kind": "blink",
           "power": 0,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 8,
+          "status": "back"
+        },
+        {
+          "id": "skill8",
+          "name": "Pfeilregen",
+          "kind": "aoe",
+          "power": 2.4,
+          "range": 20,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -218,7 +374,11 @@
           "range": 3.2,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -228,47 +388,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Rundschlag",
+          "kind": "aoe",
+          "power": 1.4,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Herausfordern",
+          "kind": "taunt",
+          "power": 0.5,
+          "range": 10,
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Schildwall",
+          "kind": "party_buff",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Zweite Luft",
+          "kind": "heal",
+          "power": 30,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Fesselstoß",
+          "kind": "slow",
+          "power": 1.1,
+          "range": 4,
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill8",
+          "name": "Beben",
+          "kind": "aoe",
+          "power": 2.5,
+          "range": 0,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -283,7 +491,11 @@
           "range": 3.2,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -293,47 +505,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Blutung",
+          "kind": "dot",
+          "power": 0.8,
+          "range": 4,
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Klingentanz",
+          "kind": "aoe",
+          "power": 1.7,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
+          "name": "Ausfallschritt",
+          "kind": "blink",
           "power": 0,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Vampirklinge",
+          "kind": "drain",
+          "power": 1.5,
+          "range": 4,
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Rüstungsbruch",
+          "kind": "break",
+          "power": 1.2,
+          "range": 4,
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill8",
+          "name": "Hinrichtung",
+          "kind": "damage",
+          "power": 3.5,
+          "range": 4,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -348,7 +608,11 @@
           "range": 14,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -358,47 +622,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Gruppenheilung",
+          "kind": "party_heal",
+          "power": 35,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Erholung",
+          "kind": "hot",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
+          "name": "Läuterung",
+          "kind": "cleanse",
           "power": 0,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Segen",
+          "kind": "party_buff",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Heiliger Kreis",
+          "kind": "aoe",
+          "power": 1.4,
+          "range": 14,
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill8",
+          "name": "Zuflucht",
+          "kind": "party_heal",
+          "power": 65,
+          "range": 0,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -413,7 +725,11 @@
           "range": 14,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -423,47 +739,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Geisterwolf",
+          "kind": "summon",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 0,
+          "duration": 30,
+          "status": "wolf"
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Heilgeist",
+          "kind": "summon",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 0,
+          "duration": 30,
+          "status": "wisp"
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Geisterexplosion",
+          "kind": "explode",
+          "power": 2,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Lebensbund",
+          "kind": "heal",
+          "power": 35,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Wächtergolem",
+          "kind": "summon",
+          "power": 1,
+          "range": 0,
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 30,
+          "status": "golem"
+        },
+        {
+          "id": "skill8",
+          "name": "Rudelruf",
+          "kind": "party_buff",
+          "power": 1,
+          "range": 0,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         }
       ]
     },
@@ -478,7 +842,11 @@
           "range": 3.2,
           "cost": 10,
           "cooldown": 3,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill2",
@@ -488,47 +856,95 @@
           "range": 0,
           "cost": 15,
           "cooldown": 10,
-          "enabled": true
+          "enabled": true,
+          "minLevel": 1,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill3",
-          "name": "Slot 3 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Stampfen",
+          "kind": "aoe",
+          "power": 1.3,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 16,
+          "cooldown": 8,
+          "enabled": true,
+          "minLevel": 2,
+          "radius": 5,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill4",
-          "name": "Slot 4 · gesperrt",
-          "kind": "locked",
-          "power": 0,
-          "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "name": "Provokation",
+          "kind": "taunt",
+          "power": 0.5,
+          "range": 12,
+          "cost": 18,
+          "cooldown": 10,
+          "enabled": true,
+          "minLevel": 3,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill5",
-          "name": "Slot 5 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Eisenhaut",
+          "kind": "party_buff",
+          "power": 1,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 20,
+          "cooldown": 12,
+          "enabled": true,
+          "minLevel": 5,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         },
         {
           "id": "skill6",
-          "name": "Slot 6 · gesperrt",
-          "kind": "locked",
-          "power": 0,
+          "name": "Selbstheilung",
+          "kind": "heal",
+          "power": 40,
           "range": 0,
-          "cost": 0,
-          "cooldown": 0,
-          "enabled": false
+          "cost": 22,
+          "cooldown": 14,
+          "enabled": true,
+          "minLevel": 8,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill7",
+          "name": "Erschüttern",
+          "kind": "slow",
+          "power": 1.1,
+          "range": 5,
+          "cost": 24,
+          "cooldown": 16,
+          "enabled": true,
+          "minLevel": 12,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
+        },
+        {
+          "id": "skill8",
+          "name": "Bollwerk",
+          "kind": "hot",
+          "power": 1,
+          "range": 0,
+          "cost": 26,
+          "cooldown": 18,
+          "enabled": true,
+          "minLevel": 16,
+          "radius": 0,
+          "duration": 8,
+          "status": ""
         }
       ]
     }
@@ -580,6 +996,76 @@
       "rarity": "Normal",
       "slot": "chest",
       "defense": 3
+    },
+    "woven_coat": {
+      "name": "Gewebter Mantel",
+      "stack": 1,
+      "price": 12,
+      "rarity": "Uncommon",
+      "slot": "chest",
+      "attack": 0,
+      "defense": 4,
+      "heal": 0
+    },
+    "arcane_lens": {
+      "name": "Arkane Linse",
+      "stack": 1,
+      "price": 12,
+      "rarity": "Uncommon",
+      "slot": "ring",
+      "attack": 3,
+      "defense": 0,
+      "heal": 0
+    },
+    "ration": {
+      "name": "Kräuterration",
+      "stack": 20,
+      "price": 12,
+      "rarity": "Normal",
+      "slot": "",
+      "attack": 0,
+      "defense": 0,
+      "heal": 25
+    },
+    "oak_chair": {
+      "name": "Eichenstuhl",
+      "stack": 20,
+      "price": 12,
+      "rarity": "Normal",
+      "slot": "",
+      "attack": 0,
+      "defense": 0,
+      "heal": 0
+    },
+    "pet_feed": {
+      "name": "Begleiterfutter",
+      "stack": 20,
+      "price": 12,
+      "rarity": "Normal",
+      "slot": "",
+      "attack": 0,
+      "defense": 0,
+      "heal": 0
+    },
+    "pet_egg": {
+      "name": "Begleitereischale",
+      "stack": 20,
+      "price": 20,
+      "rarity": "Rare",
+      "slot": "",
+      "attack": 0,
+      "defense": 0,
+      "heal": 0
+    },
+    "evolution_shard": {
+      "name": "Evolutionssplitter",
+      "stack": 20,
+      "price": 20,
+      "rarity": "Rare",
+      "slot": "",
+      "attack": 0,
+      "defense": 0,
+      "heal": 0
     }
   },
   "professions": [
@@ -614,6 +1100,76 @@
         "herb": 2
       },
       "output": "potion",
+      "count": 1
+    },
+    "woven_coat": {
+      "name": "Gewebter Mantel",
+      "profession": "tailoring",
+      "inputs": {
+        "wood": 2,
+        "herb": 1
+      },
+      "output": "woven_coat",
+      "count": 1
+    },
+    "arcane_lens": {
+      "name": "Arkane Linse",
+      "profession": "engineering",
+      "inputs": {
+        "ore": 2,
+        "scrap": 2
+      },
+      "output": "arcane_lens",
+      "count": 1
+    },
+    "ration": {
+      "name": "Kräuterration",
+      "profession": "cooking",
+      "inputs": {
+        "herb": 2,
+        "wood": 1
+      },
+      "output": "ration",
+      "count": 1
+    },
+    "oak_chair": {
+      "name": "Eichenstuhl",
+      "profession": "building",
+      "inputs": {
+        "wood": 3,
+        "ore": 1
+      },
+      "output": "oak_chair",
+      "count": 1
+    },
+    "pet_feed": {
+      "name": "Begleiterfutter",
+      "profession": "animal_breeding",
+      "inputs": {
+        "herb": 2,
+        "wood": 1
+      },
+      "output": "pet_feed",
+      "count": 1
+    },
+    "pet_egg": {
+      "name": "Begleitereischale",
+      "profession": "animal_breeding",
+      "inputs": {
+        "pet_feed": 2,
+        "herb": 2
+      },
+      "output": "pet_egg",
+      "count": 1
+    },
+    "evolution_shard": {
+      "name": "Evolutionssplitter",
+      "profession": "engineering",
+      "inputs": {
+        "ore": 3,
+        "scrap": 2
+      },
+      "output": "evolution_shard",
       "count": 1
     }
   },
@@ -738,5 +1294,24 @@
   "petInterval": 3,
   "petRange": 10,
   "petExpPerLevel": 50,
-  "levelExpBase": 100
+  "levelExpBase": 100,
+  "partyLimit": 10,
+  "partyExpRadius": 40,
+  "localChatRadius": 30,
+  "interestRadius": 52,
+  "professionGatherXp": 10,
+  "professionCraftXp": 25,
+  "professionLevelXp": 100,
+  "hotHeal": 4,
+  "statusPenalty": 3,
+  "blinkDistance": 4,
+  "maxOwnedPets": 10,
+  "petBreedLevel": 2,
+  "petEvolutionLevel": 5,
+  "petTrainingSeconds": 300,
+  "petTrainingExp": 50,
+  "farmRadius": 14,
+  "farmSeconds": 60,
+  "daySeconds": 600,
+  "weatherSeconds": 120
 }

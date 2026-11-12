@@ -21,10 +21,11 @@ func _ready() -> void:
     var tabs := HBoxContainer.new()
     tabs.position = Vector2(12,12)
     add_child(tabs)
-    for name in ["Charakter","Inventar","Quests","Pet","Layout","Schließen"]:
+    for name in ["Charakter","Skills","Inventar","Quests","Pet","Automatik","Layout","Schließen"]:
         var button = TouchAction.new()
         button.text = name
-        button.custom_minimum_size = Vector2(106,40)
+        button.add_theme_font_size_override("font_size",16)
+        button.custom_minimum_size = Vector2(82,40)
         button.pressed.connect(func():
             if name=="Schließen":hide()
             else:tab=name;_rebuild())
@@ -53,7 +54,7 @@ func _action(title_value: String,kind: String,target_value: String) -> void:
 
 func update_info(state: Dictionary) -> void:
     info = state
-    if visible and cooldown<=0 and tab!="Layout":
+    if visible and cooldown<=0 and tab not in ["Layout","Skills"]:
         cooldown = 1.0
         _rebuild()
 
@@ -72,6 +73,19 @@ func _rebuild() -> void:
             _text("Farm-EXP %s / %s (Kosten wachsen exponentiell)"%[info.farmXp,info.farmCost])
             _action("Zusätzlichen Statpunkt verdienen","farm_stat","")
             _text("Ausrüstung: "+str(info.equipment))
+        "Skills":
+            _text("Acht aktive Skills. Level schaltet frei; sechs Plätze sind gleichzeitig sichtbar.")
+            var slot_picker:=OptionButton.new()
+            for i in range(6):slot_picker.add_item("Zielplatz %d"%(i+1))
+            slot_picker.custom_minimum_size.y=42
+            content.add_child(slot_picker)
+            for skill in info.get("skillbook",info.skills):
+                _text("%s · Stufe %d · %d Mana"%[skill.name,skill.get("minLevel",1),skill.cost])
+                var binding_button=TouchAction.new()
+                binding_button.text="Auf gewählten Platz legen"
+                binding_button.custom_minimum_size.y=42
+                binding_button.pressed.connect(func():intent.emit("slot","%d|%s"%[slot_picker.selected,skill.id]))
+                content.add_child(binding_button)
         "Inventar":
             _text("24 konfigurierbare Stack-Slots. Händler: rechts der Wache; Werkbank: links.")
             for item in info.inventory:
@@ -82,16 +96,37 @@ func _rebuild() -> void:
             for item in ["potion","iron_sword","guard_coat"]:_action("Kaufen: %s · %d Münzen"%[catalog.items[item].name,catalog.items[item].price],"buy",item)
             for recipe in catalog.recipes:_action("Werkbank: "+catalog.recipes[recipe].name,"craft",recipe)
             for node in catalog.nodes:_action("Sammeln: %s · bei (%.0f, %.0f)"%[node.name,node.x,node.z],"gather",node.id)
-            _text("Berufspraxis: "+str(info.professions))
+            for profession in catalog.professions:
+                var experience: int=info.professions.get(profession,0)
+                _text("%s · St. %d · %d EXP"%[profession,1+experience/int(catalog.professionLevelXp),experience])
         "Quests":
             _text("Miras Hauptauftrag bleibt rechts im HUD. Zusatzaufträge laufen automatisch bei passenden Tätigkeiten.")
             for q in info.quests:
                 _text("%s [%s] · %d / %d · %s"%[q.name,q.type,q.progress,q.required,"abgegeben" if q.claimed else ("offen" if q.unlocked else "Voraussetzung fehlt")])
                 if not q.claimed:_action("Beim Händler abgeben","claim",q.id)
         "Pet":
-            _text("Arkaner Funke · Stufe %d · %d EXP · Modus: %s\nEin aktiver Begleiter. Zucht/Evolution: Datenmodell, noch nicht spielbar."%[info.pet.level,info.pet.exp,info.pet.mode])
-            for mode in ["combat","heal","loot","off"]:_action("Begleiter: "+mode,"pet",mode)
+            _text("Arkaner Funke · Stufe %d · %d EXP · Modus: %s\nEin aktiver Begleiter · Entwicklung und Zucht an der Werkbank."%[info.pet.level,info.pet.exp,info.pet.mode])
+            for mode in ["combat","heal","tank","buff","loot","gather","off"]:_action("Begleiter: "+mode,"pet",mode)
 
+            _text("Eigenschaften: "+str(info.pet.get("traits",{}))+" · Entwicklung "+str(info.pet.evolution))
+            _text("Pet-Tasche: "+str(info.pet.get("inventory",{})))
+            _action("Pet-Tasche übernehmen","pet_take","")
+            _action("Begleitereischale ausbrüten (Werkbank)","pet_hatch","")
+            _action("Entwickeln: St. 5 + Evolutionssplitter","pet_evolve","")
+            _action("Offline trainieren: inaktiv + Futter, 5 Minuten","pet_train","")
+            if info.pet.get("trainingUntil",0)>0:_text("Training: noch %.0f Sekunden"%maxf(0,info.pet.trainingUntil-Time.get_unix_time_from_system()))
+            for companion in info.get("ownedPets",[]):
+                _text("%s · St. %d · Eltern %d"%[companion.id.left(8),companion.level,companion.parents.size()])
+                _action("Diesen Begleiter auswählen","pet_select",companion.id)
+                if companion.id!=info.pet.id:_action("Mit aktiv gewähltem Pet kreuzen (2× Futter)","pet_breed",companion.id)
+        "Automatik":
+            _text("Bewachte Automatik am sicheren Stadtrand · maximal 60 Sekunden / Radius 14.")
+            _text("Manuelle Bewegung beendet sofort. HP-/Mana-/Inventargrenzen lösen Rückkehr aus.")
+            _text("Kein Offline-Farmen. Ein blockierter Rückweg wird abgebrochen, nicht teleportiert.")
+            var state: Dictionary=info.get("automation",{})
+            _text("Aktiv: %s · Rückkehr: %s · %.0f Sekunden"%[state.get("active",false),state.get("returning",false),state.get("remaining",0)])
+            _action("Automatik starten · Radius 14","farm_start","14")
+            _action("Automatik sofort stoppen","farm_stop","")
         "Layout":
             _text("Touchpositionen in 12-Pixel-Schritten ändern. Lokal gespeichert.")
             var choose := OptionButton.new()
