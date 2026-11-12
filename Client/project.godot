@@ -14,3 +14,6 @@ textures/default_filters/use_nearest_mipmap_filter=false
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+
+[input_devices]
+pointing/emulate_mouse_from_touch=true

@@ -1,16 +1,41 @@
 name: Server build
 on:
   workflow_dispatch:
+  pull_request:
+    paths: ['Server/**', 'tests/**', '.github/workflows/build-server.yml']
   push:
-    paths:
-      - 'Server/**'
-      - '.github/workflows/build-server.yml'
+    branches: [main]
+    paths: ['Server/**', 'tests/**', '.github/workflows/build-server.yml']
+permissions:
+  contents: read
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r tests/requirements.txt
       - run: dotnet build Server/MMORPG.Server.csproj --configuration Release
+      - name: Real WebSocket integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet Server/bin/Release/net8.0/MMORPG.Server.dll --urls http://127.0.0.1:5080 > server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:5080/health; then break; fi
+            sleep 1
+          done
+          python tests/multiplayer.py
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: server-log
+          path: server.log
