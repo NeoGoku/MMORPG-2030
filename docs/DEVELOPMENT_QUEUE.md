@@ -75,3 +75,5 @@ Next highest priorities: process-crash/backup-restore acceptance and queued pers
 Next: durable acknowledged simulation queue preserving character/shared-world CAS; transaction-cut process crash/replay cases; shared floor/elevation model before adding upper housing rooms. Do not repeat completed SIGKILL-after-confirmation, workshop cancellation or region foundations.
 
 M7 final verification: all server/PostgreSQL/crash/restore and Android/Windows/Web jobs passed for `d9db175383007e2a3eebcb7706ebe1af30f94a84`; artifacts/next task in DEVELOPMENT_HANDOFF.md and open PR #11. Documentation-only evidence follow-up does not repeat builds.
+
+M8 package 1: transaction-bound canonical payload receipts, account-owned lookup and persisted last-commit IDs; exact write retransmission resolves once, superseded payload is rejected. Memory and actual PostgreSQL reopen/replay checks passed. Migration 003 is additive; back up commit_receipts with the existing database. Immediate post-commit response-loss resolution added; fully asynchronous save queue and unresolved prolonged-outage reconciliation remain partial. No zero-loss unconfirmed-tick claim.

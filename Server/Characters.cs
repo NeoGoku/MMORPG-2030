@@ -49,6 +49,7 @@ public sealed class CharacterState
 }
 public sealed class CharacterRecord
 {
+    public string LastCommit {get;set;}="";
     public string Id {get;set;}=Guid.NewGuid().ToString("N");public string AccountId {get;set;}="";public int Slot {get;set;}public string Name {get;set;}="Reisender";public string ClassId {get;set;}="Shield Sword";
     public string Appearance {get;set;}="default";public long Version {get;set;} public CharacterState State {get;set;}=new();
 }

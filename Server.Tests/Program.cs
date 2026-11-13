@@ -92,3 +92,5 @@ Cycle2Tests.Run();
 CheckpointTests.Run();
 
 WorldContentTests.Run();
+
+CommitReceiptTests.Run();

@@ -106,3 +106,5 @@ Downloads expire 2026-11-27; matching protocol v9:
 - [.NET8 server/content/migrations/source metadata](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128518/artifacts/14031451042)
 
 No physical Android acceptance or full-alpha/load certification; next implementation remains durable acknowledged save queue/uncertain-commit reconciliation, then elevation/floors. PR #11 remains open, no merges.
+
+M8 package 1: transaction-bound canonical payload receipts, account-owned lookup and persisted last-commit IDs; exact write retransmission resolves once, superseded payload is rejected. Memory and actual PostgreSQL reopen/replay checks passed. Migration 003 is additive; back up commit_receipts with the existing database. Immediate post-commit response-loss resolution added; fully asynchronous save queue and unresolved prolonged-outage reconciliation remain partial. No zero-loss unconfirmed-tick claim.

@@ -5,6 +5,7 @@ namespace MMORPG.Server;
 // This is intentionally single-world-server persistence, not a multi-shard architecture.
 public sealed class SharedWorld
 {
+    public string LastCommit {get;set;}="";
     public Dictionary<string,StallState> Stalls {get;set;}=[];
     public long Version {get;set;}
     public Dictionary<string,HomeState> Homes {get;set;}=[];
