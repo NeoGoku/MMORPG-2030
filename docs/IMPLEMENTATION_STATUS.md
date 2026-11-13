@@ -72,3 +72,5 @@ Players can place named persistent stalls in the marked trade zone, escrow stack
 
 ## Issue #8 — furniture and vendor authority
 Building recipes now produce placeable tables, shelves and lamps as well as chairs, with stored item kind, model, footprint/door/occupant checks and conserved removal. NPC purchase is now explicitly catalogue-whitelisted: only listed vendor stock may be bought, preventing crafted/boss/zero-price reward items from being minted through forged buy intents. Expired stalls no longer permanently exhaust the active-stand cap; escrow remains recoverable.
+
+Issue #8 verification update: actual PostgreSQL reopen cases for guild gear/offline auctions passed locally; rendered creation-preview/quest guidance and touch stall open→list→close journey passed. Final source uses protocol v8; platform/network evidence and exact source commit will be recorded in the batch PR. Physical-device acceptance deferred per issue. Full alpha remains partial.

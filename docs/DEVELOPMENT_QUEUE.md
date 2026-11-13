@@ -3,7 +3,7 @@
 Canonical feature requirements: docs/GDD.md. Verify implementation status in current PRs before claiming any item missing or complete.
 
 ## P0 — Durable, end-to-end play
-- [ ] Reconcile PR #1 through #9 and later PRs; identify merged versus open changes.
+- [x] Reconcile available PRs: #1/#2 merged; #3–#7 open at start of Issue #8 batch; #8 is the durable issue, #9 did not yet exist. Latest gameplay base is PR #7 (79c6f4d); main adds autonomous protocol/queue only.
 - [ ] Complete account auth, reconnect, character persistence and migration-safe PostgreSQL operations.
 - [ ] Complete server-authoritative inventory/equipment, quest rewards and atomic trade flows.
 - [ ] Make all eight classes' skills, resource costs and effects genuinely usable in online play.
@@ -33,3 +33,17 @@ Canonical feature requirements: docs/GDD.md. Verify implementation status in cur
 
 ## Selection rules
 Prioritize vertical end-to-end completion over superficially touching every item. Re-evaluate from actual code, tests and PR state at each new task. Update checkboxes only with evidence and record proof in docs/IMPLEMENTATION_STATUS.md.
+
+## Issue #8 batch — 2026-11-13
+Completed adjacent slices (aggregate P0/P1/P2 goals above remain open where broader qualification/content is missing):
+- [x] Officer/leader-only guild instance withdrawals, member deposits and touch UI, preserving gear identity/condition.
+- [x] Store-reopen scenarios for guild rank/storage and offline auction gear; full-inventory rollback and repeated command rejection. Memory and actual PostgreSQL exercised.
+- [x] Validated appearance at account-owned character creation, live 3D selection preview and persisted selection.
+- [x] Quest-log tracking with authoritative objective/reward coordinates, private world marker and minimap direction.
+- [x] Physical player stalls reusing persistent escrow; proximity purchases, offline seller proceeds, safe close/return, active cap ignoring expired entries.
+- [x] Placeable table/shelf/lamp recipes and item-specific conservation/footprint/occupant checks.
+- [x] NPC vendor allowlist prevents forged purchase of reward/boss materials or zero-price reward currency.
+
+Evidence/CI/artifact commit links are recorded in the batch PR and IMPLEMENTATION_STATUS.md. No whole-feature percentage or 50–100-player qualification implied. Physical Android acceptance remains deferred until a release milestone.
+
+Next highest priorities: process-crash/backup-restore acceptance and queued persistence; guildhouse/physical housing floor model; production/stall listing UX with expiry visibility; class PvP balance and multi-device cases; richer NPC/story navigation. Do not repeat completed appearance/guild-storage implementation as missing work.

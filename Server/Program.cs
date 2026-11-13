@@ -15,7 +15,7 @@ builder.Services.AddCors(o=>o.AddDefaultPolicy(p=>p.WithOrigins((builder.Configu
 var app=builder.Build();
 app.Use(async(context,next)=>{try{await next();}catch(GameRuleException e){context.Response.StatusCode=400;await context.Response.WriteAsJsonAsync(new{error=e.Message});}});
 app.UseCors();app.UseRateLimiter();app.UseWebSockets(new WebSocketOptions{KeepAliveInterval=TimeSpan.FromSeconds(20)});
-app.MapGet("/health",(IGameStore store)=>Results.Ok(new{status="ok",service="MMORPG-2030",protocolVersion=7,multiplayerReady=true,persistenceReady=store.Durable,guestMode=builder.Configuration["MMORPG_ALLOW_GUEST"]=="true"}));
+app.MapGet("/health",(IGameStore store)=>Results.Ok(new{status="ok",service="MMORPG-2030",protocolVersion=8,multiplayerReady=true,persistenceReady=store.Durable,guestMode=builder.Configuration["MMORPG_ALLOW_GUEST"]=="true"}));
 app.MapPost("/api/register",(Credentials request,AccountService auth)=>Results.Ok(auth.Register(request.Username,request.Password))).RequireRateLimiting("auth");
 app.MapPost("/api/login",(Credentials request,AccountService auth)=>auth.Login(request.Username,request.Password) is {} s?Results.Ok(s):Results.Unauthorized()).RequireRateLimiting("auth");
 string? Account(HttpContext c,AccountService auth){var header=c.Request.Headers.Authorization.ToString();return header.StartsWith("Bearer ")?auth.Resolve(header[7..]):null;}

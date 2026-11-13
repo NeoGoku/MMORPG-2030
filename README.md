@@ -57,3 +57,12 @@ Gildenchat im Chatfenster; Leitung kann das Gildenhaus freigeben, Lager bleibt e
 Im Charakterfenster **Aussehen** anpassen. Im Inventar alte Ausrüstung ablegen und einzeln in eine eindeutige Instanz umwandeln; diese ausrüsten und beim Händler reparieren. Zustand/Identität bleiben bei Handel, Auktion und Wohnungslager erhalten. Nicht ausgewählte inaktive Pets ohne Training lassen sich über die Börse handeln. Klassen besitzen eigene Ressourcen und ab Stufe 5 wirksame Passive. In Arenamatches verwenden die sechs Skillplätze normierte Klasseneffekte mit separater Energie.
 
 Der zusammenhängende Grünsaum liegt südlich bei z=100–138: Waldgegner, Rohstoffe, offene Ruinen und Wurzelherz. Fortgeschrittene Rezepte verlangen Berufslevel und seltene Bossmaterialien; neue Klassen-/Berufs-/Weltquestketten führen weiter. Minimap links zeigt reale Gegner/Mitspieler/Services. **Darstellung** speichert Sparsam/Ausgewogen/Weite Sicht. Diese Profile sind noch keine gemessene Gerätefreigabe. [Exakter Fortsetzungspunkt](docs/DEVELOPMENT_HANDOFF.md).
+
+## Issue #8: dauerhaftes Spielen und Stände
+Die Anmeldung bietet **Aussehen / 3D-Vorschau** vor dem Erstellen. Im Questlog **Auf Karte verfolgen** wählen: Weltmarker/Minimap zeigen Ziel und später Abgabe-NPC. Gildenleiter/Offiziere entnehmen Instanzen aus dem Gildenlager; Mitglieder dürfen einzahlen.
+
+Unter **Stände** in der Handelszone (x=27–42, z=16–25; Register freihalten) einen benannten Stand eröffnen und Ware einstellen. Käufer müssen vor Ort sein; Escrow/Verkäufererlöse bleiben auch offline erhalten. Schließen lässt Restangebote an der Börse; nach Ablauf bleiben sie rücknehmbar. Neue Tisch-/Regal-/Lampenrezepte stehen im Bauwesen zur Verfügung und lassen sich in der eigenen Wohnung platzieren. Keine Möbel auf Spielern oder im Türbereich. NPCs verkaufen nur ausgewiesene Waren, keine frei erzeugbaren Belohnungsitems.
+
+[Autonomer Ablauf](docs/AUTONOMOUS_DEVELOPMENT.md) · [Queue](docs/DEVELOPMENT_QUEUE.md) · [Handoff](docs/DEVELOPMENT_HANDOFF.md). Keine automatische Aufgabenplanung; Android-Handabnahme erst zu einem sinnvollen Meilenstein.
+
+Dieses Issue-#8-Paket benötigt einen passenden **v8-Server**. Vorherige v7-Abschnitte beschreiben den historischen Stand. Bisherige Charakter-/Weltaggregate bleiben kompatibel; SQL-Migrationen 001/002 bleiben die Grundlage.
