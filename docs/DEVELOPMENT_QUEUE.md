@@ -1,3 +1,5 @@
+Latest M7 source: `d9db175383007e2a3eebcb7706ebe1af30f94a84`; [open PR #11](https://github.com/NeoGoku/MMORPG-2030/pull/11). Continue from this stack, not main. Highest next task: bounded durable save queue and uncertain-commit reconciliation before broader housing floors. Completed concrete slices are listed below; aggregate goals remain open.
+
 # Development queue — MMORPG-2030
 
 Canonical feature requirements: docs/GDD.md. Verify implementation status in current PRs before claiming any item missing or complete.
@@ -71,3 +73,5 @@ Next highest priorities: process-crash/backup-restore acceptance and queued pers
 - [ ] Broader cities, actual upper housing floors, asynchronous durable saves, measured device/server streaming and complete GDD remain open.
 
 Next: durable acknowledged simulation queue preserving character/shared-world CAS; transaction-cut process crash/replay cases; shared floor/elevation model before adding upper housing rooms. Do not repeat completed SIGKILL-after-confirmation, workshop cancellation or region foundations.
+
+M7 final verification: all server/PostgreSQL/crash/restore and Android/Windows/Web jobs passed for `d9db175383007e2a3eebcb7706ebe1af30f94a84`; artifacts/next task in DEVELOPMENT_HANDOFF.md and open PR #11. Documentation-only evidence follow-up does not repeat builds.

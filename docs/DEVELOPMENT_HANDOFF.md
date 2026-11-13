@@ -1,3 +1,13 @@
+# Current M7 handoff — 2026-11-13
+
+Branch: `codex/m7-durable-checkpoints`. Open PR: https://github.com/NeoGoku/MMORPG-2030/pull/11 (base PR #10 → #9 → previous open gameplay chain; no merges). Latest production source: `d9db175383007e2a3eebcb7706ebe1af30f94a84`. Packages: `0287d15` atomic party/confirmed saves, `d310773` pending reconnect/refundable production/actual SIGKILL drill, `d9db175` two shared-world content regions and server distribution. Protocol **v9**, retain SQL migrations 001/002 and existing JSONB aggregates.
+
+Build evidence: server/PostgreSQL/crash/restore/package run https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128518 ; Android/Windows/Web run https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497 . Final outcomes/downloads are recorded below and in PR #11. A documentation-only follow-up may be newer than the tested source; do not trigger duplicate platform builds for it.
+
+Next concrete implementation: introduce a bounded durable simulation/save queue preserving character/shared-world CAS, with explicit acknowledgement semantics. First address uncertain commit outcomes (DB commit succeeds but acknowledgement is lost): reconcile against persisted operation identity rather than blindly replaying economic actions or overwriting newer versions. Current conservative version conflicts can require operational recovery; the pending-disconnect dictionary itself is RAM-only. Add controlled transaction-boundary crash/outage scenarios. Then implement a shared elevation/stair/floor model before adding upper housing floors, richer production and larger cities. Keep existing regional quests/loot/transit and Workshop Inputs compatibility.
+
+Verified slices and limitations: see [M7_CONTENT.md](M7_CONTENT.md). Remaining full-GDD requirements are still partial; no full alpha, zero-loss unconfirmed simulation, multiple-server-per-DB or 50–100-player/device qualification. No paid services/deployment or automatic continuation scheduler. Earlier sections below are historical evidence, superseded by this header where applicable.
+
 # Issue #8 durable development handoff — 2026-11-13
 
 Durable task: https://github.com/NeoGoku/MMORPG-2030/issues/8. This issue is an entrypoint, not a scheduler. Read AUTONOMOUS_DEVELOPMENT.md and DEVELOPMENT_QUEUE.md each task. No automatic future Codex run is promised.
@@ -38,3 +48,14 @@ M7 recovery package: reconnect immediately retries an owned pending disconnect s
 
 ## M7 world/content integration
 Implemented and checked locally: Helixhafen (15–22) and Aschenhain (12–18), two-way data-driven transit, eight enemies including two open-dungeon bosses using existing multi-phase/cooperation mechanics, two public walk-in dungeon shells, four functioning merchant/workbench field NPCs, six chained quests, two mastery-gated gathering nodes and two class-restricted crafted chest pieces. Monster loot is configured per spawn and retains personal/replay protection. Completed quests navigate to the nearest actual reward trader. New scenery streams with distance hysteresis and material-batched meshes; existing Nordtor is preserved. .NET scenarios check gates/transit/input stop, item conservation, quest reward, merchant navigation and configured monster loot. Godot smoke checks area load/unload and local transit/loot parity. This is two compact playable extensions, not a massive world or completed streaming/performance qualification.
+
+## Final M7 build evidence
+Verified production source: `d9db175383007e2a3eebcb7706ebe1af30f94a84`. All relevant final jobs succeeded: [Server/PostgreSQL/WebSocket/SIGKILL/restore/package](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128518), [Android/Windows/Web including rendered client checks](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497). This last commit changes documentation only; source was not rebuilt again.
+
+Downloads expire 2026-11-27; matching protocol v9:
+- [Android debug APK inside ZIP](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497/artifacts/14030912240)
+- [Windows EXE/PCK](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497/artifacts/14031186727)
+- [Web folder](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497/artifacts/14030842378)
+- [.NET8 server/content/migrations/source metadata](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128518/artifacts/14031451042)
+
+No physical Android acceptance or full-alpha/load certification; next implementation remains durable acknowledged save queue/uncertain-commit reconciliation, then elevation/floors. PR #11 remains open, no merges.
