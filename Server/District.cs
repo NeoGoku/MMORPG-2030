@@ -26,8 +26,10 @@ public sealed class Rules
     public int KillExp { get; set; } public int QuestKills { get; set; } public int QuestExp { get; set; }
     public int QuestCoins { get; set; } public int LootCoins { get; set; } public int LootScrap { get; set; }
 }
+public sealed class RegionDef : Point {public string Name {get;set;}="";public double Radius {get;set;}public int MinLevel {get;set;}=1;}
 public sealed class District
 {
+    public RegionDef[] Regions {get;set;}=[];
     public Spawn[] Encounters {get;set;}=[];
     public HomeDef[] Homes {get;set;}=[];
     public Building[] Walls {get;set;}=[];

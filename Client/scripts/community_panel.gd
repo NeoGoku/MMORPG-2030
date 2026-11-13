@@ -118,10 +118,14 @@ func rebuild() -> void:
             for recipe in catalog.recipes:
                 var recipe_id: String=recipe
                 button("Wohnungswerkstatt: "+catalog.recipes[recipe].name,func():emit_action("home_craft",selected(homes),recipe_id))
+                button("Offline-Produktion: "+catalog.recipes[recipe].name+" (Arbeitstisch / Material wird gebunden)",func():emit_action("home_produce",selected(homes),recipe_id))
             var pets: Array=state.get("self",{}).get("character",{}).get("ownedPets",[])
             for pet in pets:
                 var pet_id: String=pet.id
                 button("Zucht mit Pet "+pet_id.left(8),func():emit_action("home_breed",selected(homes),pet_id))
+            button("Fertige Werkstattproduktion abholen",func():emit_action("home_collect",selected(homes)))
+            for home in community.get("homes",[]):
+                if home.get("production") is Dictionary:text("Produktion: %s · noch %.0f s"%[home.production.recipe,maxf(0,home.production.readyAt-Time.get_unix_time_from_system())])
             button("Garten: 1 Kraut pflanzen (5 Minuten)",func():emit_action("home_plant",selected(homes)))
             button("Garten: reife Ernte abholen",func():emit_action("home_harvest",selected(homes)))
         "Gilde":

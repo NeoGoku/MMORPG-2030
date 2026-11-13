@@ -84,3 +84,7 @@ DurableInstanceTests.Run();
 StallTests.Run();
 
 FurnitureAuthorityTests.Run();
+
+ProductionTests.Run();
+
+Cycle2Tests.Run();

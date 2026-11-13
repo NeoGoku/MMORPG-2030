@@ -47,6 +47,14 @@ public sealed partial class World
                 var transfer=text.Split('|');Need(transfer.Length==2,"Item und Menge fehlen.");var count=Number(transfer[1],1,99);var item=transfer[0];Need(Catalog.Items.ContainsKey(item),"Unbekanntes Item.");
                 if(kind=="home_put"){Need(!s.Equipment.Values.Contains(item),"Ausgerüstetes Item ablegen.");Take(s,item,count);Need(h.Storage.GetValueOrDefault(item)+count<=999,"Lagerlimit 999 je Item.");h.Storage[item]=h.Storage.GetValueOrDefault(item)+count;}
                 else{Need(h.Storage.GetValueOrDefault(item)>=count,"Lagerbestand fehlt.");Give(s,item,count);h.Storage[item]-=count;if(h.Storage[item]==0)h.Storage.Remove(item);}return "Wohnungslager aktualisiert.";
+            case "home_produce":
+                Need(h.Production is null&&h.Furniture.Values.Any(f=>f.Item=="oak_table"),"Freie Produktion und platzierter Arbeitstisch erforderlich.");
+                Need(Catalog.Recipes.TryGetValue(text,out var recipe),"Rezept unbekannt.");var r=recipe!;
+                Need(1+s.Professions.GetValueOrDefault(r.Profession)/Catalog.ProfessionLevelXp>=r.MinProfessionLevel&&(r.Tool==""||s.Inventory.GetValueOrDefault(r.Tool)>0),"Berufsstufe oder Werkzeug fehlt.");
+                foreach(var material in r.Inputs)Take(s,material.Key,material.Value);
+                h.Production=new ProductionJob{Recipe=text,Item=r.Output,Count=r.Count,Profession=r.Profession,ReadyAt=Utc+Catalog.ProductionSeconds};return "Materialien gebunden; Werkstatt arbeitet auch offline.";
+            case "home_collect":
+                Need(h.Production is not null&&h.Production.ReadyAt<=Utc,"Keine fertige Produktion.");var job=h.Production!;Give(s,job.Item,job.Count);s.Professions[job.Profession]=s.Professions.GetValueOrDefault(job.Profession)+Catalog.ProfessionCraftXp;CharacterRules.Progress(s,"craft",job.Recipe,Catalog);h.Production=null;return "Produktion einmalig abgeholt.";
             case "home_craft":Need(CharacterRules.Craft(s,text,Catalog),"Rezept, Material oder Inventarplatz fehlt.");CharacterRules.Progress(s,"craft",text,Catalog);return "An eigener Werkstatt hergestellt.";
             case "home_breed":Need(PetRules.Breed(s,text,Catalog),"Zucht braucht zwei erwachsene Pets und Futter.");return "Wohnungs-Zuchtbereich genutzt.";
             case "home_plant":Need(h.HarvestAt==0,"Garten bereits bepflanzt.");Take(s,"herb",1);h.HarvestAt=Utc+300;return "Garten angelegt. Ernte in fünf echten Minuten, auch nach Neustart.";

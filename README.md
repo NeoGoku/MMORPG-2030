@@ -66,3 +66,6 @@ Unter **Stände** in der Handelszone (x=27–42, z=16–25; Register freihalten)
 [Autonomer Ablauf](docs/AUTONOMOUS_DEVELOPMENT.md) · [Queue](docs/DEVELOPMENT_QUEUE.md) · [Handoff](docs/DEVELOPMENT_HANDOFF.md). Keine automatische Aufgabenplanung; Android-Handabnahme erst zu einem sinnvollen Meilenstein.
 
 Dieses Issue-#8-Paket benötigt einen passenden **v8-Server**. Vorherige v7-Abschnitte beschreiben den historischen Stand. Bisherige Charakter-/Weltaggregate bleiben kompatibel; SQL-Migrationen 001/002 bleiben die Grundlage.
+
+### Entwicklungszyklus 2
+Ein platzierter Eichentisch erlaubt eine Werkstattproduktion pro Wohnung: Material wird sofort gebunden, Fertigstellung läuft offline, Abholung erfolgt einmalig über das Wohnmenü. Tiefwerke benötigen Stufe 5, Grünsaum Stufe 10, auch nach Wiederverbindung. Geordnetes Serverende speichert nochmals; harte Abbrüche behalten das dokumentierte Checkpoint-Risiko. `ops/restore-isolated.sh` stellt Archive ausschließlich in eine neue `mmorpg_restore_…`-Datenbank wieder her.

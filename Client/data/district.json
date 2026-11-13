@@ -488,5 +488,21 @@
       "boss": true,
       "family": "tree"
     }
+  ],
+  "regions": [
+    {
+      "name": "Tiefwerke · Stufe 5+",
+      "x": 0,
+      "z": -72,
+      "radius": 17,
+      "minLevel": 5
+    },
+    {
+      "name": "Grünsaum · Stufe 10+",
+      "x": 0,
+      "z": 118,
+      "radius": 25,
+      "minLevel": 10
+    }
   ]
 }

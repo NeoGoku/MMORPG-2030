@@ -14,7 +14,7 @@ public sealed partial class World
             if(record.AccountId!=""){var latest=Store.Get(record.Id);if(latest is null||latest.AccountId!=record.AccountId)return null;record=latest;}
             PetRules.CompleteAll(record,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);
             var p=new Player(record.Id,record.State.X,record.State.Z,100);Import(p,record);
-            if(!district.Walkable(p.X,p.Z)||!HomeAccess(p,p.X,p.Z)){p.X=district.Spawn.X;p.Z=district.Spawn.Z;}
+            if(!district.Walkable(p.X,p.Z)||!HomeAccess(p,p.X,p.Z)||!RegionAccess(p,p.X,p.Z)){p.X=district.Spawn.X;p.Z=district.Spawn.Z;}
             p.Hp=Math.Clamp(record.State.Hp,0,CharacterRules.MaxHp(record,Catalog));p.PetX=p.X+1;p.PetZ=p.Z+1;players[p.Id]=p;return p.Id;}
     }
     private CharacterRecord Export(Player p)
@@ -141,7 +141,7 @@ public sealed partial class World
     private object CharacterView(Player p)
     {
         var c=CharacterRules.Clone(Export(p)).State;
-        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,navigation=CharacterRules.Navigation(c,q,Catalog),progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
+        return new{region=RegionName(p),id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,navigation=CharacterRules.Navigation(c,q,Catalog),progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
             focus=c.Focus,resource=Catalog.Classes[p.Data.ClassId].Resource,passive=Catalog.Classes[p.Data.ClassId].Passive,passiveActive=p.Level>=Catalog.Classes[p.Data.ClassId].PassiveLevel,mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }

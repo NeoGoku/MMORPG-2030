@@ -27,7 +27,9 @@ public sealed partial class World
     private void Give(CharacterState c,string item,int count){Need(CharacterRules.Add(c,item,count,Catalog),"Inventar voll.");}
     private static int Number(string value,int min,int max){Need(int.TryParse(value,out var n)&&n>=min&&n<=max,"Ungültige Anzahl.");return n;}
     private static void Coins(CharacterState c,int amount){Need((long)c.Coins+amount is >=0 and <=int.MaxValue,"Münzen fehlen oder Limit erreicht.");c.Coins+=amount;}
-    private bool CanWalk(Player p,double x,double z)=>district.Walkable(x,z)&&HomeAccess(p,x,z)&&!Shared.Homes.Values.SelectMany(h=>h.Furniture.Values).Any(f=>Distance(x,z,f.X,f.Z)<Catalog.Items[f.Item].FurnitureRadius+.15);
+    private bool RegionAccess(Player p,double x,double z)=>district.Regions.All(r=>Distance(x,z,r.X,r.Z)>=r.Radius||p.Level>=r.MinLevel);
+    private string RegionName(Player p)=>district.Regions.FirstOrDefault(r=>Distance(p.X,p.Z,r.X,r.Z)<r.Radius)?.Name??"Nordtor";
+    private bool CanWalk(Player p,double x,double z)=>RegionAccess(p,x,z)&&district.Walkable(x,z)&&HomeAccess(p,x,z)&&!Shared.Homes.Values.SelectMany(h=>h.Furniture.Values).Any(f=>Distance(x,z,f.X,f.Z)<Catalog.Items[f.Item].FurnitureRadius+.15);
     private bool HomeAccess(Player p,double x,double z)
     {
         foreach(var def in district.Homes.Where(d=>Math.Abs(x-d.X)<8.8&&Math.Abs(z-d.Z)<5.8)){
@@ -49,7 +51,7 @@ public sealed partial class World
                 w.Homes.TryGetValue(d.Id,out var h);var mine=h?.Owner==p.Id;
                 return new{id=d.Id,name=d.Name,x=d.X,z=d.Z,guildHall=d.GuildHall,owner=h?.Owner??"",rooms=h?.Rooms??1,rentUntil=h?.RentUntil??0,
                     furniture=h?.Furniture.Select(f=>new{id=f.Key,item=f.Value.Item,x=f.Value.X,z=f.Value.Z,yaw=f.Value.Yaw}).ToArray(),
-                    gearStorage=mine?h?.GearStorage:null,storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
+                    gearStorage=mine?h?.GearStorage:null,production=mine?h?.Production:null,storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
             guild=guild is null?null:new{name=guild.Name,leader=guild.Leader,members=guild.Members,level=1+guild.Exp/100,exp=guild.Exp,quest=guild.Quest,influence=guild.Influence,gearStorage=guild.GearStorage,storage=guild.Storage,buffUntil=guild.BuffUntil,hall=guild.Hall},
             guildInvites=w.Guilds.Where(g=>g.Value.Invitations.GetValueOrDefault(p.Id)>Utc).Select(g=>new{id=g.Key,name=g.Value.Name}).ToArray(),
             marketPage=p.MarketPage,marketPages=pages,

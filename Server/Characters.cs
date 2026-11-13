@@ -14,6 +14,7 @@ public sealed class GameCatalog
 {
     public List<string> Attributes {get;set;}=[];public Dictionary<string,ClassDef> Classes {get;set;}=[]; public Dictionary<string,ItemDef> Items {get;set;}=[];
     public Dictionary<string,Recipe> Recipes {get;set;}=[];public List<string> Professions {get;set;}=[];public List<ResourceNode> Nodes {get;set;}=[];public Dictionary<string,Point> Services {get;set;}=[];public List<QuestDef> Quests {get;set;}=[];
+    public int ProductionSeconds {get;set;}=120;
     public int MaxStalls {get;set;}=100;public int StallSeconds {get;set;}=86400;
     public int RepairPerPoint {get;set;}=1;
     public int ResetLevel {get;set;}=10;public int PrestigeLevel {get;set;}=100;public int DeathExpPercent {get;set;}=5;
