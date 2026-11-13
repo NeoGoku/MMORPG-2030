@@ -142,6 +142,12 @@ func rebuild() -> void:
                 button("Gildensegen aktivieren: 25 Gildenenergie",func():emit_action("guild_buff"))
                 button("Gildenhaus erwerben: 20 Holz + 10 Erz im Lager",func():emit_action("guild_hall","guildhall-1"))
                 items=item_picker();amount=spin(1,99,1)
+                for id in state.get("self",{}).get("character",{}).get("gear",{}):
+                    var gear_id: String=id
+                    button("Instanz ins Gildenlager: "+id.left(6),func():emit_action("guild_gear_put",gear_id))
+                for id in guild.get("gearStorage",{}):
+                    var gear_id: String=id;var instance: Dictionary=guild.gearStorage[id]
+                    button("Instanz entnehmen: %s · Zustand %d"%[catalog.items[instance.item].name,instance.condition],func():emit_action("guild_gear_take",gear_id))
                 button("Auswahl ins Gildenlager",func():emit_action("guild_put","",selected(items)+"|%d"%amount.value))
                 for item in guild.storage:
                     var item_id: String=item

@@ -19,8 +19,14 @@ func run() -> void:
     scene.lobby.slots.select(1)
     var keys: Array=scene.lobby.catalog.classes.keys()
     scene.lobby.classes.select(keys.find("Healer"))
+    scene.lobby.creator.open_for_class("Healer")
+    scene.lobby.creator.selectors[1].select(2)
+    scene.lobby.creator.update_preview()
+    scene.lobby.creation_appearance=scene.lobby.creator.value()
+    scene.lobby.creator.hide()
     await scene.lobby._create()
     if not check(scene.lobby.characters.size()==1,"Lobby creates selected owned slot"):return
+    if not check(scene.lobby.characters[0].appearance==scene.lobby.creation_appearance,"Creation API persists selected preview appearance"):return
     await scene.lobby._play()
     for i in range(300):
         if scene.world.get("self",{}).get("character",{}).get("classId","")=="Healer":break

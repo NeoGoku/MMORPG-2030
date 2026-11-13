@@ -60,3 +60,6 @@ Arena class skill intents now spend separate normalized energy and use fixed con
 
 ## Continuation package 7
 North-up minimap with real player/monster/service positions, equipment overlays and appearance variations, forest/ruin geometry, and persistent low/balanced/far graphics profiles controlling 3D scale, frame cap, shadows and actor sight. Six equipped skill buttons dispatch normalized class skills during arena matches. No measured device-performance or semi-realistic production-art claim.
+
+## Issue #8 — durable-play/creation batch
+Actual base is PR #7; #3–#7 remain open, #1/#2 merged. The main-only autonomous protocol/queue are included without reverting gameplay. Guild instance storage now accepts unequipped gear, limits withdrawal to officers/leader and preserves identity/condition through the existing shared-world transaction. New memory/PostgreSQL scenarios reopen the store around guild storage and auction escrow, reject full inventory without money/item loss and reject duplicate withdrawal/purchase. Creation API validates appearance and the online lobby offers the same choices with a live isolated 3D preview. These are character previews, not housing instances. Final DB/render/CI evidence belongs to the batch PR.

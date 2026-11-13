@@ -14,6 +14,9 @@ var status: Label
 var http := HTTPRequest.new()
 var token := ""
 var characters: Array = []
+const AppearanceCreator=preload("res://scripts/appearance_creator.gd")
+var creator=AppearanceCreator.new()
+var creation_appearance:="neutral|0|0|0|0|0"
 var busy := false
 
 func _ready() -> void:
@@ -25,6 +28,9 @@ func _ready() -> void:
     background.bg_color = Color("102b36")
     background.set_corner_radius_all(12)
     add_theme_stylebox_override("panel",background)
+    add_child(creator)
+    creator.position=Vector2(-50,-35)
+    creator.chosen.connect(func(value: String):creation_appearance=value)
     add_child(http)
     http.timeout = 10
     _label("CHARAKTERE · 3 PLÄTZE / 8 KLASSEN",Vector2(24,18),24)
@@ -55,8 +61,9 @@ func _ready() -> void:
     _button("Lokales Training",Rect2(594,360,260,50),func():
         hide()
         local_requested.emit(slots.selected,nickname.text if nickname.text.length()>=3 else "Reisender",classes.get_item_text(classes.selected)))
-    status = _label("Online speichert auf dem Server. Lokal bleibt getrennt und temporär.\nKein öffentlicher Spielserver eingerichtet. Passwörter werden nicht gespeichert.",Vector2(24,430),16)
-    status.size = Vector2(830,90)
+    _button("Aussehen / 3D-Vorschau",Rect2(24,418,400,38),func():creator.open_for_class(classes.get_item_text(classes.selected)))
+    status = _label("Online speichert auf dem Server. Lokal bleibt getrennt und temporär.\nKein öffentlicher Spielserver eingerichtet. Passwörter werden nicht gespeichert.",Vector2(24,466),16)
+    status.size = Vector2(830,65)
     status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     hide()
 
@@ -129,7 +136,7 @@ func _create() -> void:
         status.text = "Zuerst anmelden."
         return
     busy = true
-    var response: Dictionary = await _request("/api/characters",{"slot":slots.selected,"name":nickname.text,"classId":classes.get_item_text(classes.selected)},HTTPClient.METHOD_POST)
+    var response: Dictionary = await _request("/api/characters",{"slot":slots.selected,"name":nickname.text,"classId":classes.get_item_text(classes.selected),"appearance":creation_appearance},HTTPClient.METHOD_POST)
     if response.has("error"):status.text=response.error
     else:
         characters.append(response.data)
