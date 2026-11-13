@@ -73,8 +73,13 @@ func progress(kind: String, item: String) -> void:
             quest_progress[q.id] = mini(q.required,int(quest_progress.get(q.id,0))+1)
 
 func near(service: String) -> bool:
-    var point: Dictionary = catalog.services[service]
-    return Vector2(sim.player.x-point.x,sim.player.z-point.z).length() <= 3
+    var points: Array=[]
+    if catalog.services.has(service):points.append(catalog.services[service])
+    for outpost in catalog.get("outposts",[]):
+        if outpost.service==service:points.append(outpost)
+    for point in points:
+        if Vector2(sim.player.x-point.x,sim.player.z-point.z).length()<=3:return true
+    return false
 
 func action(kind: String, target: String) -> bool:
     var p: Dictionary = sim.player
@@ -227,6 +232,14 @@ func action(kind: String, target: String) -> bool:
                 if not add(item,pet.inventory[item]):ok=false;break
             if ok:pet.inventory.clear()
             else:inventory=previous
+        "world_transit":
+            for passage in sim.data.get("passages",[]):
+                if passage.id!=target:continue
+                var destination: Dictionary={}
+                if Vector2(p.x-passage.from.x,p.z-passage.from.z).length()<=3 and p.level>=passage.minLevel:destination=passage.to
+                elif Vector2(p.x-passage.to.x,p.z-passage.to.z).length()<=3:destination=passage.from
+                if not destination.is_empty() and sim._walkable(destination.x,destination.z):
+                    p.x=destination.x;p.z=destination.z;p.attacking=false;p.target="";automation.active=false;ok=true
         "transit":
             if Vector2(p.x,p.z).distance_to(Vector2(0,-40))<=3 and p.level>=5 and p.quest=="complete":p.x=0.0;p.z=-59.0;ok=true
             elif Vector2(p.x,p.z).distance_to(Vector2(0,-59))<=3:p.x=0.0;p.z=-40.0;ok=true
@@ -382,7 +395,7 @@ func tick(dt: float) -> void:
                 break
     elif pet.mode=="loot":
         for drop in sim.drops:
-            if Vector2(sim.player.x-drop.x,sim.player.z-drop.z).length()<=5 and add("boss_core" if drop.monsterId=="worldboss-1" else "scrap",1):
+            if Vector2(sim.player.x-drop.x,sim.player.z-drop.z).length()<=5 and add(sim.loot_item(drop.monsterId),1):
                 sim.drops.erase(drop)
                 sim.player.coins += sim.rules.lootCoins
                 sim.player.scrap += 1
@@ -408,7 +421,13 @@ func view() -> Dictionary:
     var quests: Array = catalog.quests.duplicate(true)
     for q in quests:
         q.progress = quest_progress.get(q.id,0)
-        q.navigation=catalog.services.merchant.duplicate() if q.progress>=q.required else q.get("navigation",{}).duplicate()
+        q.navigation=q.get("navigation",{}).duplicate()
+        if q.progress>=q.required:
+            var traders: Array=[catalog.services.merchant]
+            for outpost in catalog.get("outposts",[]):
+                if outpost.service=="merchant":traders.append(outpost)
+            traders.sort_custom(func(a: Dictionary,b: Dictionary):return Vector2(a.x-sim.player.x,a.z-sim.player.z).length_squared()<Vector2(b.x-sim.player.x,b.z-sim.player.z).length_squared())
+            q.navigation=traders[0].duplicate()
         q.claimed = claimed.has(q.id)
         q.unlocked = q.prerequisite=="" or claimed.has(q.prerequisite)
     return {"id":"local","name":nickname,"classId":class_id,"prestige":prestige,"attributes":attributes.duplicate(),"inventory":inventory.duplicate(),"equipment":equipment.duplicate(),"professions":professions.duplicate(),"quests":quests,"focus":int(focus),"resource":catalog.classes[class_id].get("resource","Focus"),"passive":catalog.classes[class_id].get("passive",""),"passiveActive":sim.player.level>=5,"mana":int(mana),"nextLevelExp":sim.player.level*catalog.levelExpBase,"maxMana":catalog.baseMana+attributes.wisdom*catalog.wisdomMana,"attack":attack(),"defense":defense(),"farmXp":str(farm_xp),"farmCost":str(farm_cost()),"automation":automation.duplicate(true),"pet":pet.duplicate(true),"ownedPets":owned_pets.duplicate(true),"persistent":false,"skills":skills,"skillbook":book}
@@ -457,7 +476,7 @@ func farm_direction(dt: float,input: Vector2) -> Vector2:
         if Vector2(drop.x,drop.z).distance_to(home)<=automation.radius:
             p.attacking=false
             if pos.distance_to(Vector2(drop.x,drop.z))<=3:
-                if add("boss_core" if drop.monsterId=="worldboss-1" else "scrap",1):sim.drops.erase(drop);p.coins+=sim.rules.lootCoins;p.scrap+=1
+                if add(sim.loot_item(drop.monsterId),1):sim.drops.erase(drop);p.coins+=sim.rules.lootCoins;p.scrap+=1
                 else:automation.returning=true
                 return Vector2.ZERO
             return farm_steer(Vector2(drop.x,drop.z),dt)

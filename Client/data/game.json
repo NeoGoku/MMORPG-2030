@@ -1376,6 +1376,68 @@
       "furnitureKind": "lamp",
       "furnitureRadius": 0.4,
       "vendor": false
+    },
+    "helix_shard": {
+      "name": "Helixsplitter",
+      "stack": 99,
+      "price": 15,
+      "rarity": "Rare",
+      "vendor": false
+    },
+    "storm_core": {
+      "name": "Sturmkern",
+      "stack": 99,
+      "price": 70,
+      "rarity": "Epic",
+      "vendor": false
+    },
+    "ashen_seed": {
+      "name": "Aschensaat",
+      "stack": 99,
+      "price": 12,
+      "rarity": "Rare",
+      "vendor": false
+    },
+    "ember_heart": {
+      "name": "Glutherz",
+      "stack": 99,
+      "price": 60,
+      "rarity": "Epic",
+      "vendor": false
+    },
+    "helix_plate": {
+      "name": "Helixpanzer",
+      "slot": "chest",
+      "attack": 3,
+      "defense": 11,
+      "classes": [
+        "Shield Sword",
+        "Tank",
+        "Dual Swords"
+      ],
+      "rarity": "Epic",
+      "minLevel": 15,
+      "stack": 1,
+      "price": 160,
+      "vendor": false
+    },
+    "ash_mantle": {
+      "name": "Aschenmantel",
+      "slot": "chest",
+      "attack": 7,
+      "defense": 6,
+      "classes": [
+        "Dark Mage",
+        "Light Mage",
+        "Healer",
+        "Creature Summoner",
+        "Archer"
+      ],
+      "rarity": "Epic",
+      "minLevel": 15,
+      "stack": 1,
+      "price": 160,
+      "vendor": false
     }
   },
   "professions": [
@@ -1591,6 +1653,30 @@
       "output": "arcane_lamp",
       "count": 1,
       "minProfessionLevel": 1
+    },
+    "helix_plate": {
+      "name": "Helixpanzer",
+      "profession": "smithing",
+      "inputs": {
+        "helix_shard": 5,
+        "storm_core": 1,
+        "ancient_ore": 3
+      },
+      "output": "helix_plate",
+      "count": 1,
+      "minProfessionLevel": 4
+    },
+    "ash_mantle": {
+      "name": "Aschenmantel",
+      "profession": "tailoring",
+      "inputs": {
+        "ashen_seed": 5,
+        "ember_heart": 1,
+        "heartwood": 2
+      },
+      "output": "ash_mantle",
+      "count": 1,
+      "minProfessionLevel": 4
     }
   },
   "services": {
@@ -1662,6 +1748,24 @@
       "x": -18,
       "z": 116,
       "minProfessionLevel": 2
+    },
+    {
+      "id": "helix_vein",
+      "name": "Helix-Erzader",
+      "profession": "mining",
+      "item": "ancient_ore",
+      "x": 111,
+      "z": -62,
+      "minProfessionLevel": 3
+    },
+    {
+      "id": "ash_trunk",
+      "name": "Glutgeäderter Stamm",
+      "profession": "woodcutting",
+      "item": "heartwood",
+      "x": -109,
+      "z": 89,
+      "minProfessionLevel": 3
     }
   ],
   "quests": [
@@ -2063,6 +2167,114 @@
         "x": -8,
         "z": 6
       }
+    },
+    {
+      "id": "helix_signal",
+      "name": "Helix I: Das gestörte Signal",
+      "type": "world",
+      "event": "kill",
+      "item": "helix-sentry",
+      "required": 3,
+      "prerequisite": "",
+      "minLevel": 15,
+      "coins": 30,
+      "exp": 200,
+      "navigation": {
+        "x": 86,
+        "z": -65
+      }
+    },
+    {
+      "id": "helix_lab",
+      "name": "Helix II: Der offene Reaktor",
+      "type": "world",
+      "event": "kill",
+      "item": "worldboss-helix",
+      "required": 1,
+      "prerequisite": "helix_signal",
+      "minLevel": 15,
+      "coins": 30,
+      "exp": 500,
+      "navigation": {
+        "x": 96,
+        "z": -81
+      },
+      "rewards": {
+        "storm_core": 1
+      }
+    },
+    {
+      "id": "helix_master",
+      "name": "Helix III: Panzer aus Sturm",
+      "type": "profession",
+      "event": "craft",
+      "item": "helix_plate",
+      "required": 1,
+      "prerequisite": "helix_lab",
+      "minLevel": 15,
+      "coins": 30,
+      "exp": 250,
+      "navigation": {
+        "x": 83,
+        "z": -52
+      },
+      "rewards": {
+        "reset_stone": 1
+      }
+    },
+    {
+      "id": "ash_guard",
+      "name": "Aschenhain I: Verdorbene Wildnis",
+      "type": "world",
+      "event": "kill",
+      "item": "ash-boar",
+      "required": 3,
+      "prerequisite": "",
+      "minLevel": 12,
+      "coins": 30,
+      "exp": 180,
+      "navigation": {
+        "x": -86,
+        "z": 90
+      }
+    },
+    {
+      "id": "ash_heart",
+      "name": "Aschenhain II: Die Aschenmutter",
+      "type": "world",
+      "event": "kill",
+      "item": "worldboss-ash",
+      "required": 1,
+      "prerequisite": "ash_guard",
+      "minLevel": 12,
+      "coins": 30,
+      "exp": 400,
+      "navigation": {
+        "x": -94,
+        "z": 108
+      },
+      "rewards": {
+        "ember_heart": 1
+      }
+    },
+    {
+      "id": "ash_master",
+      "name": "Aschenhain III: Glutfeste Webkunst",
+      "type": "profession",
+      "event": "craft",
+      "item": "ash_mantle",
+      "required": 1,
+      "prerequisite": "ash_heart",
+      "minLevel": 15,
+      "coins": 30,
+      "exp": 250,
+      "navigation": {
+        "x": -78,
+        "z": 78
+      },
+      "rewards": {
+        "reset_stone": 1
+      }
     }
   ],
   "pet": {
@@ -2133,5 +2345,31 @@
   "auctionDays": 7,
   "marketPageSize": 20,
   "maxStalls": 100,
-  "stallSeconds": 86400
+  "stallSeconds": 86400,
+  "outposts": [
+    {
+      "name": "Nera · Feldhandel / Questbelohnungen",
+      "service": "merchant",
+      "x": 80,
+      "z": -52
+    },
+    {
+      "name": "Ivo · Mobile Werkstatt",
+      "service": "workbench",
+      "x": 83,
+      "z": -52
+    },
+    {
+      "name": "Seda · Hainhandel / Questbelohnungen",
+      "service": "merchant",
+      "x": -75,
+      "z": 78
+    },
+    {
+      "name": "Lio · Hainwerkstatt",
+      "service": "workbench",
+      "x": -78,
+      "z": 78
+    }
+  ]
 }

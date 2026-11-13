@@ -104,7 +104,7 @@ func _rebuild() -> void:
                 binding_button.pressed.connect(func():intent.emit("slot","%d|%s"%[slot_picker.selected,skill.id]))
                 content.add_child(binding_button)
         "Inventar":
-            _text("24 konfigurierbare Stack-Slots. Händler: rechts der Wache; Werkbank: links.")
+            _text("24 konfigurierbare Stack-Slots. Händler und Werkbänke: Stadtwache oder markierte Außenposten.")
             for id in info.get("gear",{}):
                 var instance: Dictionary=info.gear[id]
                 _text("%s · Zustand %d / 100 · %s"%[catalog.items[instance.item].name,instance.condition,id.left(6)])

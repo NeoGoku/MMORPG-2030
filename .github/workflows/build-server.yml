@@ -77,9 +77,19 @@ jobs:
           pg_dump --dbname=mmorpg --format=custom > world.dump
           bash ops/restore-isolated.sh world.dump mmorpg_restore_ci
           for database in mmorpg mmorpg_restore_ci; do
-            psql --dbname="$database" --tuples-only --no-align --set=ON_ERROR_STOP=1 -c "SELECT 'character:' || id || ':' || md5(document::text) FROM characters UNION ALL SELECT 'world:' || id::text || ':' || md5(document::text) FROM shared_world ORDER BY 1" > "$database.fingerprint"
+            psql --dbname="$database" --tuples-only --no-align --set=ON_ERROR_STOP=1 -c "SELECT 'account:' || id || ':' || md5(row_to_json(a)::text) FROM accounts a UNION ALL SELECT 'character:' || id || ':' || md5(row_to_json(c)::text) FROM characters c UNION ALL SELECT 'world:' || id::text || ':' || md5(row_to_json(w)::text) FROM shared_world w UNION ALL SELECT 'migration:' || version::text || ':' || md5(row_to_json(m)::text) FROM schema_migrations m ORDER BY 1" > "$database.fingerprint"
           done
           diff -u mmorpg.fingerprint mmorpg_restore_ci.fingerprint
+      - name: Package reproducible framework-dependent server
+        run: |
+          dotnet publish Server/MMORPG.Server.csproj --configuration Release --no-build --output artifacts/server
+          printf '%s\n' '${{ github.event.pull_request.head.sha || github.sha }}' > artifacts/server/SOURCE_COMMIT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MMORPG-Server
+          path: artifacts/server/
+          if-no-files-found: error
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

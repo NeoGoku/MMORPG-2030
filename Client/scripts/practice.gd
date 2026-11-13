@@ -27,6 +27,11 @@ func _init() -> void:
     player.hp = m3.catalog.baseHp
     player.maxHp = m3.catalog.baseHp
 
+func loot_item(monster_id: String) -> String:
+    for spawn in data.monsters+data.get("encounters",[]):
+        if spawn.id==monster_id and spawn.get("lootItem","")!="":return spawn.lootItem
+    return "boss_core" if monster_id=="worldboss-1" else ("root_core" if monster_id=="worldboss-forest" else "scrap")
+
 func _distance(a: Dictionary, b: Dictionary) -> float:
     return Vector2(a.x - b.x, a.z - b.z).length()
 
@@ -83,7 +88,7 @@ func act(kind: String, target: String = "") -> void:
                 player.message = "Mira: Gute Arbeit!" if player.quest == "complete" else "Mira: Noch %d Drohnen im Nordhof." % (rules.questKills - player.kills)
         "loot":
             for drop in drops:
-                if (target.is_empty() or target == drop.id) and _distance(player, drop) <= 3 and m3.add("boss_core" if drop.monsterId=="worldboss-1" else "scrap",1):
+                if (target.is_empty() or target == drop.id) and _distance(player, drop) <= 3 and m3.add(loot_item(drop.monsterId),1):
                     player.coins += rules.lootCoins
                     player.scrap += rules.lootScrap
                     player.message = "Beute: +4 Münzen, +1 Drohnenschrott."

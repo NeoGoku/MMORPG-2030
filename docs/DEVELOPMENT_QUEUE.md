@@ -63,3 +63,11 @@ Next highest priorities: process-crash/backup-restore acceptance and queued pers
 - [x] Reconnect flushes pending owned disconnect state; blocks stale reconnect while save fails.
 - [x] Production cancellation refunds original persisted inputs once; legacy jobs remain collectible.
 - [x] Local actual PostgreSQL SIGKILL/restart confirms whole acknowledged character document, fresh login and old-ticket rejection; CI drill added.
+
+## M7 adjacent world slice
+- [x] Two connected level-gated content areas, public dungeon shells, eight configured encounters/two phase bosses and personal configured loot.
+- [x] Six linked quests, field trader/workbench functions and two regional profession recipes.
+- [x] Data-driven two-way transit, interaction/minimap, distance-streamed material batches for new area scenery; local headless and authority checks passed.
+- [ ] Broader cities, actual upper housing floors, asynchronous durable saves, measured device/server streaming and complete GDD remain open.
+
+Next: durable acknowledged simulation queue preserving character/shared-world CAS; transaction-cut process crash/replay cases; shared floor/elevation model before adding upper housing rooms. Do not repeat completed SIGKILL-after-confirmation, workshop cancellation or region foundations.

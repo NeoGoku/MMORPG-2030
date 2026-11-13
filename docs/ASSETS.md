@@ -17,3 +17,5 @@ M5: `community_city.gd` authors modular cutaway apartment shells, doorways/windo
 Continuation: original procedural boar/forest-spirit/tree-boss meshes, additional forest/bridge/ruin scenery, avatar face/body/hair/skin/tattoo parameters and equipped weapon/chest overlays. Original minimap and graphics-profile UI. No third-party model/texture/audio licenses introduced; final semi-realistic rigs, textures and extensive animations remain unimplemented.
 
 Issue #8: creation preview reuses the original class/appearance Actor in a UI-only SubViewport. New tables/shelves/lamps and named stand canopy/counter meshes are original procedural geometry/materials in community_city.gd. No external pack, texture, model, font or audio license is introduced.
+
+M7: `world_regions.gd` adds original material-batched laboratory/shrine walls, courtyard props, ash trees, field-service humanoids, transit pads and road geometry. It reuses existing actor/boss animation families. No external model, image, texture or paid asset was added; these remain stylized procedural assets rather than final semi-realistic art.

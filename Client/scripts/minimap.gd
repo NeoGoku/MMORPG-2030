@@ -1,4 +1,6 @@
 extends Control
+var district: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
+var catalog: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/game.json"))
 var state: Dictionary={}
 var player: Dictionary={}
 var radius:=45.0
@@ -16,6 +18,13 @@ func _draw() -> void:
     for marker in [Vector2(-3,6),Vector2(8,6),Vector2(-8,6),Vector2(30,24),Vector2(30,12)]:
         var pos:=point(marker.x,marker.y)
         if pos.distance_to(Vector2(80,80))<72:draw_circle(pos,3,Color("eac982"))
+    for outpost in catalog.get("outposts",[]):
+        var pos:=point(outpost.x,outpost.z)
+        if pos.distance_to(Vector2(80,80))<72:draw_circle(pos,3,Color("eac982"))
+    for passage in district.get("passages",[]):
+        for endpoint in [passage.from,passage.to]:
+            var pos:=point(endpoint.x,endpoint.z)
+            if pos.distance_to(Vector2(80,80))<72:draw_rect(Rect2(pos-Vector2(3,3),Vector2(6,6)),Color("72ded1"))
     draw_circle(Vector2(80,80),4,Color("a7f1cb"))
     if destination!=Vector2.INF:
         var vector:=point(destination.x,destination.y)-Vector2(80,80)
