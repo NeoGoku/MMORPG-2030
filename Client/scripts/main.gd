@@ -4,6 +4,10 @@ const Network = preload("res://scripts/network.gd")
 const Practice = preload("res://scripts/practice.gd")
 const Actor = preload("res://scripts/actor.gd")
 const SocialPanel = preload("res://scripts/social_panel.gd")
+const Minimap=preload("res://scripts/minimap.gd")
+var minimap=Minimap.new()
+const GraphicsOptions=preload("res://scripts/graphics_options.gd")
+var graphics_options=GraphicsOptions.new()
 var social_panel = SocialPanel.new()
 const CommunityPanel=preload("res://scripts/community_panel.gd")
 const CommunityCity=preload("res://scripts/community_city.gd")
@@ -47,6 +51,14 @@ func _ready() -> void:
     hud.action_requested.connect(_action)
     hud.connect_requested.connect(_connect)
     hud.practice_requested.connect(_start_practice)
+    hud.add_child(graphics_options)
+    graphics_options.quality_changed.connect(func(distance: float,shadows: bool):
+        Actor.draw_distance=distance
+        camera.far=distance+40
+        $DirectionalLight3D.shadow_enabled=shadows)
+    var options_button=hud._button(hud,"Darstellung",Rect2(25,480,160,34),"online")
+    options_button.pressed.connect(func():graphics_options.visible=not graphics_options.visible)
+    hud.add_child(minimap)
     hud.add_child(menu)
     hud.character_menu = menu
     menu.intent.connect(_intent)
@@ -132,7 +144,7 @@ func _clear_dynamic() -> void:
 
 func _physics_process(delta: float) -> void:
     var input := Vector2.ZERO
-    if not hud.online_panel.visible and not menu.visible and not social_panel.visible and not community_panel.visible:
+    if not hud.online_panel.visible and not menu.visible and not social_panel.visible and not community_panel.visible and not graphics_options.visible:
         input = hud.joystick.direction
         input += Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
     if not DisplayServer.window_is_focused():
@@ -169,7 +181,15 @@ func _receive_world(state: Dictionary) -> void:
     _sync_actors(state.monsters, monsters, "monster", selected)
     _sync_loot(state.loot)
     _sync_pets(state.get("pets",[]))
-    _sync_summons(state.get("summons",[]))
+    var all_summons: Array=state.get("summons",[]).duplicate()
+    for match_data in state.get("arena",{}).get("matches",[]):
+        for key in match_data.get("effects",{}):
+            if str(key).begins_with("summon:") and match_data.effects[key]>float(state.tick)/20:
+                var owner: String=str(key).trim_prefix("summon:")
+                for actor_state in state.players:
+                    if actor_state.id==owner:all_summons.append({"owner":owner,"kind":"wolf","x":actor_state.x+1,"z":actor_state.z,"hp":60,"maxHp":60,"remaining":10})
+    _sync_summons(all_summons)
+    minimap.update_world(state,local_player)
     social_panel.update_state(state,online)
     community_panel.update_state(state,online)
     if not local_player.is_empty():community_city.update_world(state,Vector3(local_player.x,0,local_player.z))
@@ -264,7 +284,7 @@ func _action(kind: String) -> void:
         _receive_world(practice.snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and not event.echo and not hud.online_panel.visible and not menu.visible and not social_panel.visible and not community_panel.visible:
+    if event is InputEventKey and event.pressed and not event.echo and not hud.online_panel.visible and not menu.visible and not social_panel.visible and not community_panel.visible and not graphics_options.visible:
         match event.physical_keycode:
             KEY_TAB: _action("target"); get_viewport().set_input_as_handled()
             KEY_SPACE: _action("attack")
@@ -371,6 +391,17 @@ func _services() -> void:
         add_child(label)
 
 func _cast_slot(index: int) -> void:
+    if online:
+        for match_state in world.get("arena",{}).get("matches",[]):
+            if match_state.hp.has(local_id):
+                var skills: Array=world.get("self",{}).get("character",{}).get("skills",[])
+                if index>=0 and index<skills.size():
+                    var opponents: Array=match_state.b if local_id in match_state.a else match_state.a
+                    var enemy: String=""
+                    for id in opponents:
+                        if match_state.hp[id]>0:enemy=id;break
+                    network.action("arena_skill",skills[index].id,enemy)
+                return
     var character: Dictionary=world.get("self",{}).get("character",{})
     if index>=0 and index<character.get("skills",[]).size():_intent("skill",character.skills[index].id)
 

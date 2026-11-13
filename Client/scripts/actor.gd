@@ -27,6 +27,7 @@ var dead := false
 var _attack_serial := 0
 var _hurt_serial := 0
 var floating: Array = []
+static var draw_distance:=60.0
 static var materials: Dictionary = {}
 
 func _ready() -> void:
@@ -175,7 +176,7 @@ func apply_state(state: Dictionary, selected: bool) -> void:
                     if node and key=="head":node.material_override=_material(skin,false);node.scale.x=.42+.04*int(parts[1])
                 var hair=model.get_node_or_null("hair")
                 if hair:hair.scale.y=.18+.07*int(parts[3]);hair.material_override=_material([Color("292a32"),Color("9c744b"),Color("b7bec4"),Color("583d61")][int(parts[3])],false)
-                model.scale=Vector3(1+.05*int(parts[2]),.94+.04*int(parts[2]),1)
+                model.scale=Vector3((.94 if parts[0]=="female" else 1.0)+.05*int(parts[2]),.94+.04*int(parts[2]),1)
                 var tattoo=model.get_node_or_null("tattoo")
                 if tattoo:tattoo.queue_free()
                 if int(parts[5])>0:_part(model,"tattoo",BoxMesh.new(),Vector3(.29,1.54,-.23),Vector3(.1,.06*int(parts[5]),.03),Color("3e6e7c"))
@@ -209,7 +210,7 @@ func _process(delta: float) -> void:
     var camera:=get_viewport().get_camera_3d()
     if camera:
         var distance:=global_position.distance_to(camera.global_position)
-        model.visible=distance<60
+        model.visible=distance<draw_distance
         name_label.visible=distance<28 and not dead
         hp_label.visible=distance<28 and not dead
     timer += delta

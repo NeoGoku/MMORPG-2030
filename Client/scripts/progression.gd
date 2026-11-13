@@ -137,7 +137,7 @@ func action(kind: String, target: String) -> bool:
         "craft":
             if near("workbench") and catalog.recipes.has(target):
                 var recipe: Dictionary = catalog.recipes[target]
-                var enough := true
+                var enough: bool=1+int(professions.get(recipe.profession,0))/int(catalog.professionLevelXp)>=int(recipe.get("minProfessionLevel",1))
                 for item in recipe.inputs:
                     if inventory.get(item,0) < recipe.inputs[item]: enough = false
                 if enough:
@@ -153,7 +153,7 @@ func action(kind: String, target: String) -> bool:
                     else: inventory = previous
         "gather":
             for node in catalog.nodes:
-                if node.id == target and Vector2(p.x-node.x,p.z-node.z).length() <= 3 and cooldowns.get("gather:"+target,0)<=0 and add(node.item,1):
+                if node.id == target and 1+int(professions.get(node.profession,0))/int(catalog.professionLevelXp)>=int(node.get("minProfessionLevel",1)) and Vector2(p.x-node.x,p.z-node.z).length() <= 3 and cooldowns.get("gather:"+target,0)<=0 and add(node.item,1):
                     professions[node.profession] += catalog.professionGatherXp
                     farm_xp += 10
                     cooldowns["gather:"+target] = 5.0
