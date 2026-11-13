@@ -114,3 +114,7 @@ func _refresh_view() -> void:
     for item in character.get("inventory",{}):
         offer_item.add_item("%s × %d"%[catalogue.items[item].name,character.inventory[item]]);offer_item.set_item_metadata(offer_item.item_count-1,item)
         if item==selected_item:offer_item.select(offer_item.item_count-1)
+
+    for id in character.get("gear",{}):
+        var instance: Dictionary=character.gear[id]
+        offer_item.add_item(catalogue.items[instance.item].name+" · Zustand "+str(instance.condition));offer_item.set_item_metadata(offer_item.item_count-1,id)

@@ -47,12 +47,12 @@ public sealed partial class World
                 w.Homes.TryGetValue(d.Id,out var h);var mine=h?.Owner==p.Id;
                 return new{id=d.Id,name=d.Name,x=d.X,z=d.Z,guildHall=d.GuildHall,owner=h?.Owner??"",rooms=h?.Rooms??1,rentUntil=h?.RentUntil??0,
                     furniture=h?.Furniture.Select(f=>new{id=f.Key,item=f.Value.Item,x=f.Value.X,z=f.Value.Z,yaw=f.Value.Yaw}).ToArray(),
-                    storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
+                    gearStorage=mine?h?.GearStorage:null,storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
             guild=guild is null?null:new{name=guild.Name,leader=guild.Leader,members=guild.Members,level=1+guild.Exp/100,exp=guild.Exp,quest=guild.Quest,influence=guild.Influence,storage=guild.Storage,buffUntil=guild.BuffUntil,hall=guild.Hall},
             guildInvites=w.Guilds.Where(g=>g.Value.Invitations.GetValueOrDefault(p.Id)>Utc).Select(g=>new{id=g.Key,name=g.Value.Name}).ToArray(),
             marketPage=p.MarketPage,marketPages=pages,
-            auctions=offers.Skip(p.MarketPage*pageSize).Take(pageSize).Select(a=>new{id=a.Key,seller=a.Value.Seller,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price}).ToArray(),
-            ownAuctions=w.Auctions.Where(a=>a.Value.Seller==p.Id).Select(a=>new{id=a.Key,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price,expired=a.Value.Created+Catalog.AuctionDays*86400L<=Utc}).ToArray(),
+            auctions=offers.Skip(p.MarketPage*pageSize).Take(pageSize).Select(a=>new{id=a.Key,seller=a.Value.Seller,item=a.Value.Item,petLevel=a.Value.Pet?.Level??0,condition=a.Value.Gear?.Condition,count=a.Value.Count,price=a.Value.Price}).ToArray(),
+            ownAuctions=w.Auctions.Where(a=>a.Value.Seller==p.Id).Select(a=>new{id=a.Key,item=a.Value.Item,petLevel=a.Value.Pet?.Level??0,condition=a.Value.Gear?.Condition,count=a.Value.Count,price=a.Value.Price,expired=a.Value.Created+Catalog.AuctionDays*86400L<=Utc}).ToArray(),
             proceeds=w.Proceeds.GetValueOrDefault(p.Id),marketSearch=search,serverUtc=Utc
         };
     }

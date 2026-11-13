@@ -24,8 +24,10 @@ public sealed partial class World
             return "Besuchsrechte aktualisiert.";
         }
         Need(Math.Abs(s.X-def!.X)<8.8&&Math.Abs(s.Z-def.Z)<5.8,"Diese Aktion benötigt Anwesenheit in deiner Wohnung.");
-        if(kind is not ("home_take" or "home_remove"))Need(h.RentUntil>Utc,"Miete überfällig. Am Wohnamt oder im Menü bezahlen.");
+        if(kind is not ("home_take" or "home_remove" or "home_gear_take"))Need(h.RentUntil>Utc,"Miete überfällig. Am Wohnamt oder im Menü bezahlen.");
         switch(kind){
+            case "home_gear_put":Need(s.Gear.ContainsKey(text)&&!s.EquippedGear.Values.Contains(text)&&h.GearStorage.Count<48,"Instanz ablegen oder Lager voll.");h.GearStorage[text]=s.Gear[text];s.Gear.Remove(text);return "Instanz sicher eingelagert.";
+            case "home_gear_take":Need(h.GearStorage.ContainsKey(text)&&CharacterRules.Slots(s,Catalog)<Catalog.InventorySlots&&!s.Gear.ContainsKey(text),"Instanz fehlt oder Inventar voll.");s.Gear[text]=h.GearStorage[text];h.GearStorage.Remove(text);return "Instanz zurückgenommen.";
             case "home_expand":Need(h.Rooms==1,"Zweites Zimmer bereits offen.");Take(s,"wood",8);Coins(s,-20);h.Rooms=2;return "Angrenzendes Zimmer geöffnet: gleiche Welt, zusätzliche Fläche.";
             case "home_place":case "home_move":
                 var parts=text.Split('|');Need(parts.Length==4,"Möbel-ID/Item, X, Z und Drehung fehlen.");

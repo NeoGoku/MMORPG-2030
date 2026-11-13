@@ -74,3 +74,5 @@ M5ReviewTests.Run();
 M6Tests.Run();
 
 ContinuationTests.Run();
+
+InstanceEconomyTests.Run();

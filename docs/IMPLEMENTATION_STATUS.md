@@ -51,3 +51,6 @@ Connected Grünsaum forest/bridge/open root ruins with four level-10–15 encoun
 
 ## Continuation package 4
 Recipe mastery requirements/tool hook, advanced resource nodes tied to gathering levels, new class-constrained weapons/head/feet/accessory items, Epic/Legendary recipe outputs with boss materials, eight class practice quests and chained forest/profession objectives. Original recipe paths retained. Broader narrative/factions and final balance remain open.
+
+## Continuation package 5
+Distinct equipment condition/identity now survives direct two-confirmation trade, auction escrow and owner housing storage. Equipped instances are rejected for transfer; capacity is revalidated and the existing atomic save boundaries are used. Inactive, unselected pets without training can be auctioned with identity/traits/lineage intact; duplicate purchases cannot mint a second pet. Housing floors/expanded furniture catalogue and stalls remain open.

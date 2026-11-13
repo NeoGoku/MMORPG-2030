@@ -21,6 +21,7 @@ public sealed class HomeState
     public int Rooms {get;set;}=1;
     public long RentUntil {get;set;}
     public Dictionary<string,FurnitureState> Furniture {get;set;}=[];
+    public Dictionary<string,GearState> GearStorage {get;set;}=[];
     public Dictionary<string,int> Storage {get;set;}=[];
     public long HarvestAt {get;set;}
 }
@@ -33,6 +34,7 @@ public sealed class GuildState
     public string Name {get;set;}="";public string Leader {get;set;}="";
     public Dictionary<string,string> Members {get;set;}=[];
     public Dictionary<string,long> Invitations {get;set;}=[];
+    public Dictionary<string,GearState> GearStorage {get;set;}=[];
     public Dictionary<string,int> Storage {get;set;}=[];
     public int Exp {get;set;}public int Quest {get;set;}public int Influence {get;set;}
     public long BuffUntil {get;set;}
@@ -40,6 +42,8 @@ public sealed class GuildState
 }
 public sealed class AuctionState
 {
+    public PetState? Pet {get;set;}
+    public GearState? Gear {get;set;}public string GearId {get;set;}="";
     public string Seller {get;set;}="";public string Item {get;set;}="";
     public int Count {get;set;}public int Price {get;set;}public long Created {get;set;}
 }
