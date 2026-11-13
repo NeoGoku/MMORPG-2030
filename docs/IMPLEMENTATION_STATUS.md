@@ -1,3 +1,7 @@
+# Latest M7 evidence
+
+Production source `d9db175383007e2a3eebcb7706ebe1af30f94a84`, [PR #11](https://github.com/NeoGoku/MMORPG-2030/pull/11), matching protocol v9. Locally verified: atomic party checkpoint/failure retry, safe pending-disconnect reconnect, exact cancellable production escrow, real PostgreSQL SIGKILL-after-confirmation restoration and fresh login; two regional content loops with server gates/loot/craft/quests and Godot geometry streaming. CI source runs: server `43414128518`, clients `43414128497`; final outcomes below/PR. Full GDD and unconfirmed crash-loss/queued persistence remain partial. See [actual M7 content](M7_CONTENT.md).
+
 # Implementation status — M5 shared-world integration
 Updated 2026-11-13. Based on the verified M4 branch, with open M3/M4 PRs preserved. GDD v1.1 remains binding. M5 is **partial**, not a production-complete MMORPG.
 
@@ -83,3 +87,22 @@ Placed oak table enables one queued recipe job per apartment. Start validates pr
 
 ## Cycle 2 — region authority
 Data-driven shared dungeon/forest regions now enforce minimum character levels on movement and join/reconnect. Qualified characters remain in the same open world; no channels or private instances. Original low-level city/hunt remains accessible. Region names appear in character UI. Full world streaming/content expansion remains partial.
+
+## M7 persistence continuation
+Routine checkpoint writes connected party members together using the existing optimistic SaveBatch transaction (party cap ten), so shared combat progression is not checkpointed one member at a time. Failed routine writes use bounded exponential retry delay; orderly shutdown forces a final attempt. Explicit save-now action reports success only after store commit and exposes last confirmed tick. A hard crash can still lose unconfirmed ticks; no zero-loss or asynchronous save-queue claim.
+
+M7 recovery package: reconnect immediately retries an owned pending disconnect snapshot and refuses stale SQL state during failure. Workshop production stores original input escrow and supports once-only atomic cancellation/refund, including after restart/catalogue edits; old jobs without input metadata remain collectible and cannot be refunded. Focused tests passed. A real disposable PostgreSQL server SIGKILL/restart test preserves the entire explicitly confirmed character document and rejects old bearer sessions/tickets; unconfirmed simulation remains outside this guarantee. CI includes this drill. The first M7 server CI failed on a social-test stale snapshot access, now synchronized on both client trade views.
+
+## M7 world/content integration
+Implemented and checked locally: Helixhafen (15–22) and Aschenhain (12–18), two-way data-driven transit, eight enemies including two open-dungeon bosses using existing multi-phase/cooperation mechanics, two public walk-in dungeon shells, four functioning merchant/workbench field NPCs, six chained quests, two mastery-gated gathering nodes and two class-restricted crafted chest pieces. Monster loot is configured per spawn and retains personal/replay protection. Completed quests navigate to the nearest actual reward trader. New scenery streams with distance hysteresis and material-batched meshes; existing Nordtor is preserved. .NET scenarios check gates/transit/input stop, item conservation, quest reward, merchant navigation and configured monster loot. Godot smoke checks area load/unload and local transit/loot parity. This is two compact playable extensions, not a massive world or completed streaming/performance qualification.
+
+## Final M7 build evidence
+Verified production source: `d9db175383007e2a3eebcb7706ebe1af30f94a84`. All relevant final jobs succeeded: [Server/PostgreSQL/WebSocket/SIGKILL/restore/package](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128518), [Android/Windows/Web including rendered client checks](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497). This last commit changes documentation only; source was not rebuilt again.
+
+Downloads expire 2026-11-27; matching protocol v9:
+- [Android debug APK inside ZIP](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497/artifacts/14030912240)
+- [Windows EXE/PCK](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497/artifacts/14031186727)
+- [Web folder](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128497/artifacts/14030842378)
+- [.NET8 server/content/migrations/source metadata](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43414128518/artifacts/14031451042)
+
+No physical Android acceptance or full-alpha/load certification; next implementation remains durable acknowledged save queue/uncertain-commit reconciliation, then elevation/floors. PR #11 remains open, no merges.

@@ -24,7 +24,7 @@ public sealed partial class World
             return "Besuchsrechte aktualisiert.";
         }
         Need(Math.Abs(s.X-def!.X)<8.8&&Math.Abs(s.Z-def.Z)<5.8,"Diese Aktion benötigt Anwesenheit in deiner Wohnung.");
-        if(kind is not ("home_take" or "home_remove" or "home_gear_take"))Need(h.RentUntil>Utc,"Miete überfällig. Am Wohnamt oder im Menü bezahlen.");
+        if(kind is not ("home_take" or "home_remove" or "home_gear_take" or "home_cancel"))Need(h.RentUntil>Utc,"Miete überfällig. Am Wohnamt oder im Menü bezahlen.");
         switch(kind){
             case "home_gear_put":Need(s.Gear.ContainsKey(text)&&!s.EquippedGear.Values.Contains(text)&&h.GearStorage.Count<48,"Instanz ablegen oder Lager voll.");h.GearStorage[text]=s.Gear[text];s.Gear.Remove(text);return "Instanz sicher eingelagert.";
             case "home_gear_take":Need(h.GearStorage.ContainsKey(text)&&CharacterRules.Slots(s,Catalog)<Catalog.InventorySlots&&!s.Gear.ContainsKey(text),"Instanz fehlt oder Inventar voll.");s.Gear[text]=h.GearStorage[text];h.GearStorage.Remove(text);return "Instanz zurückgenommen.";
@@ -52,7 +52,11 @@ public sealed partial class World
                 Need(Catalog.Recipes.TryGetValue(text,out var recipe),"Rezept unbekannt.");var r=recipe!;
                 Need(1+s.Professions.GetValueOrDefault(r.Profession)/Catalog.ProfessionLevelXp>=r.MinProfessionLevel&&(r.Tool==""||s.Inventory.GetValueOrDefault(r.Tool)>0),"Berufsstufe oder Werkzeug fehlt.");
                 foreach(var material in r.Inputs)Take(s,material.Key,material.Value);
-                h.Production=new ProductionJob{Recipe=text,Item=r.Output,Count=r.Count,Profession=r.Profession,ReadyAt=Utc+Catalog.ProductionSeconds};return "Materialien gebunden; Werkstatt arbeitet auch offline.";
+                h.Production=new ProductionJob{Inputs=new(r.Inputs),Recipe=text,Item=r.Output,Count=r.Count,Profession=r.Profession,ReadyAt=Utc+Catalog.ProductionSeconds};return "Materialien gebunden; Werkstatt arbeitet auch offline.";
+            case "home_cancel":
+                Need(h.Production is not null&&h.Production.Inputs.Count>0,"Dieser Auftrag hat keine erstattbare Materialliste; fertigstellen und abholen.");
+                foreach(var material in h.Production!.Inputs)Give(s,material.Key,material.Value);
+                h.Production=null;return "Auftrag abgebrochen; gebundene Materialien einmalig zurückgegeben.";
             case "home_collect":
                 Need(h.Production is not null&&h.Production.ReadyAt<=Utc,"Keine fertige Produktion.");var job=h.Production!;Give(s,job.Item,job.Count);s.Professions[job.Profession]=s.Professions.GetValueOrDefault(job.Profession)+Catalog.ProfessionCraftXp;CharacterRules.Progress(s,"craft",job.Recipe,Catalog);h.Production=null;return "Produktion einmalig abgeholt.";
             case "home_craft":Need(CharacterRules.Craft(s,text,Catalog),"Rezept, Material oder Inventarplatz fehlt.");CharacterRules.Progress(s,"craft",text,Catalog);return "An eigener Werkstatt hergestellt.";

@@ -1,3 +1,5 @@
+Latest M7 source: `d9db175383007e2a3eebcb7706ebe1af30f94a84`; [open PR #11](https://github.com/NeoGoku/MMORPG-2030/pull/11). Continue from this stack, not main. Highest next task: bounded durable save queue and uncertain-commit reconciliation before broader housing floors. Completed concrete slices are listed below; aggregate goals remain open.
+
 # Development queue — MMORPG-2030
 
 Canonical feature requirements: docs/GDD.md. Verify implementation status in current PRs before claiming any item missing or complete.
@@ -54,3 +56,22 @@ Next highest priorities: process-crash/backup-restore acceptance and queued pers
 - [x] Persistent one-slot housing workshop job binds materials, respects recipe mastery/tool checks and grants output once after UTC deadline/recreated world.
 - [x] Shared dungeon/forest minimum-level gates apply to movement and reconnect, with region UI.
 - [ ] Abrupt-process-kill zero-loss durability, queued persistence and full restore/outage operational qualification remain open.
+
+## M7 next persistence slice
+- [x] Party-wide atomic routine checkpoint batches, bounded retry backoff and forced final shutdown attempt.
+- [x] Explicit save-now commit confirmation; RAM backend clearly remains nondurable.
+- [ ] Crash-proof acknowledged simulation, asynchronous durable save queue and multi-process leases remain open. Do not infer zero-loss crash persistence from checkpoint confirmation.
+
+- [x] Reconnect flushes pending owned disconnect state; blocks stale reconnect while save fails.
+- [x] Production cancellation refunds original persisted inputs once; legacy jobs remain collectible.
+- [x] Local actual PostgreSQL SIGKILL/restart confirms whole acknowledged character document, fresh login and old-ticket rejection; CI drill added.
+
+## M7 adjacent world slice
+- [x] Two connected level-gated content areas, public dungeon shells, eight configured encounters/two phase bosses and personal configured loot.
+- [x] Six linked quests, field trader/workbench functions and two regional profession recipes.
+- [x] Data-driven two-way transit, interaction/minimap, distance-streamed material batches for new area scenery; local headless and authority checks passed.
+- [ ] Broader cities, actual upper housing floors, asynchronous durable saves, measured device/server streaming and complete GDD remain open.
+
+Next: durable acknowledged simulation queue preserving character/shared-world CAS; transaction-cut process crash/replay cases; shared floor/elevation model before adding upper housing rooms. Do not repeat completed SIGKILL-after-confirmation, workshop cancellation or region foundations.
+
+M7 final verification: all server/PostgreSQL/crash/restore and Android/Windows/Web jobs passed for `d9db175383007e2a3eebcb7706ebe1af30f94a84`; artifacts/next task in DEVELOPMENT_HANDOFF.md and open PR #11. Documentation-only evidence follow-up does not repeat builds.

@@ -13,6 +13,8 @@ const CommunityPanel=preload("res://scripts/community_panel.gd")
 const CommunityCity=preload("res://scripts/community_city.gd")
 var community_panel=CommunityPanel.new()
 var community_city=CommunityCity.new()
+const WorldRegions=preload("res://scripts/world_regions.gd")
+var world_regions=WorldRegions.new()
 var summon_nodes: Dictionary = {}
 const Lobby = preload("res://scripts/lobby.gd")
 const CharacterMenu = preload("res://scripts/character_menu.gd")
@@ -68,6 +70,7 @@ func _ready() -> void:
     hud.add_child(social_panel)
     social_panel.intent.connect(_social_intent)
     add_child(community_city)
+    add_child(world_regions)
     hud.add_child(community_panel)
     community_panel.intent.connect(_social_intent)
     var world_button=hud._button(hud,"Wohnen / Gilde / Börse",Rect2(22,258,240,44),"online")
@@ -196,7 +199,9 @@ func _receive_world(state: Dictionary) -> void:
     minimap.update_world(state,local_player)
     social_panel.update_state(state,online)
     community_panel.update_state(state,online)
-    if not local_player.is_empty():community_city.update_world(state,Vector3(local_player.x,0,local_player.z))
+    if not local_player.is_empty():
+        var focus:=Vector3(local_player.x,0,local_player.z)
+        community_city.update_world(state,focus);world_regions.update_focus(focus)
     if not local_player.is_empty():$City.apply_environment(state.get("environment",{}),Vector3(local_player.x,0,local_player.z))
     hud.update_state(state,local_player,online)
     if not local_player.is_empty():
@@ -260,12 +265,20 @@ func _action(kind: String) -> void:
             var pos: Dictionary = practice.m3.catalog.services[key]
             var dist := Vector2(local_player.x-pos.x,local_player.z-pos.z).length()
             if dist<=3 and dist<closest:closest=dist;service=key
+        for outpost in practice.m3.catalog.get("outposts",[]):
+            var dist:=Vector2(local_player.x-outpost.x,local_player.z-outpost.z).length()
+            if dist<=3 and dist<closest:closest=dist;service=outpost.service
+        for passage in practice.data.get("passages",[]):
+            for endpoint in [passage.from,passage.to]:
+                var dist:=Vector2(local_player.x-endpoint.x,local_player.z-endpoint.z).length()
+                if dist<=3 and dist<closest:closest=dist;service="passage:"+passage.id
         for node in practice.m3.catalog.nodes:
             var dist := Vector2(local_player.x-node.x,local_player.z-node.z).length()
             if dist<=3 and dist<closest:closest=dist;service="node:"+node.id
         if service in ["merchant","workbench"]:
             menu.tab="Inventar";menu.show();menu._rebuild();return
         if service in ["teleporter","return"]:_intent("teleport","");return
+        if service.begins_with("passage:"):_intent("world_transit",service.get_slice(":",1));return
         if service.begins_with("node:"):_intent("gather",service.get_slice(":",1));return
     if kind == "target":
         var candidates: Array = []

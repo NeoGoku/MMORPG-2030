@@ -68,6 +68,8 @@ func _rebuild() -> void:
     if info.is_empty():return
     match tab:
         "Charakter":
+            _action("Online-Zustand jetzt speichern / bestätigen","save_now","")
+            _text("Bestätigter Tick: %d · aktueller Tick: %d"%[info.get("savedTick",0),info.get("currentTick",0)])
             _text("Region: "+str(info.get("region","Nordtor")))
             _text("%s · %s · Angriff %d · Schutz %d\nMana %d / %d"%[info.name,info.classId,info.attack,info.defense,info.mana,info.maxMana])
             for key in catalog.attributes:_action("%s: %d  [+1 Statpunkt]"%[key,info.attributes.get(key,0)],"stat",key)
@@ -102,7 +104,7 @@ func _rebuild() -> void:
                 binding_button.pressed.connect(func():intent.emit("slot","%d|%s"%[slot_picker.selected,skill.id]))
                 content.add_child(binding_button)
         "Inventar":
-            _text("24 konfigurierbare Stack-Slots. Händler: rechts der Wache; Werkbank: links.")
+            _text("24 konfigurierbare Stack-Slots. Händler und Werkbänke: Stadtwache oder markierte Außenposten.")
             for id in info.get("gear",{}):
                 var instance: Dictionary=info.gear[id]
                 _text("%s · Zustand %d / 100 · %s"%[catalog.items[instance.item].name,instance.condition,id.left(6)])

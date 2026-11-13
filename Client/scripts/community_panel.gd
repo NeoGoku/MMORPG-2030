@@ -1,6 +1,7 @@
 extends Panel
 signal intent(kind: String,target: String,text: String)
 const TouchAction=preload("res://scripts/touch_action.gd")
+var district: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
 var catalog: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/game.json"))
 var state: Dictionary={}
 var online:=false
@@ -123,9 +124,10 @@ func rebuild() -> void:
             for pet in pets:
                 var pet_id: String=pet.id
                 button("Zucht mit Pet "+pet_id.left(8),func():emit_action("home_breed",selected(homes),pet_id))
+            button("Produktion abbrechen / Materialien zurück",func():emit_action("home_cancel",selected(homes)))
             button("Fertige Werkstattproduktion abholen",func():emit_action("home_collect",selected(homes)))
             for home in community.get("homes",[]):
-                if home.get("production") is Dictionary:text("Produktion: %s · noch %.0f s"%[home.production.recipe,maxf(0,home.production.readyAt-Time.get_unix_time_from_system())])
+                if home.get("production") is Dictionary:text("Produktion: %s · noch %.0f s"%[home.production.recipe,maxf(0,home.production.readyAt-community.get("serverUtc",Time.get_unix_time_from_system()))])
             button("Garten: 1 Kraut pflanzen (5 Minuten)",func():emit_action("home_plant",selected(homes)))
             button("Garten: reife Ernte abholen",func():emit_action("home_harvest",selected(homes)))
         "Gilde":
@@ -194,6 +196,9 @@ func rebuild() -> void:
                     var listing_id: String=offer.id
                     button("Am Stand kaufen: %s × %d · %d Münzen"%[catalog.items[offer.item].name,offer.count,offer.price],func():emit_action("stall_buy",listing_id))
         "Arena":
+            for passage in district.get("passages",[]):
+                var passage_id: String=passage.id
+                button("%s · Stufe %d · (%.0f,%.0f) ↔ (%.0f,%.0f)"%[passage.name,passage.minLevel,passage.from.x,passage.from.z,passage.to.x,passage.to.z],func():emit_action("world_transit",passage_id))
             button("Grünsaum-Transit: (0,90), Stufe 10 / Rückweg (0,112)",func():emit_action("forest_transit"))
             button("Tiefwerk-Transit benutzen: bei (0,-40), St. 5 + Miras Auftrag",func():emit_action("transit"))
             text("PvP ist ausschließlich in der markierten Arena möglich. Normierte Match-HP und Angriffe sind vom PvE-Fortschritt getrennt.")

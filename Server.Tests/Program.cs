@@ -88,3 +88,7 @@ FurnitureAuthorityTests.Run();
 ProductionTests.Run();
 
 Cycle2Tests.Run();
+
+CheckpointTests.Run();
+
+WorldContentTests.Run();

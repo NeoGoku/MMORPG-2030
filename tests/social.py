@@ -30,7 +30,7 @@ async def main():
             suffix=secrets.token_hex(5);token=api('/api/register',dict(username='s_'+suffix,password='Social-Test-Only-Password-123!'))['token']
             c=api('/api/characters',dict(slot=0,name='Spieler'+name,classId='Shield Sword'),token);ticket=api('/api/ticket',dict(characterId=c['id']),token)['ticket']
             ws=await websockets.connect(BASE.replace('http','ws',1)+'/ws');sockets.append(ws);seq[name]=0
-            await ws.send(json.dumps(dict(type='auth',ticket=ticket)));welcome=json.loads(await ws.recv());assert welcome['version']==8;ids[name]=welcome['id'];readers.append(asyncio.create_task(watch(name,ws)))
+            await ws.send(json.dumps(dict(type='auth',ticket=ticket)));welcome=json.loads(await ws.recv());assert welcome['version']==9;ids[name]=welcome['id'];readers.append(asyncio.create_task(watch(name,ws)))
         await wait(lambda:len(states)==3)
         await send('A','party_invite',ids['B']);await wait(lambda:len(states['B']['social']['invitations'])==1)
         await send('B','party_accept',ids['A']);await wait(lambda:states['A']['social']['party'] is not None and len(states['A']['social']['party']['members'])==2)
@@ -41,9 +41,9 @@ async def main():
         await send('A','chat_party','','Gruppenkanal')
         await wait(lambda:any(c['text']=='Gruppenkanal' for c in states['B']['social']['chat']))
         assert not any(c['text']=='Gruppenkanal' for c in states['C']['social']['chat'])
-        await send('A','trade_open',ids['B']);await wait(lambda:states['B']['social']['trade'] is not None)
+        await send('A','trade_open',ids['B']);await wait(lambda:all(states[n]['social']['trade'] is not None for n in 'AB'))
         await send('A','trade_offer','','potion|1|0');await send('B','trade_offer','','|0|5')
-        await wait(lambda:any(o['coins']==5 for o in states['A']['social']['trade']['offers']))
+        await wait(lambda:all(any(o['coins']==5 for o in states[n]['social']['trade']['offers']) and any(o['count']==1 for o in states[n]['social']['trade']['offers']) for n in 'AB'))
         await send('A','trade_confirm');await wait(lambda:any(o['owner']==ids['A'] and o['confirmed'] for o in states['A']['social']['trade']['offers']))
         assert states['A']['self']['coins']==20
         await send('B','trade_confirm');await wait(lambda:states['A']['self']['coins']==25 and states['B']['self']['coins']==15)

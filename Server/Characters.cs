@@ -10,10 +10,13 @@ public sealed class ItemDef {public bool Vendor {get;set;}public string Furnitur
 public sealed class Recipe {public int MinProfessionLevel {get;set;}=1;public string Tool {get;set;}="";public string Name {get;set;}="";public string Profession {get;set;}="";public Dictionary<string,int> Inputs {get;set;}=[];public string Output {get;set;}="";public int Count {get;set;} }
 public sealed class QuestDef {public Point? Navigation {get;set;}public int MinLevel {get;set;}=1;public string ClassId {get;set;}="";public bool Daily {get;set;}public int Points {get;set;}public Dictionary<string,int> Rewards {get;set;}=[];public string Id {get;set;}="";public string Name {get;set;}="";public string Type {get;set;}="";public string Event {get;set;}="";public string Item {get;set;}="";public string Prerequisite {get;set;}="";public int Required {get;set;}public int Coins {get;set;}public int Exp {get;set;} }
 public sealed class ResourceNode : Point {public int MinProfessionLevel {get;set;}=1;public string Id {get;set;}="";public string Name {get;set;}="";public string Profession {get;set;}="";public string Item {get;set;}="";}
+public sealed class OutpostDef : Point {public string Name {get;set;}="";public string Service {get;set;}="";}
 public sealed class GameCatalog
 {
     public List<string> Attributes {get;set;}=[];public Dictionary<string,ClassDef> Classes {get;set;}=[]; public Dictionary<string,ItemDef> Items {get;set;}=[];
     public Dictionary<string,Recipe> Recipes {get;set;}=[];public List<string> Professions {get;set;}=[];public List<ResourceNode> Nodes {get;set;}=[];public Dictionary<string,Point> Services {get;set;}=[];public List<QuestDef> Quests {get;set;}=[];
+    public List<OutpostDef> Outposts {get;set;}=[];
+    public IEnumerable<Point> ServiceLocations(string service)=>Outposts.Where(o=>o.Service==service).Cast<Point>().Concat(Services.TryGetValue(service,out var point)?new[]{point}:Array.Empty<Point>());
     public int ProductionSeconds {get;set;}=120;
     public int MaxStalls {get;set;}=100;public int StallSeconds {get;set;}=86400;
     public int RepairPerPoint {get;set;}=1;
@@ -64,7 +67,7 @@ public static class CharacterRules
     public static int Attack(CharacterRecord c,GameCatalog g)=>g.BaseAttack+ClassRules.Attack(c,g)+Math.Min(c.State.Prestige,100)+c.State.Attributes.GetValueOrDefault(g.Classes[c.ClassId].Attribute)+c.State.Equipment.Values.Sum(i=>g.Items[i].Attack)+GearRules.Bonus(c.State,g,true);
     public static int Defense(CharacterRecord c,GameCatalog g)=>ClassRules.Defense(c,g)+c.State.Attributes.GetValueOrDefault("armor")+c.State.Equipment.Values.Sum(i=>g.Items[i].Defense)+GearRules.Bonus(c.State,g,false);
     public static int MaxHp(CharacterRecord c,GameCatalog g)=>g.BaseHp+c.State.Attributes.GetValueOrDefault("vitality")*g.VitalityHp;
-    public static Point? Navigation(CharacterState c,QuestDef q,GameCatalog g)=>!QuestOpen(c,q)?null:c.QuestProgress.GetValueOrDefault(q.Id)>=q.Required?g.Services.GetValueOrDefault("merchant"):q.Navigation;
+    public static Point? Navigation(CharacterState c,QuestDef q,GameCatalog g)=>!QuestOpen(c,q)?null:c.QuestProgress.GetValueOrDefault(q.Id)>=q.Required?g.ServiceLocations("merchant").OrderBy(p=>(p.X-c.X)*(p.X-c.X)+(p.Z-c.Z)*(p.Z-c.Z)).FirstOrDefault():q.Navigation;
     public static long Day=>DateTimeOffset.UtcNow.ToUnixTimeSeconds()/86400;
     public static bool QuestOpen(CharacterState c,QuestDef q)=>c.Level>=q.MinLevel&&(q.Prerequisite==""||c.ClaimedQuests.Contains(q.Prerequisite))&&(!c.ClaimedQuests.Contains(q.Id)||q.Daily&&c.DailyClaims.GetValueOrDefault(q.Id)!=Day);
     public static void Progress(CharacterState c,string kind,string item,GameCatalog g){foreach(var q in g.Quests.Where(q=>QuestOpen(c,q)&&q.Event==kind&&(q.Item==""||q.Item==item))){if(q.Daily&&c.DailyClaims.GetValueOrDefault(q.Id,-1)!=Day){c.QuestProgress[q.Id]=0;c.DailyClaims[q.Id]=Day;c.ClaimedQuests.Remove(q.Id);}c.QuestProgress[q.Id]=Math.Min(q.Required,c.QuestProgress.GetValueOrDefault(q.Id)+1);}}

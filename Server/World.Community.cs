@@ -15,14 +15,14 @@ public sealed partial class World
         try{
             var w=SharedWorld.Copy(Shared);var c=CharacterRules.Clone(Export(p));
             var message=kind.StartsWith("home_")?HousingAction(w,c,kind,target,text):kind.StartsWith("guild_")?GuildAction(w,c,kind,target,text):kind.StartsWith("stall_")?StallAction(w,c,kind,target,text):MarketAction(w,c,kind,target,text);
-            Store.SaveWorld(w,[c]);sharedState=w;Import(p,c);p.Message=message;
+            Store.SaveWorld(w,[c]);sharedState=w;Import(p,c);p.SavedTick=tick;p.Message=message;
             // Revocation/rent changes must eject an already-present unauthorized visitor as well.
             foreach(var visitor in players.Values)if(!HomeAccess(visitor,visitor.X,visitor.Z)){visitor.X=district.Spawn.X;visitor.Z=district.Spawn.Z;visitor.Dx=visitor.Dz=0;visitor.Message="Besuchsrecht fehlt oder wurde widerrufen.";}
         }catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){p.Message=e is GameRuleException?e.Message:"Datenbankfehler: keine Übertragung gespeichert.";}
         return true;
     }
     private static void Need(bool ok,string message){if(!ok)throw new GameRuleException(message);}
-    private static string DropItem(Drop drop)=>drop.MonsterId=="worldboss-1"?"boss_core":drop.MonsterId=="worldboss-forest"?"root_core":"scrap";
+    private string DropItem(Drop drop)=>monsters.TryGetValue(drop.MonsterId,out var enemy)&&enemy.Spawn.LootItem!=""?enemy.Spawn.LootItem:drop.MonsterId=="worldboss-1"?"boss_core":drop.MonsterId=="worldboss-forest"?"root_core":"scrap";
     private static void Take(CharacterState c,string item,int count){Need(count>0&&c.Inventory.GetValueOrDefault(item)>=count,"Material fehlt.");c.Inventory[item]-=count;if(c.Inventory[item]==0)c.Inventory.Remove(item);}
     private void Give(CharacterState c,string item,int count){Need(CharacterRules.Add(c,item,count,Catalog),"Inventar voll.");}
     private static int Number(string value,int min,int max){Need(int.TryParse(value,out var n)&&n>=min&&n<=max,"Ungültige Anzahl.");return n;}

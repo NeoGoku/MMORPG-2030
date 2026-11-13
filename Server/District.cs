@@ -12,7 +12,7 @@ public sealed class Building
 public sealed class Spawn
 {
     public string Id { get; set; } = ""; public string Name { get; set; } = "";
-    public string Family {get;set;}="";public int Hp {get;set;} public int Level {get;set;}=1;public bool Boss {get;set;}
+    public string LootItem {get;set;}="";public string Family {get;set;}="";public int Hp {get;set;} public int Level {get;set;}=1;public bool Boss {get;set;}
     public string DamageType {get;set;}="physical";public double Reach {get;set;}=2;public double Speed {get;set;}=1.8;
     public double X { get; set; } public double Z { get; set; }
 }
@@ -27,8 +27,10 @@ public sealed class Rules
     public int QuestCoins { get; set; } public int LootCoins { get; set; } public int LootScrap { get; set; }
 }
 public sealed class RegionDef : Point {public string Name {get;set;}="";public double Radius {get;set;}public int MinLevel {get;set;}=1;}
+public sealed class PassageDef {public string Id {get;set;}="";public string Name {get;set;}="";public Point From {get;set;}=new();public Point To {get;set;}=new();public int MinLevel {get;set;}=1;}
 public sealed class District
 {
+    public PassageDef[] Passages {get;set;}=[];
     public RegionDef[] Regions {get;set;}=[];
     public Spawn[] Encounters {get;set;}=[];
     public HomeDef[] Homes {get;set;}=[];
