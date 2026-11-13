@@ -200,9 +200,9 @@ func _receive_world(state: Dictionary) -> void:
     social_panel.update_state(state,online)
     community_panel.update_state(state,online)
     if not local_player.is_empty():
-        var focus:=Vector3(local_player.x,0,local_player.z)
+        var focus:=Vector3(local_player.x,float(local_player.get("elevation",0)),local_player.z)
         community_city.update_world(state,focus);world_regions.update_focus(focus)
-    if not local_player.is_empty():$City.apply_environment(state.get("environment",{}),Vector3(local_player.x,0,local_player.z))
+    if not local_player.is_empty():$City.apply_environment(state.get("environment",{}),Vector3(local_player.x,float(local_player.get("elevation",0)),local_player.z))
     hud.update_state(state,local_player,online)
     if not local_player.is_empty():
         var nearby := Vector2(local_player.x-practice.data.npc.x,local_player.z-practice.data.npc.z).length() <= 3
@@ -220,10 +220,11 @@ func _sync_actors(states: Array, nodes: Dictionary, kind: String, selected: Stri
             actor.class_id=state.get("classId",practice.m3.class_id if state.id==local_id else "Shield Sword")
             actor.tint = Color("58cdb3") if state.id == local_id else Color("719ed4")
             actor.display_name = ("Du · "+state.get("name","Reisender")) if state.id == local_id else (state.get("name","Reisender "+state.id.substr(0,4)) if kind == "player" else state.get("name","Gegner")+" · St. "+str(state.get("level",1)))
-            actor.position = Vector3(state.x,.18,state.z)
+            actor.position = Vector3(state.x,.18+float(state.get("elevation",0)),state.z)
             add_child(actor)
             nodes[state.id] = actor
         nodes[state.id].apply_state(state,state.id==selected)
+        nodes[state.id].visible=kind!="player" or int(state.get("floor",0))==int(local_player.get("floor",0))
     for id in nodes.keys():
         if not seen.has(id):
             nodes[id].queue_free()
@@ -261,6 +262,11 @@ func _action(kind: String) -> void:
     if kind == "interact":
         var closest := Vector2(local_player.x-practice.data.npc.x,local_player.z-practice.data.npc.z).length()
         var service := ""
+        if online:
+            var own_floor:=int(local_player.get("floor",0))
+            for home in world.get("community",{}).get("homes",[]):
+                if not home.guildHall and home.get("floors",1)>1 and Vector2(local_player.x-home.x+7,local_player.z-home.z-3).length()<=1.8:
+                    _social_intent("home_stairs",home.id,str(1 if own_floor==0 else own_floor-1));return
         for key in practice.m3.catalog.services:
             var pos: Dictionary = practice.m3.catalog.services[key]
             var dist := Vector2(local_player.x-pos.x,local_player.z-pos.z).length()
@@ -368,11 +374,11 @@ func _sync_pets(states: Array) -> void:
             var node = Actor.new()
             node.kind = "pet"
             node.display_name = "Arkaner Funke"
-            node.position = Vector3(pet.x,.2,pet.z)
+            node.position = Vector3(pet.x,.2+float(pet.get("elevation",0)),pet.z)
             add_child(node)
             pet_nodes[pet.owner] = node
         var actor = pet_nodes[pet.owner]
-        actor.target_position = Vector3(pet.x,.2,pet.z)
+        actor.target_position = Vector3(pet.x,.2+float(pet.get("elevation",0)),pet.z)
         actor.scale=Vector3.ONE*(1+pet.get("evolution",0)*.15)
         actor.hp_label.text = "St. %d · %s · %d HP"%[pet.level,pet.mode,pet.get("hp",100)]
     for key in pet_nodes.keys():

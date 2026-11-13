@@ -28,7 +28,7 @@ public sealed partial class World
         var target=MonsterTarget(m);
         if(target is null){m.WarningUntil=0;return;}
         if(m.WarningUntil>0&&time>=m.WarningUntil){
-            var victims=players.Values.Where(p=>p.Hp>0&&Distance(p.X,p.Z,m.WarningX,m.WarningZ)<5).ToArray();
+            var victims=players.Values.Where(p=>p.Hp>0&&p.Data.State.Floor==0&&Distance(p.X,p.Z,m.WarningX,m.WarningZ)<5).ToArray();
             foreach(var p in victims){var damage=Math.Max(1,(m.Hp<MaxMonsterHp(m)/2?45:30)/Math.Max(1,victims.Length));p.Hp=Math.Max(0,p.Hp-damage);p.HurtSerial++;p.LastDamage=damage;if(p.Hp==0){p.Respawn=time+R.PlayerRespawnSeconds;p.Attacking=false;p.Target="";p.Dx=p.Dz=0;}}
             m.WarningUntil=0;m.NextWave=time+6;
         }else if(m.WarningUntil==0&&time>=m.NextWave){m.WarningX=target.X;m.WarningZ=target.Z;m.WarningUntil=time+(m.Hp<MaxMonsterHp(m)/2?1.8:2.5);}
@@ -36,22 +36,23 @@ public sealed partial class World
     private IEnumerable<Player> FriendlyTargets(Player caster,double radius)
     {
         var group=PartyOf(caster.Id);
-        return players.Values.Where(p=>p.Hp>0&&(p.Id==caster.Id||(group is not null&&group.Members.ContainsKey(p.Id)&&Distance(caster.X,caster.Z,p.X,p.Z)<=radius)));
+        return players.Values.Where(p=>p.Hp>0&&SameLayer(p,caster)&&(p.Id==caster.Id||(group is not null&&group.Members.ContainsKey(p.Id)&&Distance(caster.X,caster.Z,p.X,p.Z)<=radius)));
     }
     private Player? MonsterTarget(Monster m)
     {
-        if(m.TauntUntil>time&&players.TryGetValue(m.ForcedTarget,out var forced)&&forced.Hp>0&&Distance(forced.X,forced.Z,m.Spawn.X,m.Spawn.Z)<18)return forced;
-        return players.Values.Where(p=>p.Hp>0&&Distance(p.X,p.Z,m.X,m.Z)<R.AggroRange&&Distance(p.X,p.Z,m.Spawn.X,m.Spawn.Z)<12).OrderByDescending(p=>m.Threat.GetValueOrDefault(p.Id)).ThenBy(p=>Distance(p.X,p.Z,m.X,m.Z)).FirstOrDefault();
+        if(m.TauntUntil>time&&players.TryGetValue(m.ForcedTarget,out var forced)&&forced.Hp>0&&forced.Data.State.Floor==0&&Distance(forced.X,forced.Z,m.Spawn.X,m.Spawn.Z)<18)return forced;
+        return players.Values.Where(p=>p.Hp>0&&p.Data.State.Floor==0&&Distance(p.X,p.Z,m.X,m.Z)<R.AggroRange&&Distance(p.X,p.Z,m.Spawn.X,m.Spawn.Z)<12).OrderByDescending(p=>m.Threat.GetValueOrDefault(p.Id)).ThenBy(p=>Distance(p.X,p.Z,m.X,m.Z)).FirstOrDefault();
     }
     private void EffectsTick(double dt)
     {
-        foreach(var m in monsters.Values.ToArray())if(m.Hp>0&&m.DotUntil>time&&m.NextDot<=time&&players.TryGetValue(m.DotOwner,out var owner)){
+        foreach(var m in monsters.Values.ToArray())if(m.Hp>0&&m.DotUntil>time&&m.NextDot<=time&&players.TryGetValue(m.DotOwner,out var owner)&&owner.Data.State.Floor==0){
             m.NextDot=time+1;HitMonster(owner,m,m.DotPower);
         }
         foreach(var p in players.Values)if(p.Hp>0&&p.Cooldowns.GetValueOrDefault("status:hot")>time&&tick%20==0)p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+Catalog.HotHeal);
         foreach(var pair in summons.ToArray()){
             var s=pair.Value;
             if(s.Hp<=0||s.Until<=time||!players.TryGetValue(s.Owner,out var p)||p.Hp<=0){summons.Remove(pair.Key);continue;}
+            if(p.Data.State.Floor!=0){s.X=p.X-1;s.Z=p.Z+1;continue;}
             var tx=p.X-1;var tz=p.Z+1;
             if(p.Target!=""&&monsters.TryGetValue(p.Target,out var m)&&m.Hp>0&&Distance(p.X,p.Z,m.X,m.Z)<=18){
                 tx=m.X;tz=m.Z;

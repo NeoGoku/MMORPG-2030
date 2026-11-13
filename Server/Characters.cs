@@ -17,6 +17,7 @@ public sealed class GameCatalog
     public Dictionary<string,Recipe> Recipes {get;set;}=[];public List<string> Professions {get;set;}=[];public List<ResourceNode> Nodes {get;set;}=[];public Dictionary<string,Point> Services {get;set;}=[];public List<QuestDef> Quests {get;set;}=[];
     public List<OutpostDef> Outposts {get;set;}=[];
     public IEnumerable<Point> ServiceLocations(string service)=>Outposts.Where(o=>o.Service==service).Cast<Point>().Concat(Services.TryGetValue(service,out var point)?new[]{point}:Array.Empty<Point>());
+    public int HousingMaxFloors {get;set;}=3;public int HousingFloorWood {get;set;}=20;public int HousingFloorCoins {get;set;}=60;public double HousingFloorHeight {get;set;}=3.6;
     public int ProductionSeconds {get;set;}=120;
     public int MaxStalls {get;set;}=100;public int StallSeconds {get;set;}=86400;
     public int RepairPerPoint {get;set;}=1;
@@ -33,6 +34,8 @@ public sealed class GameCatalog
 public sealed class PetState {public string Id {get;set;}="";public int Hp {get;set;}=100;public double RecoveryUntil {get;set;}public double TrainingUntil {get;set;}public Dictionary<string,int> Traits {get;set;}=new(){{"strength",1},{"affinity",1},{"vitality",1}};public Dictionary<string,int> Inventory {get;set;}=[];public bool Active {get;set;} public string Mode {get;set;}="combat";public int Level {get;set;}=1;public int Exp {get;set;}public int Evolution {get;set;}public List<string> Parents {get;set;}=[];}
 public sealed class CharacterState
 {
+    public int Floor {get;set;}
+    public string HomeId {get;set;}="";
     public Dictionary<string,GearState> Gear {get;set;}=[];public Dictionary<string,string> EquippedGear {get;set;}=[];
     public int WearCounter {get;set;}
     public int Focus {get;set;}=100;

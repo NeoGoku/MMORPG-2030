@@ -2,6 +2,7 @@ extends Node3D
 # Original modular buildings. New housing shells are streamed by distance; old Nordtor stays loaded.
 var data: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
 var chunks: Dictionary={}
+var floor_chunks: Dictionary={}
 var furniture: Dictionary={}
 var catalogue: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/game.json"))
 var room_dividers: Dictionary={}
@@ -47,8 +48,8 @@ func _ready() -> void:
     for x in [-13,13]:
         for z in [120,129,136]:box(self,Vector3(x,2,z),Vector3(1.4,4,1.4),Color("7c8377"))
     sign_text(self,"GRÜNSAUM · STUFE 10–15\nOffene Wurzelruinen / Wurzelherz",Vector3(0,4,96))
-func make_home(def: Dictionary) -> Node3D:
-    var chunk:=Node3D.new();chunk.position=Vector3(def.x,0,def.z);add_child(chunk)
+func make_home(def: Dictionary,floor_index: int=0,height: float=3.6) -> Node3D:
+    var chunk:=Node3D.new();chunk.position=Vector3(def.x,floor_index*height,def.z);add_child(chunk)
     box(chunk,Vector3(0,.14,0),Vector3(18,.25,12),Color("aa9e8b"))
     for wall in [Vector3(-9,1.6,0),Vector3(9,1.6,0),Vector3(0,1.6,-6),Vector3(-7.5,1.6,6),Vector3(3.5,1.6,6)]:
         var dimensions:=Vector3(.4,3.2,12) if absf(wall.x)==9 else Vector3(18 if wall.z<0 else (3 if wall.x<0 else 11),3.2,.4)
@@ -56,20 +57,23 @@ func make_home(def: Dictionary) -> Node3D:
     for x in [-8.9,8.9]:
         for z in [-3,1,4]:box(chunk,Vector3(x,1.8,z),Vector3(.08,1.2,1.6),Color("607e88"))
     box(chunk,Vector3(-4,3.1,6),Vector3(3,.25,.6),Color("5b8b86"))
-    sign_text(chunk,def.name+"\nEINGANG",Vector3(-4,3.8,6.2))
+    sign_text(chunk,def.name+" · GESCHOSS "+str(floor_index)+"\nEINGANG / TREPPE",Vector3(-4,3.8,6.2))
     # Workshop, pet enclosure and roofless courtyard garden occupy real floor coordinates.
     box(chunk,Vector3(-6,1,-4),Vector3(2,.25,1),Color("846548"))
     box(chunk,Vector3(-2,.3,-4),Vector3(2,.5,1.5),Color("6d9068"))
     var divider:=box(chunk,Vector3(0,1.4,0),Vector3(.18,2.8,11.5),Color("596d72"))
-    room_dividers[def.id]=divider
+    room_dividers[def.id+"|"+str(floor_index)]=divider
     sign_text(chunk,"WERKSTATT · ZUCHT · GARTEN",Vector3(-4,2,-5.7))
+    for step in range(10):
+        box(chunk,Vector3(-7,step*height/10+height/20,1.6+step*.25),Vector3(1.2,height/10,.27),Color("79878b"))
+    sign_text(chunk,"TREPPE · INTERAGIEREN",Vector3(-7,2.7,3))
     return chunk
 func update_world(state: Dictionary,focus: Vector3) -> void:
     var community: Dictionary=state.get("community",{}) if state.get("community") is Dictionary else {}
     for def in data.get("homes",[]):
         var distance:=Vector2(focus.x-def.x,focus.z-def.z).length()
         if distance<60 and not chunks.has(def.id):chunks[def.id]=make_home(def)
-        elif distance>75 and chunks.has(def.id):chunks[def.id].queue_free();chunks.erase(def.id);room_dividers.erase(def.id)
+        elif distance>75 and chunks.has(def.id):chunks[def.id].queue_free();chunks.erase(def.id);room_dividers.erase(def.id+"|0")
     var warned: Dictionary={}
     for enemy in state.get("monsters",[]):
         if enemy.get("warning",0)>0:
@@ -91,8 +95,19 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
     for id in stalls.keys():
         if not visible_stalls.has(id):stalls[id].queue_free();stalls.erase(id)
     var seen: Dictionary={}
+    var visible_floors: Dictionary={}
+    var own_floor: int=state.get("self",{}).get("character",{}).get("floor",0)
     for home in community.get("homes",[]):
-        if room_dividers.has(home.id):room_dividers[home.id].visible=home.rooms==1 and not home.guildHall
+        var base_key: String=home.id+"|0"
+        if room_dividers.has(base_key):room_dividers[base_key].visible=home.rooms==1 and not home.guildHall
+        if chunks.has(home.id):chunks[home.id].visible=own_floor==0 or absf(focus.x-home.x)>9 or absf(focus.z-home.z)>6
+        for floor_index in range(1,int(home.get("floors",1))):
+            var key: String=home.id+"|"+str(floor_index)
+            if not chunks.has(home.id):continue
+            visible_floors[key]=true
+            if not floor_chunks.has(key):floor_chunks[key]=make_home(home,floor_index,float(home.get("floorHeight",3.6)))
+            floor_chunks[key].visible=own_floor==floor_index
+            if room_dividers.has(key):room_dividers[key].visible=home.rooms==1
         if not chunks.has(home.id):continue
         var objects=home.get("furniture",[])
         if not objects is Array:continue
@@ -117,6 +132,9 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
                     else:
                         box(chair,Vector3(0,1,0),Vector3(.12,2,.12),Color("62777f"));box(chair,Vector3(0,2,0),Vector3(.6,.4,.6),Color("a9decf"))
                 furniture[item.id]=chair
-            furniture[item.id].position=Vector3(item.x,.2,item.z);furniture[item.id].rotation.y=item.yaw
+            furniture[item.id].visible=int(item.get("floor",0))==own_floor
+            furniture[item.id].position=Vector3(item.x,.2+int(item.get("floor",0))*float(home.get("floorHeight",3.6)),item.z);furniture[item.id].rotation.y=item.yaw
+    for key in floor_chunks.keys():
+        if not visible_floors.has(key):floor_chunks[key].queue_free();floor_chunks.erase(key);room_dividers.erase(key)
     for id in furniture.keys():
         if not seen.has(id):furniture[id].queue_free();furniture.erase(id)

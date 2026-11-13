@@ -16,7 +16,7 @@ public sealed partial class World
         var trade=TradeOf(p.Id);
         switch(kind){
             case "trade_open":
-                if(p.Data.AccountId==""||!players.TryGetValue(target,out var peer)||target==p.Id||peer.Data.AccountId==""||TradeOf(target) is not null||trade is not null||Distance(p.X,p.Z,peer.X,peer.Z)>5){p.Message="Handel braucht zwei angemeldete Spieler in 5 m Reichweite.";break;}
+                if(p.Data.AccountId==""||!players.TryGetValue(target,out var peer)||target==p.Id||peer.Data.AccountId==""||!SameLayer(p,peer)||TradeOf(target) is not null||trade is not null||Distance(p.X,p.Z,peer.X,peer.Z)>5){p.Message="Handel braucht zwei angemeldete Spieler in 5 m Reichweite.";break;}
                 trades.Add(new(p.Id,target,time+120));p.Message="Handelsfenster geöffnet. Beide Angebote und Bestätigungen nötig.";peer.Message=p.Data.Name+" möchte handeln.";break;
             case "trade_offer":
                 if(trade is null){p.Message="Kein Handel.";break;}
@@ -30,7 +30,7 @@ public sealed partial class World
                 if(trade is null)break;
                 trade.Confirmed.Add(p.Id);
                 if(trade.Confirmed.Count<2){p.Message="Warte auf Gegenbestätigung.";break;}
-                if(!players.TryGetValue(trade.A,out var a)||!players.TryGetValue(trade.B,out var b)||a.Hp<=0||b.Hp<=0||Distance(a.X,a.Z,b.X,b.Z)>5){trades.Remove(trade);p.Message="Handel abgebrochen: Reichweite/Verbindung.";break;}
+                if(!players.TryGetValue(trade.A,out var a)||!players.TryGetValue(trade.B,out var b)||a.Hp<=0||b.Hp<=0||!SameLayer(a,b)||Distance(a.X,a.Z,b.X,b.Z)>5){trades.Remove(trade);p.Message="Handel abgebrochen: Reichweite/Verbindung.";break;}
                 var ca=CharacterRules.Clone(Export(a));var cb=CharacterRules.Clone(Export(b));
                 var oa=trade.Offers[a.Id];var ob=trade.Offers[b.Id];
                 if(!RemoveOffer(ca.State,oa)||!RemoveOffer(cb.State,ob)||!ReceiveOffer(ca.State,ob)||!ReceiveOffer(cb.State,oa)){trades.Remove(trade);p.Message="Handel abgebrochen: Besitz, Währung oder Inventarplatz geändert.";break;}

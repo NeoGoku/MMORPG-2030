@@ -20,7 +20,7 @@ public sealed partial class World
             if(record.AccountId!=""){var latest=Store.Get(record.Id);if(latest is null||latest.AccountId!=record.AccountId)return null;record=latest;}
             PetRules.CompleteAll(record,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);
             var p=new Player(record.Id,record.State.X,record.State.Z,100);Import(p,record);
-            if(!district.Walkable(p.X,p.Z)||!HomeAccess(p,p.X,p.Z)||!RegionAccess(p,p.X,p.Z)){p.X=district.Spawn.X;p.Z=district.Spawn.Z;}
+            if(!district.Walkable(p.X,p.Z)||!HomeAccess(p,p.X,p.Z)||!RegionAccess(p,p.X,p.Z)){ResetInterior(p);p.X=district.Spawn.X;p.Z=district.Spawn.Z;}
             p.Hp=Math.Clamp(record.State.Hp,0,CharacterRules.MaxHp(record,Catalog));p.PetX=p.X+1;p.PetZ=p.Z+1;players[p.Id]=p;return p.Id;}
     }
     private CharacterRecord Export(Player p)
@@ -49,7 +49,7 @@ public sealed partial class World
         foreach(var pair in pendingSaves.ToArray())try{Store.Save(pair.Value);pendingSaves.Remove(pair.Key);}catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){failed=true;}
         checkpointFailures=failed?Math.Min(5,checkpointFailures+1):0;checkpointRetryAt=failed?time+Math.Min(30,Math.Pow(2,checkpointFailures)):time;
     }
-    private bool Near(Player p,string service)=>Catalog.ServiceLocations(service).Any(point=>Distance(p.X,p.Z,point.X,point.Z)<=3);
+    private bool Near(Player p,string service)=>p.Data.State.Floor==0&&Catalog.ServiceLocations(service).Any(point=>Distance(p.X,p.Z,point.X,point.Z)<=3);
     private bool ExtendedAction(Player p,string kind,string target)
     {
         if(FarmAction(p,kind,target))return true;
@@ -100,6 +100,7 @@ public sealed partial class World
     private bool Cast(Player p,string id)
     {
         if(ArenaOf(p.Id) is not null){p.Message="Arena verwendet normierte Match-Angriffe; PvE-Skills sind hier gesperrt.";return true;}
+        if(p.Data.State.Floor!=0)return false;
         var skill=Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id&&s.Enabled&&p.Level>=s.MinLevel);
         if(skill is null||p.Data.State.Focus<skill.FocusCost||p.Mana<skill.Cost||p.Cooldowns.GetValueOrDefault(id)>time){p.Message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv.";return true;}
         var needsTarget=skill.Kind is "damage" or "dot" or "slow" or "break" or "drain" or "taunt";
@@ -145,6 +146,7 @@ public sealed partial class World
         if(time<p.NextPet)return;p.NextPet=time+Catalog.PetInterval;var pet=p.Data.State.Pet;
         if(pet.Mode=="heal")p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+Catalog.PetHeal+pet.Level+pet.Traits.GetValueOrDefault("affinity",1)+pet.Evolution*2);
         else if(pet.Mode=="buff")p.BuffUntil=Math.Max(p.BuffUntil,time+4);
+        else if(p.Data.State.Floor!=0)return;
         else if(pet.Mode=="gather"){
             var node=Catalog.Nodes.FirstOrDefault(n=>1+p.Data.State.Professions.GetValueOrDefault(n.Profession)/Catalog.ProfessionLevelXp>=n.MinProfessionLevel&&Distance(p.X,p.Z,n.X,n.Z)<=5&&p.Cooldowns.GetValueOrDefault("gather:"+n.Id)<=time);
             if(node is not null&&PetRules.AddBag(pet,node.Item,Catalog)){p.Cooldowns["gather:"+node.Id]=time+5;p.Data.State.Professions[node.Profession]=p.Data.State.Professions.GetValueOrDefault(node.Profession)+Catalog.ProfessionGatherXp;}
@@ -157,7 +159,7 @@ public sealed partial class World
     private object CharacterView(Player p)
     {
         var c=CharacterRules.Clone(Export(p)).State;
-        return new{commitReceipt=p.Data.LastCommit,savedTick=p.SavedTick,currentTick=tick,region=RegionName(p),id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,navigation=CharacterRules.Navigation(c,q,Catalog),progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
+        return new{floor=p.Data.State.Floor,homeId=p.Data.State.HomeId,elevation=Elevation(p),commitReceipt=p.Data.LastCommit,savedTick=p.SavedTick,currentTick=tick,region=RegionName(p),id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,navigation=CharacterRules.Navigation(c,q,Catalog),progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
             focus=c.Focus,resource=Catalog.Classes[p.Data.ClassId].Resource,passive=Catalog.Classes[p.Data.ClassId].Passive,passiveActive=p.Level>=Catalog.Classes[p.Data.ClassId].PassiveLevel,mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }

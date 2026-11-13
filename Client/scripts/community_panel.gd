@@ -72,6 +72,11 @@ func rebuild() -> void:
             button("Einführungsquest bei Elin annehmen",func():emit_action("home_intro"))
             button("Ausgewählte freie Wohnung erhalten",func():emit_action("home_claim",selected(homes)))
             button("Miete: 10 Münzen je Woche / Rückstand begleichen",func():emit_action("home_rent",selected(homes)))
+            button("Zusätzliches Geschoss: Holz/Münzen × vorhandene Etagen",func():emit_action("home_floor",selected(homes)))
+            var current_floor: int=state.get("self",{}).get("character",{}).get("floor",0)
+            text("Aktuelles Geschoss: %d · Wechsel am Treppenaufgang (Haus-X−7, Haus-Z+3)"%current_floor)
+            button("Treppe hinauf",func():emit_action("home_stairs",selected(homes),str(current_floor+1)))
+            button("Treppe hinunter",func():emit_action("home_stairs",selected(homes),str(maxi(0,current_floor-1))))
             button("Angrenzendes Zimmer: 8 Holz + 20 Münzen",func():emit_action("home_expand",selected(homes)))
             text("Möbel: Weltkoordinaten, Drehung in Grad. Im eigenen Raum stehen; Tür freihalten.")
             var player: Dictionary={}
@@ -87,10 +92,11 @@ func rebuild() -> void:
                     button(catalog.items[item].name+" platzieren",func():emit_action("home_place",selected(homes),"%s|%.2f|%.2f|%.3f"%[item_id,x_pos.value,z_pos.value,deg_to_rad(rotation_picker.value)]))
             for home in community.get("homes",[]):
                 if home.owner!=own_id:continue
-                text("Deine Wohnung: %s · Mietende UTC %d · Lager %s"%[home.name,home.rentUntil,str(home.get("storage",{}))])
+                text("Deine Wohnung: %s · %d Geschosse · Mietende UTC %d · Lager %s"%[home.name,home.get("floors",1),home.rentUntil,str(home.get("storage",{}))])
                 if home.get("furniture") is Array:
                     for object in home.furniture:
                         var furniture_id: String=object.id;var house_id: String=home.id
+                        if int(object.get("floor",0))!=current_floor:continue
                         button("Möbel %s an Eingabeposition verschieben/drehen"%furniture_id.left(6),func():emit_action("home_move",house_id,"%s|%.2f|%.2f|%.3f"%[furniture_id,x_pos.value,z_pos.value,deg_to_rad(rotation_picker.value)]))
                         button("Möbel %s ins Inventar zurück"%furniture_id.left(6),func():emit_action("home_remove",house_id,furniture_id))
             peers=peer_picker()
