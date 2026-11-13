@@ -39,3 +39,6 @@ All remaining GDD goals remain on the roadmap. No menu or data definition alone 
 
 ## M6 integration update (2026-11-13)
 Implemented with focused tests: guild-only chat, leader hall release, auction pagination/expiry retaining escrow, gated item/stat-point quest rewards and UTC daily objectives, consumable rare stat reset, level-cap prestige and configurable death EXP loss. Touch controls connect the online actions; local reset/prestige are temporary. Protocol v6. See DEVELOPMENT_HANDOFF.md for rule proposals, exact continuation and qualification categories. This does not declare the full MMORPG alpha complete; all M5 gaps not explicitly replaced remain open.
+
+## Continuation package 1
+Appearance editing and public avatar reconciliation (gender/face/body/hair/skin/tattoo choices), distinct gear instances with equip/unequip/condition/repair and actual damage contributions. Existing pristine item stacks stay valid; explicit unpack converts one stack item to one unique instance without deleting legacy saves. Instance transfer/storage is addressed separately before claiming full economy integration. Models remain procedural, not final semi-realistic art. PR #8 unavailable (404); continuation uses latest available #6.

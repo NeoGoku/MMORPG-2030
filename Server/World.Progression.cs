@@ -41,6 +41,12 @@ public sealed partial class World
         if(FarmAction(p,kind,target))return true;
         var c=Export(p).State;var ok=false;
         switch(kind){
+            case "appearance":if(AppearanceRules.Valid(target)){p.Data.Appearance=target;ok=true;}break;
+            case "gear_unpack":ok=GearRules.Unpack(c,target,Catalog);break;
+            case "gear_equip":ok=GearRules.Equip(p.Data,target,Catalog);break;
+            case "gear_legacy_remove":ok=c.Equipment.Remove(target);break;
+            case "gear_remove":ok=c.EquippedGear.Remove(target);break;
+            case "gear_repair":ok=Near(p,"merchant")&&GearRules.Repair(c,target,Catalog);break;
             case "slot":
                 var binding=target.Split('|');
                 if(binding.Length==2&&int.TryParse(binding[0],out var index)&&index>=0&&index<6&&Catalog.Classes[p.Data.ClassId].Skills.Any(s=>s.Id==binding[1])){while(c.SkillBar.Count<6)c.SkillBar.Add("skill1");c.SkillBar[index]=binding[1];ok=true;}break;
@@ -50,7 +56,7 @@ public sealed partial class World
             case "farm_stat":ok=CharacterRules.FarmPoint(c,Catalog);break;
             case "buy":ok=Near(p,"merchant")&&CharacterRules.Buy(c,target,Catalog);break;
             case "sell":ok=Near(p,"merchant")&&CharacterRules.Sell(c,target,Catalog);break;
-            case "equip":ok=CharacterRules.Equip(c,target,Catalog);break;
+            case "equip":ok=CharacterRules.Equip(c,target,Catalog,p.Data.ClassId);break;
             case "craft":ok=Near(p,"workbench")&&CharacterRules.Craft(c,target,Catalog);if(ok)CharacterRules.Progress(c,"craft",target,Catalog);break;
             case "gather":
                 var node=Catalog.Nodes.FirstOrDefault(n=>n.Id==target);
@@ -134,7 +140,7 @@ public sealed partial class World
     private object CharacterView(Player p)
     {
         var c=CharacterRules.Clone(Export(p)).State;
-        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
+        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
             mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }

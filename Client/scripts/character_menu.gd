@@ -21,11 +21,11 @@ func _ready() -> void:
     var tabs := HBoxContainer.new()
     tabs.position = Vector2(12,12)
     add_child(tabs)
-    for name in ["Charakter","Skills","Inventar","Quests","Pet","Automatik","Layout","Schließen"]:
+    for name in ["Charakter","Aussehen","Skills","Inventar","Quests","Pet","Automatik","Layout","Schließen"]:
         var button = TouchAction.new()
         button.text = name
         button.add_theme_font_size_override("font_size",16)
-        button.custom_minimum_size = Vector2(82,40)
+        button.custom_minimum_size = Vector2(73,40)
         button.pressed.connect(func():
             if name=="Schließen":hide()
             else:tab=name;_rebuild())
@@ -54,7 +54,7 @@ func _action(title_value: String,kind: String,target_value: String) -> void:
 
 func update_info(state: Dictionary) -> void:
     info = state
-    if visible and cooldown<=0 and tab not in ["Layout","Skills"]:
+    if visible and cooldown<=0 and tab not in ["Layout","Skills","Aussehen"]:
         cooldown = 1.0
         _rebuild()
 
@@ -76,6 +76,16 @@ func _rebuild() -> void:
             _action("Stat-Reset: Stufe 10 + seltener Resetstein","reset_stats","")
             _action("Prestige: Stufe 100 + Bosskern (beim Händler)","prestige","")
             _text("Ausrüstung: "+str(info.equipment))
+        "Aussehen":
+            _text("Online-Erscheinung: Geschlecht, Gesicht, Körper, Frisur, Haut und Tattoo.")
+            var choices: Array=[]
+            for options in [["male","female","neutral"],["Gesicht 1","Gesicht 2","Gesicht 3","Gesicht 4"],["Körper 1","Körper 2","Körper 3","Körper 4"],["Frisur 1","Frisur 2","Frisur 3","Frisur 4"],["Haut 1","Haut 2","Haut 3","Haut 4"],["Kein Tattoo","Tattoo 1","Tattoo 2","Tattoo 3"]]:
+                var choose:=OptionButton.new();choose.custom_minimum_size.y=42
+                for value in options:choose.add_item(value)
+                content.add_child(choose);choices.append(choose)
+            var save=TouchAction.new();save.text="Erscheinung online speichern";save.custom_minimum_size.y=44
+            save.pressed.connect(func():intent.emit("appearance","%s|%d|%d|%d|%d|%d"%[choices[0].get_item_text(choices[0].selected),choices[1].selected,choices[2].selected,choices[3].selected,choices[4].selected,choices[5].selected]))
+            content.add_child(save)
         "Skills":
             _text("Acht aktive Skills. Level schaltet frei; sechs Plätze sind gleichzeitig sichtbar.")
             var slot_picker:=OptionButton.new()
@@ -91,8 +101,16 @@ func _rebuild() -> void:
                 content.add_child(binding_button)
         "Inventar":
             _text("24 konfigurierbare Stack-Slots. Händler: rechts der Wache; Werkbank: links.")
+            for id in info.get("gear",{}):
+                var instance: Dictionary=info.gear[id]
+                _text("%s · Zustand %d / 100 · %s"%[catalog.items[instance.item].name,instance.condition,id.left(6)])
+                _action("Instanz ausrüsten","gear_equip",id)
+                _action("Beim Händler reparieren (1 Münze je Zustandspunkt)","gear_repair",id)
+            for slot in info.get("equippedGear",{}):_action("Instanz ablegen: "+slot,"gear_remove",slot)
+            for slot in info.equipment:_action("Alte Ausrüstung ablegen: "+slot,"gear_legacy_remove",slot)
             for item in info.inventory:
                 _text("%s × %d · %s"%[catalog.items[item].name,info.inventory[item],catalog.items[item].rarity])
+                if catalog.items[item].get("slot","")!="" and info.id!="local":_action("In eindeutige Instanz umwandeln (vorher ablegen)","gear_unpack",item)
                 if catalog.items[item].get("slot","")!="":_action("Ausrüsten · "+catalog.items[item].name,"equip",item)
                 if item=="potion":_action("Heiltrank benutzen","use",item)
                 _action("1 verkaufen (beim Händler)","sell",item)

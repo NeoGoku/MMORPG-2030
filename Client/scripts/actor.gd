@@ -1,5 +1,8 @@
 extends Node3D
 
+var appearance_key:=""
+var worn_weapon: MeshInstance3D
+var worn_chest: MeshInstance3D
 var kind := "player"
 var monster_variant := "drone"
 var class_id := "Shield Sword"
@@ -36,6 +39,11 @@ func _ready() -> void:
         else:_golem()
     else:
         _human()
+    if kind=="player":
+        _part(model,"equipped_blade",BoxMesh.new(),Vector3(.65,1.1,-.25),Vector3(.12,1.1,.18),Color("c8d5dc"))
+        worn_weapon=model.get_node("equipped_blade");worn_weapon.visible=false
+        _part(model,"equipped_chest",BoxMesh.new(),Vector3(0,1.35,0),Vector3(.8,.65,.5),Color("64788d"))
+        worn_chest=model.get_node("equipped_chest");worn_chest.visible=false
     name_label = _label(display_name, Vector3(0, 2.65, 0), Color("e7eee3"), 26)
     hp_label = _label("", Vector3(0, 2.35, 0), tint, 22)
     ring = MeshInstance3D.new()
@@ -155,6 +163,27 @@ func _label(text: String, pos: Vector3, color: Color, font_size: int) -> Label3D
     return label
 
 func apply_state(state: Dictionary, selected: bool) -> void:
+    if kind=="player":
+        var value: String=state.get("appearance","default")
+        if value!=appearance_key:
+            appearance_key=value
+            var parts:=value.split("|")
+            if parts.size()==6:
+                var skin=[Color("d8b8a0"),Color("b78a67"),Color("825c46"),Color("533b32")][int(parts[4])]
+                for key in ["head","eyes"]:
+                    var node=model.get_node_or_null(key)
+                    if node and key=="head":node.material_override=_material(skin,false);node.scale.x=.42+.04*int(parts[1])
+                var hair=model.get_node_or_null("hair")
+                if hair:hair.scale.y=.18+.07*int(parts[3]);hair.material_override=_material([Color("292a32"),Color("9c744b"),Color("b7bec4"),Color("583d61")][int(parts[3])],false)
+                model.scale=Vector3(1+.05*int(parts[2]),.94+.04*int(parts[2]),1)
+                var tattoo=model.get_node_or_null("tattoo")
+                if tattoo:tattoo.queue_free()
+                if int(parts[5])>0:_part(model,"tattoo",BoxMesh.new(),Vector3(.29,1.54,-.23),Vector3(.1,.06*int(parts[5]),.03),Color("3e6e7c"))
+        var gear=state.get("equipment",{})
+        if gear is Dictionary:
+            if worn_weapon:worn_weapon.visible=gear.has("weapon")
+            if worn_chest:worn_chest.visible=gear.has("chest")
+
     target_position = Vector3(state.x, .18, state.z)
     if state.has("yaw"):
         target_yaw = state.yaw
