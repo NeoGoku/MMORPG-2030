@@ -69,3 +69,6 @@ Data-driven quest navigation coordinates now accompany valid quest snapshots; co
 
 ## Issue #8 — physical player stalls
 Players can place named persistent stalls in the marked trade zone, escrow stack items or unique gear, inspect nearby stock and buy only within range. Purchases/proceeds use the existing atomic auction transaction; equipped gear/capacity/replay protections remain. Closing moves unsold offers back into the ordinary exchange; expiry preserves seller escrow. Stalls are shared world props, not a separate channel or paid convenience. Pet listings remain at the auction exchange.
+
+## Issue #8 — furniture and vendor authority
+Building recipes now produce placeable tables, shelves and lamps as well as chairs, with stored item kind, model, footprint/door/occupant checks and conserved removal. NPC purchase is now explicitly catalogue-whitelisted: only listed vendor stock may be bought, preventing crafted/boss/zero-price reward items from being minted through forged buy intents. Expired stalls no longer permanently exhaust the active-stand cap; escrow remains recoverable.

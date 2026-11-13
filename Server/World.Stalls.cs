@@ -11,7 +11,7 @@ public sealed partial class World
         if(kind=="stall_open"){
             var name=text.Trim();Need(name.Length is >=3 and <=28&&name.All(ch=>char.IsLetterOrDigit(ch)||ch is ' ' or '-' or '_'),"Standname: 3–28 Buchstaben/Ziffern.");
             Need(s.X is >=27 and <=42&&s.Z is >=16 and <=25&&Distance(s.X,s.Z,30,24)>=3,"Stände nur in Handelszone x=27–42, z=16–25; Register freihalten.");
-            Need(w.Stalls.Count<Catalog.MaxStalls||w.Stalls.ContainsKey(c.Id),"Standlimit erreicht.");Need(w.Stalls.Where(p=>p.Key!=c.Id&&p.Value.Until>Utc).All(p=>Distance(p.Value.X,p.Value.Z,s.X,s.Z)>=3),"Drei Meter Abstand zum nächsten Stand.");
+            Need(w.Stalls.Count(entry=>entry.Value.Until>Utc)<Catalog.MaxStalls||w.Stalls.TryGetValue(c.Id,out var previous)&&previous.Until>Utc,"Standlimit erreicht.");Need(w.Stalls.Where(p=>p.Key!=c.Id&&p.Value.Until>Utc).All(p=>Distance(p.Value.X,p.Value.Z,s.X,s.Z)>=3),"Drei Meter Abstand zum nächsten Stand.");
             w.Stalls[c.Id]=new StallState{Title=name,X=s.X,Z=s.Z,Until=Utc+Catalog.StallSeconds};return "Stand geöffnet. Angebote nutzen persistentes Escrow, auch während du offline bist.";
         }
         Need(w.Stalls.TryGetValue(c.Id,out var own),"Kein eigener Stand.");Need(Distance(s.X,s.Z,own!.X,own.Z)<=4,"Eigenen Stand besuchen.");

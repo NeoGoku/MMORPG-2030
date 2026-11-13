@@ -82,3 +82,5 @@ ContinuationCombatTests.Run();
 DurableInstanceTests.Run();
 
 StallTests.Run();
+
+FurnitureAuthorityTests.Run();

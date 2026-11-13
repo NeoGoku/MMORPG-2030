@@ -80,7 +80,10 @@ func rebuild() -> void:
             x_pos=spin(-89,89,player.get("x",0),.25);x_pos.prefix="X: "
             z_pos=spin(-89,89,player.get("z",0)-2,.25);z_pos.prefix="Z: "
             rotation_picker=spin(-180,180,0,15);rotation_picker.suffix="°"
-            button("Eichenstuhl platzieren",func():emit_action("home_place",selected(homes),"oak_chair|%.2f|%.2f|%.3f"%[x_pos.value,z_pos.value,deg_to_rad(rotation_picker.value)]))
+            for item in catalog.items:
+                if catalog.items[item].get("furnitureKind","")!="":
+                    var item_id: String=item
+                    button(catalog.items[item].name+" platzieren",func():emit_action("home_place",selected(homes),"%s|%.2f|%.2f|%.3f"%[item_id,x_pos.value,z_pos.value,deg_to_rad(rotation_picker.value)]))
             for home in community.get("homes",[]):
                 if home.owner!=own_id:continue
                 text("Deine Wohnung: %s · Mietende UTC %d · Lager %s"%[home.name,home.rentUntil,str(home.get("storage",{}))])

@@ -36,8 +36,11 @@ public sealed partial class World
                 x=double.Parse(parts[1],CultureInfo.InvariantCulture);z=double.Parse(parts[2],CultureInfo.InvariantCulture);yaw=double.Parse(parts[3],CultureInfo.InvariantCulture);
                 Need(Math.Abs(x-def.X)<7.5&&Math.Abs(z-def.Z)<4.5&&(h.Rooms>1||x<def.X-1.2)&&Distance(x,z,def.X-4,def.Z+5)>2,"Möbel innerhalb freier eigener Wohnfläche platzieren; Eingang freihalten.");
                 var id=kind=="home_place"?Guid.NewGuid().ToString("N"):parts[0];
-                Need(!h.Furniture.Any(f=>f.Key!=id&&Distance(f.Value.X,f.Value.Z,x,z)<1.3),"Möbel überschneiden sich.");
-                if(kind=="home_place"){Need(parts[0]=="oak_chair"&&h.Furniture.Count<30,"Nur vorhandene Möbel, maximal 30.");Take(s,parts[0],1);h.Furniture[id]=new FurnitureState();}
+                var movingItem=kind=="home_place"?parts[0]:h.Furniture.GetValueOrDefault(id)?.Item??"";Need(Catalog.Items.TryGetValue(movingItem,out var movingDef),"Unbekanntes Möbel.");var radius=movingDef!.FurnitureRadius;
+                Need(Math.Abs(x-def.X)+radius<8.5&&Math.Abs(z-def.Z)+radius<5.5&&Distance(x,z,def.X-4,def.Z+5)>2+radius,"Möbelgröße oder Eingang blockiert.");
+                Need(players.Values.All(player=>Distance(player.X,player.Z,x,z)>radius+.45),"Keinen Spieler mit Möbeln einschließen.");
+                Need(!h.Furniture.Any(f=>f.Key!=id&&Distance(f.Value.X,f.Value.Z,x,z)<radius+Catalog.Items[f.Value.Item].FurnitureRadius+.25),"Möbel überschneiden sich.");
+                if(kind=="home_place"){Need(Catalog.Items.TryGetValue(parts[0],out var furnitureDef)&&furnitureDef.FurnitureKind!=""&&h.Furniture.Count<30,"Nur vorhandene Möbel, maximal 30.");Take(s,parts[0],1);h.Furniture[id]=new FurnitureState{Item=parts[0]};}
                 Need(h.Furniture.ContainsKey(id),"Möbel nicht gefunden.");h.Furniture[id].X=x;h.Furniture[id].Z=z;h.Furniture[id].Yaw=Math.IEEERemainder(yaw,Math.Tau);return "Möbelposition synchronisiert und gespeichert.";
             case "home_remove":Need(h.Furniture.TryGetValue(text,out var furniture),"Möbel nicht gefunden.");Give(s,furniture!.Item,1);h.Furniture.Remove(text);return "Möbel ohne Duplikation zurück im Inventar.";
             case "home_put":case "home_take":

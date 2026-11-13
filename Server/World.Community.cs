@@ -27,7 +27,7 @@ public sealed partial class World
     private void Give(CharacterState c,string item,int count){Need(CharacterRules.Add(c,item,count,Catalog),"Inventar voll.");}
     private static int Number(string value,int min,int max){Need(int.TryParse(value,out var n)&&n>=min&&n<=max,"Ungültige Anzahl.");return n;}
     private static void Coins(CharacterState c,int amount){Need((long)c.Coins+amount is >=0 and <=int.MaxValue,"Münzen fehlen oder Limit erreicht.");c.Coins+=amount;}
-    private bool CanWalk(Player p,double x,double z)=>district.Walkable(x,z)&&HomeAccess(p,x,z)&&!Shared.Homes.Values.SelectMany(h=>h.Furniture.Values).Any(f=>Distance(x,z,f.X,f.Z)<.65);
+    private bool CanWalk(Player p,double x,double z)=>district.Walkable(x,z)&&HomeAccess(p,x,z)&&!Shared.Homes.Values.SelectMany(h=>h.Furniture.Values).Any(f=>Distance(x,z,f.X,f.Z)<Catalog.Items[f.Item].FurnitureRadius+.15);
     private bool HomeAccess(Player p,double x,double z)
     {
         foreach(var def in district.Homes.Where(d=>Math.Abs(x-d.X)<8.8&&Math.Abs(z-d.Z)<5.8)){

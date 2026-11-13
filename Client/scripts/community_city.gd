@@ -3,6 +3,7 @@ extends Node3D
 var data: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
 var chunks: Dictionary={}
 var furniture: Dictionary={}
+var catalogue: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/game.json"))
 var room_dividers: Dictionary={}
 var danger: Dictionary={}
 var stalls: Dictionary={}
@@ -103,6 +104,18 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
                 box(chair,Vector3(0,1.05,.45),Vector3(1.1,.8,.16),Color("a37b51"))
                 for x in [-.4,.4]:
                     for z in [-.35,.35]:box(chair,Vector3(x,.3,z),Vector3(.13,.6,.13),Color("514a40"))
+                var kind: String=catalogue.items[item.item].get("furnitureKind","chair")
+                if kind!="chair":
+                    for part in chair.get_children():part.queue_free()
+                    if kind=="table":
+                        box(chair,Vector3(0,.9,0),Vector3(1.8,.2,1.4),Color("927151"))
+                        for x in [-.7,.7]:
+                            for z in [-.5,.5]:box(chair,Vector3(x,.4,z),Vector3(.15,.8,.15),Color("514a40"))
+                    elif kind=="shelf":
+                        for x in [-.7,.7]:box(chair,Vector3(x,1,0),Vector3(.15,2,.55),Color("796047"))
+                        for y in [.2,.8,1.4,1.9]:box(chair,Vector3(0,y,0),Vector3(1.5,.12,.55),Color("947a5b"))
+                    else:
+                        box(chair,Vector3(0,1,0),Vector3(.12,2,.12),Color("62777f"));box(chair,Vector3(0,2,0),Vector3(.6,.4,.6),Color("a9decf"))
                 furniture[item.id]=chair
             furniture[item.id].position=Vector3(item.x,.2,item.z);furniture[item.id].rotation.y=item.yaw
     for id in furniture.keys():

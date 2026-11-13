@@ -127,7 +127,7 @@ func action(kind: String, target: String) -> bool:
                 equipment[catalog.items[target].slot] = target
                 ok = true
         "buy":
-            if near("merchant") and catalog.items.has(target) and p.coins >= catalog.items[target].price and add(target,1):
+            if near("merchant") and catalog.items.has(target) and catalog.items[target].get("vendor",false) and p.coins >= catalog.items[target].price and add(target,1):
                 p.coins -= catalog.items[target].price
                 ok = true
         "sell":
