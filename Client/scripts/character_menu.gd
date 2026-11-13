@@ -116,7 +116,7 @@ func _rebuild() -> void:
                 if item=="potion":_action("Heiltrank benutzen","use",item)
                 _action("1 verkaufen (beim Händler)","sell",item)
             for item in ["potion","iron_sword","guard_coat"]:_action("Kaufen: %s · %d Münzen"%[catalog.items[item].name,catalog.items[item].price],"buy",item)
-            for recipe in catalog.recipes:_action("Werkbank: "+catalog.recipes[recipe].name,"craft",recipe)
+            for recipe in catalog.recipes:_action("Werkbank: "+catalog.recipes[recipe].name+" · Berufs-St. "+str(catalog.recipes[recipe].get("minProfessionLevel",1)),"craft",recipe)
             for node in catalog.nodes:_action("Sammeln: %s · bei (%.0f, %.0f)"%[node.name,node.x,node.z],"gather",node.id)
             for profession in catalog.professions:
                 var experience: int=info.professions.get(profession,0)

@@ -22,7 +22,7 @@ public sealed partial class World
         return true;
     }
     private static void Need(bool ok,string message){if(!ok)throw new GameRuleException(message);}
-    private static string DropItem(Drop drop)=>drop.MonsterId=="worldboss-1"?"boss_core":"scrap";
+    private static string DropItem(Drop drop)=>drop.MonsterId=="worldboss-1"?"boss_core":drop.MonsterId=="worldboss-forest"?"root_core":"scrap";
     private static void Take(CharacterState c,string item,int count){Need(count>0&&c.Inventory.GetValueOrDefault(item)>=count,"Material fehlt.");c.Inventory[item]-=count;if(c.Inventory[item]==0)c.Inventory.Remove(item);}
     private void Give(CharacterState c,string item,int count){Need(CharacterRules.Add(c,item,count,Catalog),"Inventar voll.");}
     private static int Number(string value,int min,int max){Need(int.TryParse(value,out var n)&&n>=min&&n<=max,"Ungültige Anzahl.");return n;}

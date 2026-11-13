@@ -60,7 +60,7 @@ public sealed partial class World
             case "craft":ok=Near(p,"workbench")&&CharacterRules.Craft(c,target,Catalog);if(ok)CharacterRules.Progress(c,"craft",target,Catalog);break;
             case "gather":
                 var node=Catalog.Nodes.FirstOrDefault(n=>n.Id==target);
-                if(node is not null&&Distance(p.X,p.Z,node.X,node.Z)<=3&&p.Cooldowns.GetValueOrDefault("gather:"+target)<=time&&CharacterRules.Add(c,node.Item,1,Catalog)){
+                if(node is not null&&1+c.Professions.GetValueOrDefault(node.Profession)/Catalog.ProfessionLevelXp>=node.MinProfessionLevel&&Distance(p.X,p.Z,node.X,node.Z)<=3&&p.Cooldowns.GetValueOrDefault("gather:"+target)<=time&&CharacterRules.Add(c,node.Item,1,Catalog)){
                     p.Cooldowns["gather:"+target]=time+5;c.Professions[node.Profession]=c.Professions.GetValueOrDefault(node.Profession)+Catalog.ProfessionGatherXp;c.FarmXp=(BigInteger.Parse(c.FarmXp)+10).ToString();CharacterRules.Progress(c,"gather",target,Catalog);ok=true;
                 }break;
             case "claim":ok=Near(p,"merchant")&&CharacterRules.Claim(c,target,Catalog,p.Data.ClassId);break;

@@ -48,3 +48,6 @@ Eight configurable class resources with skill expenditure, passive unlocks affec
 
 ## Continuation package 3
 Connected Grünsaum forest/bridge/open root ruins with four level-10–15 encounters and a second worldboss, gated fast travel with unrestricted return, vegetation/ruin presentation. Boss below half HP uses stronger/faster warned blasts. Player/monster snapshot candidates use a reusable 24 m spatial cell index, retaining exact distance checks and one shared world. This is not a measured 100-player capacity claim or complete async asset streaming.
+
+## Continuation package 4
+Recipe mastery requirements/tool hook, advanced resource nodes tied to gathering levels, new class-constrained weapons/head/feet/accessory items, Epic/Legendary recipe outputs with boss materials, eight class practice quests and chained forest/profession objectives. Original recipe paths retained. Broader narrative/factions and final balance remain open.
