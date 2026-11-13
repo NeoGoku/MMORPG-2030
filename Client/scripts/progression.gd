@@ -203,6 +203,9 @@ func action(kind: String, target: String) -> bool:
                 if not add(item,pet.inventory[item]):ok=false;break
             if ok:pet.inventory.clear()
             else:inventory=previous
+        "transit":
+            if Vector2(p.x,p.z).distance_to(Vector2(0,-40))<=3 and p.level>=5 and p.quest=="complete":p.x=0.0;p.z=-59.0;ok=true
+            elif Vector2(p.x,p.z).distance_to(Vector2(0,-59))<=3:p.x=0.0;p.z=-40.0;ok=true
         "teleport":
             if near("teleporter") or (catalog.services.has("return") and near("return")):
                 p.x = 0.0
@@ -217,6 +220,7 @@ func action(kind: String, target: String) -> bool:
 
 func _hit(enemy: Dictionary, damage: int) -> void:
     if enemy.hp<=0:return
+    if enemy.get("boss",false):damage=maxi(1,damage/2)
     if enemy.get("break",0)>0:damage+=catalog.statusPenalty
     enemy.hp=maxi(0,enemy.hp-damage)
     enemy.lastDamage=damage
@@ -225,8 +229,9 @@ func _hit(enemy: Dictionary, damage: int) -> void:
     if enemy.hp==0:
         enemy.respawn=sim.time+sim.rules.monsterRespawnSeconds
         sim.player.attacking=false
-        sim._exp(sim.rules.killExp)
-        if sim.player.quest=="active":
+        sim._exp(sim.rules.killExp*enemy.get("level",1))
+        progress("kill",enemy.id)
+        if sim.player.quest=="active" and str(enemy.id).begins_with("drone-"):
             sim.player.kills+=1
             if sim.player.kills>=sim.rules.questKills:sim.player.quest="ready"
         sim.drop_sequence+=1
@@ -351,7 +356,7 @@ func tick(dt: float) -> void:
                 break
     elif pet.mode=="loot":
         for drop in sim.drops:
-            if Vector2(sim.player.x-drop.x,sim.player.z-drop.z).length()<=5 and add("scrap",1):
+            if Vector2(sim.player.x-drop.x,sim.player.z-drop.z).length()<=5 and add("boss_core" if drop.monsterId=="worldboss-1" else "scrap",1):
                 sim.drops.erase(drop)
                 sim.player.coins += sim.rules.lootCoins
                 sim.player.scrap += 1
@@ -425,7 +430,7 @@ func farm_direction(dt: float,input: Vector2) -> Vector2:
         if Vector2(drop.x,drop.z).distance_to(home)<=automation.radius:
             p.attacking=false
             if pos.distance_to(Vector2(drop.x,drop.z))<=3:
-                if add("scrap",1):sim.drops.erase(drop);p.coins+=sim.rules.lootCoins;p.scrap+=1
+                if add("boss_core" if drop.monsterId=="worldboss-1" else "scrap",1):sim.drops.erase(drop);p.coins+=sim.rules.lootCoins;p.scrap+=1
                 else:automation.returning=true
                 return Vector2.ZERO
             return farm_steer(Vector2(drop.x,drop.z),dt)

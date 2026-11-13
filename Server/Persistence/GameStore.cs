@@ -6,6 +6,8 @@ namespace MMORPG.Server;
 public sealed record AccountRecord(string Id,string Username,byte[] Salt,byte[] PasswordHash);
 public interface IGameStore
 {
+    SharedWorld LoadWorld()=>new();
+    void SaveWorld(SharedWorld world,IReadOnlyList<CharacterRecord> characters)=>throw new GameRuleException("Shared storage unavailable.");
     bool Durable {get;}
     AccountRecord? Account(string username);
     void Register(AccountRecord account);
@@ -18,6 +20,12 @@ public interface IGameStore
 public sealed class MemoryGameStore : IGameStore
 {
     private readonly object gate=new();private readonly Dictionary<string,AccountRecord> accounts=[];private readonly Dictionary<string,CharacterRecord> characters=[];
+    private SharedWorld shared=new();
+    public SharedWorld LoadWorld(){lock(gate)return SharedWorld.Copy(shared);}
+    public void SaveWorld(SharedWorld world,IReadOnlyList<CharacterRecord> batch){lock(gate){
+        if(world.Version!=shared.Version)throw new GameRuleException("Weltversion veraltet.");
+        SaveBatch(batch);world.Version++;shared=SharedWorld.Copy(world);
+    }}
     public bool Durable=>false;
     public AccountRecord? Account(string username){lock(gate)return accounts.GetValueOrDefault(username);}
     public void Register(AccountRecord a){lock(gate){if(!accounts.TryAdd(a.Username,a))throw new GameRuleException("Account bereits vorhanden.");}}
@@ -51,16 +59,24 @@ public sealed class PostgresGameStore : IGameStore,IDisposable
     public CharacterRecord? Get(string id){using var db=source.OpenConnection();using var cmd=new NpgsqlCommand("SELECT document::text,version FROM characters WHERE id=$1",db);cmd.Parameters.AddWithValue(id);using var r=cmd.ExecuteReader();if(!r.Read())return null;var c=JsonSerializer.Deserialize<CharacterRecord>(r.GetString(0))!;c.Version=r.GetInt64(1);return c;}
     public void Create(CharacterRecord c){using var db=source.OpenConnection();using var cmd=new NpgsqlCommand("INSERT INTO characters(id,account_id,slot,document,level,coins) VALUES($1,$2,$3,$4::jsonb,$5,$6)",db);cmd.Parameters.AddWithValue(c.Id);cmd.Parameters.AddWithValue(c.AccountId);cmd.Parameters.AddWithValue(c.Slot);cmd.Parameters.AddWithValue(JsonSerializer.Serialize(c));cmd.Parameters.AddWithValue(c.State.Level);cmd.Parameters.AddWithValue(c.State.Coins);try{cmd.ExecuteNonQuery();}catch(PostgresException e)when(e.SqlState=="23505"){throw new GameRuleException("Charakterplatz belegt.");}}
     public void Save(CharacterRecord c)=>SaveBatch([c]);
-    public void SaveBatch(IReadOnlyList<CharacterRecord> batch)
+    public SharedWorld LoadWorld(){using var db=source.OpenConnection();using var cmd=new NpgsqlCommand("SELECT document::text,version FROM shared_world WHERE id=1",db);using var r=cmd.ExecuteReader();if(!r.Read())throw new GameRuleException("Welt fehlt.");var w=JsonSerializer.Deserialize<SharedWorld>(r.GetString(0))!;w.Version=r.GetInt64(1);return w;}
+    public void SaveWorld(SharedWorld world,IReadOnlyList<CharacterRecord> batch)=>SaveTransaction(batch,world);
+    public void SaveBatch(IReadOnlyList<CharacterRecord> batch)=>SaveTransaction(batch,null);
+    private void SaveTransaction(IReadOnlyList<CharacterRecord> batch,SharedWorld? shared)
     {
         if(batch.Count>10||batch.Select(c=>c.Id).Distinct().Count()!=batch.Count)throw new GameRuleException("Ungültige Transaktion.");
         using var db=source.OpenConnection();using var tx=db.BeginTransaction();
+        if(shared is not null){
+            using var worldCmd=new NpgsqlCommand("UPDATE shared_world SET document=$1::jsonb,version=version+1,updated_at=now() WHERE id=1 AND version=$2",db,tx);
+            worldCmd.Parameters.AddWithValue(JsonSerializer.Serialize(shared));worldCmd.Parameters.AddWithValue(shared.Version);
+            if(worldCmd.ExecuteNonQuery()!=1)throw new GameRuleException("Weltversion veraltet.");
+        }
         foreach(var c in batch.OrderBy(c=>c.Id)){
             using var cmd=new NpgsqlCommand("UPDATE characters SET document=$1::jsonb,level=$2,coins=$3,version=version+1,updated_at=now() WHERE id=$4 AND account_id=$5 AND version=$6",db,tx);
             cmd.Parameters.AddWithValue(JsonSerializer.Serialize(c));cmd.Parameters.AddWithValue(c.State.Level);cmd.Parameters.AddWithValue(c.State.Coins);cmd.Parameters.AddWithValue(c.Id);cmd.Parameters.AddWithValue(c.AccountId);cmd.Parameters.AddWithValue(c.Version);
             if(cmd.ExecuteNonQuery()!=1)throw new GameRuleException("Speicherversion veraltet.");
         }
-        tx.Commit();foreach(var c in batch)c.Version++;
+        tx.Commit();foreach(var c in batch)c.Version++;if(shared is not null)shared.Version++;
     }
     public void Dispose()=>source.Dispose();
 }

@@ -9,15 +9,29 @@ public sealed partial class World
         public int Hp=60;
     }
     private readonly Dictionary<string,Summon> summons=[];
-    private Monster CloneMonster(Monster m)=>new(m.Spawn,m.Hp){X=m.X,Z=m.Z,NextAttack=m.NextAttack,Respawn=m.Respawn,AttackSerial=m.AttackSerial,HurtSerial=m.HurtSerial,LastDamage=m.LastDamage,DotOwner=m.DotOwner,DotUntil=m.DotUntil,NextDot=m.NextDot,DotPower=m.DotPower,SlowUntil=m.SlowUntil,BreakUntil=m.BreakUntil,ForcedTarget=m.ForcedTarget,TauntUntil=m.TauntUntil,HardTauntUntil=m.HardTauntUntil};
+    private Monster CloneMonster(Monster m)=>new(m.Spawn,m.Hp){X=m.X,Z=m.Z,WarningUntil=m.WarningUntil,WarningX=m.WarningX,WarningZ=m.WarningZ,NextWave=m.NextWave,Contributors=new(m.Contributors),NextAttack=m.NextAttack,Respawn=m.Respawn,AttackSerial=m.AttackSerial,HurtSerial=m.HurtSerial,LastDamage=m.LastDamage,DotOwner=m.DotOwner,DotUntil=m.DotUntil,NextDot=m.NextDot,DotPower=m.DotPower,SlowUntil=m.SlowUntil,BreakUntil=m.BreakUntil,ForcedTarget=m.ForcedTarget,TauntUntil=m.TauntUntil,HardTauntUntil=m.HardTauntUntil};
     private Dictionary<string,Summon> CloneSummons()=>summons.ToDictionary(s=>s.Key,s=>new Summon(s.Value.Owner,s.Value.Kind,s.Value.X,s.Value.Z,s.Value.Until){NextAttack=s.Value.NextAttack,Hp=s.Value.Hp});
     private void HitMonster(Player p,Monster m,int raw)
     {
         if(m.Hp<=0)return;
+        m.Contributors[p.Id]=time;foreach(var id in m.Contributors.Where(c=>time-c.Value>4).Select(c=>c.Key).ToArray())m.Contributors.Remove(id);
+        if(m.Spawn.Boss&&m.Contributors.Count<2)raw=Math.Max(1,raw/2);
         var amount=Math.Max(1,raw+(m.BreakUntil>time?Catalog.StatusPenalty:0));
         m.Hp=Math.Max(0,m.Hp-amount);m.HurtSerial++;m.LastDamage=amount;
         if(m.HardTauntUntil<=time){m.ForcedTarget=p.Id;m.TauntUntil=Math.Max(m.TauntUntil,time+5);}
         if(m.Hp==0)RewardKill(p,m);
+    }
+    private int MaxMonsterHp(Monster m)=>m.Spawn.Hp>0?m.Spawn.Hp:R.MonsterHp;
+    private void BossTick(Monster m)
+    {
+        if(!m.Spawn.Boss)return;
+        var target=MonsterTarget(m);
+        if(target is null){m.WarningUntil=0;return;}
+        if(m.WarningUntil>0&&time>=m.WarningUntil){
+            var victims=players.Values.Where(p=>p.Hp>0&&Distance(p.X,p.Z,m.WarningX,m.WarningZ)<5).ToArray();
+            foreach(var p in victims){var damage=Math.Max(1,30/Math.Max(1,victims.Length));p.Hp=Math.Max(0,p.Hp-damage);p.HurtSerial++;p.LastDamage=damage;if(p.Hp==0){p.Respawn=time+R.PlayerRespawnSeconds;p.Attacking=false;p.Target="";p.Dx=p.Dz=0;}}
+            m.WarningUntil=0;m.NextWave=time+6;
+        }else if(m.WarningUntil==0&&time>=m.NextWave){m.WarningX=target.X;m.WarningZ=target.Z;m.WarningUntil=time+2.5;}
     }
     private IEnumerable<Player> FriendlyTargets(Player caster,double radius)
     {

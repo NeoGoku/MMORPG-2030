@@ -1,6 +1,7 @@
 extends Node3D
 
 var kind := "player"
+var monster_variant := "drone"
 var class_id := "Shield Sword"
 var tint := Color("39cbb3")
 var display_name := "Reisender"
@@ -31,7 +32,8 @@ func _ready() -> void:
         _part(model,"spirit",SphereMesh.new(),Vector3(0,1.1,0),Vector3(.7,.9,.7),Color("82dccb"),true)
         _part(model,"core",SphereMesh.new(),Vector3(0,1.1,-.3),Vector3(.2,.2,.2),Color("fff2aa"),true)
     elif kind == "monster":
-        _drone()
+        if monster_variant=="drone":_drone()
+        else:_golem()
     else:
         _human()
     name_label = _label(display_name, Vector3(0, 2.65, 0), Color("e7eee3"), 26)
@@ -100,6 +102,16 @@ func _human() -> void:
     elif not magic and class_id!="Archer":
         _part(model,"shield",BoxMesh.new(),Vector3(-.65,1.18,-.10),Vector3(.13,1.05 if class_id=="Tank" else .75,.7),Color("bca16a"))
         if class_id=="Tank":_part(model,"helmet",BoxMesh.new(),Vector3(0,2.25,.02),Vector3(.58,.25,.53),Color("6b8492"))
+
+func _golem() -> void:
+    var boss: bool=monster_variant=="boss"
+    _part(model,"reactor",SphereMesh.new(),Vector3(0,1.5,0),Vector3(1.5,1.3,1.2) if boss else Vector3(1,.9,.8),Color("444f65"))
+    _part(model,"core_glow",SphereMesh.new(),Vector3(0,1.6,-.65),Vector3(.55,.55,.35),Color("c578ed") if boss else Color("7bddd0"),true)
+    _part(model,"head",BoxMesh.new(),Vector3(0,2.5,0),Vector3(.8,.65,.8),Color("8f9393"))
+    for side in [-1,1]:
+        _part(model,"arm",BoxMesh.new(),Vector3(side*1.1,1.4,0),Vector3(.5,1.5,.6),Color("747b80"))
+        _part(model,"leg",BoxMesh.new(),Vector3(side*.45,.5,0),Vector3(.55,1,.65),Color("526575"))
+        if boss:_part(model,"pylon",CylinderMesh.new(),Vector3(side*.8,2.6,.2),Vector3(.3,1.6,.3),Color("d4b28e"))
 
 func _drone() -> void:
     _part(model, "core", SphereMesh.new(), Vector3(0, 1.0, 0), Vector3(1.15, .7, .9), Color("92694e"))

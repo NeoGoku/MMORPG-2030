@@ -25,6 +25,7 @@ public sealed class GameCatalog
 public sealed class PetState {public string Id {get;set;}="";public int Hp {get;set;}=100;public double RecoveryUntil {get;set;}public double TrainingUntil {get;set;}public Dictionary<string,int> Traits {get;set;}=new(){{"strength",1},{"affinity",1},{"vitality",1}};public Dictionary<string,int> Inventory {get;set;}=[];public bool Active {get;set;} public string Mode {get;set;}="combat";public int Level {get;set;}=1;public int Exp {get;set;}public int Evolution {get;set;}public List<string> Parents {get;set;}=[];}
 public sealed class CharacterState
 {
+    public bool HousingIntro {get;set;}
     public int Level {get;set;}=1;public int Exp {get;set;}public int StatPoints {get;set;}public int Coins {get;set;}=20;public int Scrap {get;set;}public int Kills {get;set;}public string Quest {get;set;}="available";
     public int Hp {get;set;}=100;public Dictionary<string,double> Timers {get;set;}=[];public double BuffExpires {get;set;}
     public double X {get;set;}=0;public double Z {get;set;}=10;public int Mana {get;set;}=100;public Dictionary<string,int> Attributes {get;set;}=[];

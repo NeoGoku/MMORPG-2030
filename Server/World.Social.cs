@@ -96,9 +96,10 @@ public sealed partial class World
         var party=PartyOf(killer.Id);
         var eligible=players.Values.Where(p=>p.Id==killer.Id||(party is not null&&party.Members.ContainsKey(p.Id)&&p.Hp>0&&Distance(p.X,p.Z,monster.X,monster.Z)<=Catalog.PartyExpRadius)).OrderBy(p=>p.Id).ToArray();
         for(var i=0;i<eligible.Length;i++){
-            var p=eligible[i];var amount=R.KillExp/eligible.Length+(i<R.KillExp%eligible.Length?1:0);
+            var p=eligible[i];var pool=R.KillExp*monster.Spawn.Level;var amount=pool/eligible.Length+(i<pool%eligible.Length?1:0);
             GrantExp(p,amount);GrantPetExp(p);
-            if(p.Quest=="active"){p.Kills++;if(p.Kills>=R.QuestKills)p.Quest="ready";}
+            CharacterRules.Progress(p.Data.State,"kill",monster.Spawn.Id,Catalog);
+            if(p.Quest=="active"&&monster.Spawn.Id.StartsWith("drone-")){p.Kills++;if(p.Kills>=R.QuestKills)p.Quest="ready";}
             var dropId=Guid.NewGuid().ToString("N");loot[dropId]=new(dropId,p.Id,monster.Spawn.Id,monster.X,monster.Z,time+90);
             p.Message=$"Gegner besiegt. +{amount} Gruppen-EXP; persönliche Beute liegt bereit.";
         }

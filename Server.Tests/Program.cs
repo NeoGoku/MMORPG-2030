@@ -65,3 +65,8 @@ M3Regression.Run();
 M4Tests.Run();
 M4PetTests.Run();
 M4ReviewTests.Run();
+
+M5Tests.Run();
+M5ArenaTests.Run();
+M5WorldTests.Run();
+M5ReviewTests.Run();

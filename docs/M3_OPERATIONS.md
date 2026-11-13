@@ -1,5 +1,7 @@
 # M3 identity and persistence operations
 
+Historical M3/M4 details below. Current M5 requires protocol v5 and adds migration 002; see [M5 operations](M5_OPERATIONS.md).
+
 No public server, paid service, external account permission or production database was provisioned. Tests use an isolated local PostgreSQL 16 container and CI PostgreSQL service, with deliberately disposable test credentials.
 
 ## Reproduce locally or in an existing cloud workspace

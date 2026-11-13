@@ -14,7 +14,7 @@ public sealed partial class World
             if(record.AccountId!=""){var latest=Store.Get(record.Id);if(latest is null||latest.AccountId!=record.AccountId)return null;record=latest;}
             PetRules.CompleteAll(record,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);
             var p=new Player(record.Id,record.State.X,record.State.Z,100);Import(p,record);
-            if(!district.Walkable(p.X,p.Z)){p.X=district.Spawn.X;p.Z=district.Spawn.Z;}
+            if(!district.Walkable(p.X,p.Z)||!HomeAccess(p,p.X,p.Z)){p.X=district.Spawn.X;p.Z=district.Spawn.Z;}
             p.Hp=Math.Clamp(record.State.Hp,0,CharacterRules.MaxHp(record,Catalog));p.PetX=p.X+1;p.PetZ=p.Z+1;players[p.Id]=p;return p.Id;}
     }
     private CharacterRecord Export(Player p)
@@ -24,7 +24,7 @@ public sealed partial class World
     }
     private void Import(Player p,CharacterRecord d)
     {p.Data=d;var c=d.State;p.X=c.X;p.Z=c.Z;p.Level=c.Level;p.Exp=c.Exp;p.StatPoints=c.StatPoints;p.Coins=c.Coins;p.Scrap=c.Scrap;p.Kills=c.Kills;p.Quest=c.Quest;p.Mana=c.Mana;p.Hp=c.Hp;p.Cooldowns=c.Timers.ToDictionary(k=>k.Key,k=>k.Value-wallStart);p.NextPet=c.Timers.GetValueOrDefault("pet")-wallStart;p.Respawn=c.Timers.GetValueOrDefault("respawn")-wallStart;p.BuffUntil=c.BuffExpires-wallStart;}
-    private int Damage(Player p)=>CharacterRules.Attack(Export(p),Catalog)+(p.BuffUntil>time?Catalog.BuffAttack:0)-(p.Cooldowns.GetValueOrDefault("status:weaken")>time?Catalog.StatusPenalty:0);
+    private int Damage(Player p)=>GuildBonus(p)+CharacterRules.Attack(Export(p),Catalog)+(p.BuffUntil>time?Catalog.BuffAttack:0)-(p.Cooldowns.GetValueOrDefault("status:weaken")>time?Catalog.StatusPenalty:0);
     private void CommitAction(Player p,CharacterRecord previous,int oldHp,Dictionary<string,Drop> oldLoot,Dictionary<string,Monster> oldMonsters,Dictionary<string,CharacterRecord> oldPeers,Dictionary<string,Summon> oldSummons,FarmState oldFarm)
     {
         if(p.Data.AccountId=="")return;
@@ -64,6 +64,7 @@ public sealed partial class World
             case "pet_train":ok=Near(p,"workbench")&&PetRules.Train(c,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);break;
             case "pet_select":ok=PetRules.Select(c,target);break;
             case "pet_take":ok=PetRules.TakeBag(c,Catalog);break;
+            case "transit":if(Distance(p.X,p.Z,0,-40)<=3&&p.Level>=5&&p.Quest=="complete"){p.X=0;p.Z=-59;ok=true;}else if(Distance(p.X,p.Z,0,-59)<=3){p.X=0;p.Z=-40;ok=true;}break;
             case "teleport":if(Near(p,"teleporter")||Near(p,"return")){p.X=district.Spawn.X;p.Z=p.Z<30?Catalog.Services["return"].Z:district.Spawn.Z;ok=true;}break;
             case "skill":return Cast(p,target);
             default:return false;
@@ -73,6 +74,7 @@ public sealed partial class World
     }
     private bool Cast(Player p,string id)
     {
+        if(ArenaOf(p.Id) is not null){p.Message="Arena verwendet normierte Match-Angriffe; PvE-Skills sind hier gesperrt.";return true;}
         var skill=Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id&&s.Enabled&&p.Level>=s.MinLevel);
         if(skill is null||p.Mana<skill.Cost||p.Cooldowns.GetValueOrDefault(id)>time){p.Message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv.";return true;}
         var needsTarget=skill.Kind is "damage" or "dot" or "slow" or "break" or "drain" or "taunt";
@@ -124,7 +126,7 @@ public sealed partial class World
         }
         else if(pet.Mode=="loot"){
             var drop=loot.Values.FirstOrDefault(d=>d.Owner==p.Id&&Distance(p.X,p.Z,d.X,d.Z)<=5);
-            if(drop is not null&&CharacterRules.Add(p.Data.State,"scrap",1,Catalog)){loot.Remove(drop.Id);p.Coins+=R.LootCoins;p.Scrap+=R.LootScrap;}
+            if(drop is not null&&CharacterRules.Add(p.Data.State,DropItem(drop),1,Catalog)){loot.Remove(drop.Id);p.Coins+=R.LootCoins;p.Scrap+=R.LootScrap;}
         }else if(p.Target!=""&&monsters.TryGetValue(p.Target,out var m)&&m.Hp>1&&Distance(p.X,p.Z,m.X,m.Z)<=Catalog.PetRange){var damage=Math.Min(m.Hp-1,Catalog.PetDamage+pet.Level+pet.Traits.GetValueOrDefault("strength",1)+pet.Evolution*2);m.Hp-=damage;m.HurtSerial++;m.LastDamage=damage;}
     }
     private object CharacterView(Player p)

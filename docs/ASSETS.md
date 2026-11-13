@@ -11,3 +11,5 @@ All new visible assets were authored for this repository using Godot primitive m
 These are economical stylized slice assets. Semi-realistic final art, sound and production animation remain pending. This provenance note does not introduce or change a repository-wide license.
 
 M4 adds original procedural robes/staff/focus, bow/quiver, second blade, shield/helmet silhouettes, summon/pet variants, day/night light/fog and primitive particle rain in the same scripts. No third-party model, texture or audio is introduced. These remain stylized code-authored assets, not final production character rigs.
+
+M5: `community_city.gd` authors modular cutaway apartment shells, doorways/windows, worktables/planters/chairs, quarter roads/lamps, arena markings, Tiefwerk columns and boss warning disks from original primitive meshes/materials. `actor.gd` adds original construct and AUR-IX silhouettes. No downloaded model/texture/audio, paid asset or unclear license was introduced. These are stylized original assets, not final semi-realistic production art or measured texture-compression/LOD assets.

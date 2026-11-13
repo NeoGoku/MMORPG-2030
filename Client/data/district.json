@@ -1,6 +1,6 @@
 {
   "name": "Nordtor",
-  "bounds": 56,
+  "bounds": 90,
   "spawn": {
     "x": 0,
     "z": 10
@@ -75,6 +75,30 @@
       "depth": 12,
       "height": 12,
       "name": "ALCHEMIE"
+    },
+    {
+      "x": -45,
+      "z": -43,
+      "width": 16,
+      "depth": 8,
+      "height": 12,
+      "name": "WERK 09"
+    },
+    {
+      "x": -63,
+      "z": -50,
+      "width": 8,
+      "depth": 18,
+      "height": 18,
+      "name": "KONDENSATOR"
+    },
+    {
+      "x": 48,
+      "z": -18,
+      "width": 16,
+      "depth": 16,
+      "height": 20,
+      "name": "HANDELSKONTOR"
     }
   ],
   "monsters": [
@@ -122,5 +146,296 @@
     "questCoins": 25,
     "lootCoins": 4,
     "lootScrap": 1
-  }
+  },
+  "homes": [
+    {
+      "id": "home-1",
+      "name": "Lindenhof 1",
+      "x": 40,
+      "z": 34,
+      "guildHall": false
+    },
+    {
+      "id": "home-2",
+      "name": "Lindenhof 2",
+      "x": 64,
+      "z": 34,
+      "guildHall": false
+    },
+    {
+      "id": "home-3",
+      "name": "Lindenhof 3",
+      "x": 40,
+      "z": 54,
+      "guildHall": false
+    },
+    {
+      "id": "home-4",
+      "name": "Lindenhof 4",
+      "x": 64,
+      "z": 54,
+      "guildHall": false
+    },
+    {
+      "id": "guildhall-1",
+      "name": "Gildenhaus Lindenhof",
+      "x": 64,
+      "z": 74,
+      "guildHall": true
+    }
+  ],
+  "walls": [
+    {
+      "x": 31,
+      "z": 34,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 49,
+      "z": 34,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 40,
+      "z": 28,
+      "width": 18,
+      "depth": 0.4
+    },
+    {
+      "x": 32.5,
+      "z": 40,
+      "width": 3,
+      "depth": 0.4
+    },
+    {
+      "x": 43.5,
+      "z": 40,
+      "width": 11,
+      "depth": 0.4
+    },
+    {
+      "x": 55,
+      "z": 34,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 73,
+      "z": 34,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 64,
+      "z": 28,
+      "width": 18,
+      "depth": 0.4
+    },
+    {
+      "x": 56.5,
+      "z": 40,
+      "width": 3,
+      "depth": 0.4
+    },
+    {
+      "x": 67.5,
+      "z": 40,
+      "width": 11,
+      "depth": 0.4
+    },
+    {
+      "x": 31,
+      "z": 54,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 49,
+      "z": 54,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 40,
+      "z": 48,
+      "width": 18,
+      "depth": 0.4
+    },
+    {
+      "x": 32.5,
+      "z": 60,
+      "width": 3,
+      "depth": 0.4
+    },
+    {
+      "x": 43.5,
+      "z": 60,
+      "width": 11,
+      "depth": 0.4
+    },
+    {
+      "x": 55,
+      "z": 54,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 73,
+      "z": 54,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 64,
+      "z": 48,
+      "width": 18,
+      "depth": 0.4
+    },
+    {
+      "x": 56.5,
+      "z": 60,
+      "width": 3,
+      "depth": 0.4
+    },
+    {
+      "x": 67.5,
+      "z": 60,
+      "width": 11,
+      "depth": 0.4
+    },
+    {
+      "x": 55,
+      "z": 74,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 73,
+      "z": 74,
+      "width": 0.4,
+      "depth": 12
+    },
+    {
+      "x": 64,
+      "z": 68,
+      "width": 18,
+      "depth": 0.4
+    },
+    {
+      "x": 56.5,
+      "z": 80,
+      "width": 3,
+      "depth": 0.4
+    },
+    {
+      "x": 67.5,
+      "z": 80,
+      "width": 11,
+      "depth": 0.4
+    },
+    {
+      "x": -14,
+      "z": -57,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": -14,
+      "z": -65,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": -14,
+      "z": -73,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": -14,
+      "z": -81,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": 14,
+      "z": -57,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": 14,
+      "z": -65,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": 14,
+      "z": -73,
+      "width": 1.2,
+      "depth": 1.2
+    },
+    {
+      "x": 14,
+      "z": -81,
+      "width": 1.2,
+      "depth": 1.2
+    }
+  ],
+  "encounters": [
+    {
+      "id": "forge-1",
+      "name": "Schrottgolem",
+      "x": -45,
+      "z": -56,
+      "hp": 120,
+      "level": 3,
+      "speed": 1.4,
+      "reach": 2
+    },
+    {
+      "id": "forge-2",
+      "name": "Industriewächter",
+      "x": -52,
+      "z": -64,
+      "hp": 150,
+      "level": 4,
+      "speed": 1.6,
+      "reach": 3
+    },
+    {
+      "id": "sentinel-1",
+      "name": "Tiefwerk-Sentinel",
+      "x": -7,
+      "z": -65,
+      "hp": 180,
+      "level": 5,
+      "speed": 1.2,
+      "reach": 3
+    },
+    {
+      "id": "sentinel-2",
+      "name": "Arkaner Sentinel",
+      "x": 8,
+      "z": -69,
+      "hp": 210,
+      "level": 6,
+      "speed": 1.4,
+      "reach": 4,
+      "damageType": "arcane"
+    },
+    {
+      "id": "worldboss-1",
+      "name": "Kernhüter AUR-IX",
+      "x": 0,
+      "z": -76,
+      "hp": 900,
+      "level": 8,
+      "speed": 1,
+      "reach": 3,
+      "boss": true
+    }
+  ]
 }

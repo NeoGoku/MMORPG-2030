@@ -12,7 +12,7 @@ func _initialize() -> void:
     sim.player.z = 7.0
     sim.act("interact", "")
     assert(sim.snapshot().self.quest == "active", "quest accepted")
-    for enemy in sim.monsters:
+    for enemy in sim.monsters.filter(func(m):return str(m.id).begins_with("drone-")):
         sim.player.x = enemy.x
         sim.player.z = enemy.z + 2.0
         sim.act("target", enemy.id)

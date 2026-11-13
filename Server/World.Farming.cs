@@ -37,7 +37,7 @@ public sealed partial class World
         var drop=loot.Values.Where(d=>d.Owner==p.Id&&Distance(d.X,d.Z,f.X,f.Z)<=f.Radius).OrderBy(d=>Distance(p.X,p.Z,d.X,d.Z)).FirstOrDefault();
         if(drop is not null){
             p.Attacking=false;
-            if(Distance(p.X,p.Z,drop.X,drop.Z)<=3){if(CharacterRules.Add(p.Data.State,"scrap",1,Catalog)){loot.Remove(drop.Id);p.Coins+=R.LootCoins;p.Scrap+=R.LootScrap;}else f.Returning=true;}
+            if(Distance(p.X,p.Z,drop.X,drop.Z)<=3){if(CharacterRules.Add(p.Data.State,DropItem(drop),1,Catalog)){loot.Remove(drop.Id);p.Coins+=R.LootCoins;p.Scrap+=R.LootScrap;}else f.Returning=true;}
             else SteerFarm(p,drop.X,drop.Z,dt);
             return;
         }
