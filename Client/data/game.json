@@ -1438,6 +1438,33 @@
       "stack": 1,
       "price": 160,
       "vendor": false
+    },
+    "forge_station": {
+      "name": "Arkanschmiede",
+      "stack": 10,
+      "price": 50,
+      "rarity": "Rare",
+      "vendor": false,
+      "furnitureKind": "forge",
+      "furnitureRadius": 1.0
+    },
+    "loom_station": {
+      "name": "Industriewebstuhl",
+      "stack": 10,
+      "price": 50,
+      "rarity": "Rare",
+      "vendor": false,
+      "furnitureKind": "loom",
+      "furnitureRadius": 1.0
+    },
+    "alchemy_station": {
+      "name": "Destillationsanlage",
+      "stack": 10,
+      "price": 50,
+      "rarity": "Rare",
+      "vendor": false,
+      "furnitureKind": "alchemy",
+      "furnitureRadius": 1.0
     }
   },
   "professions": [
@@ -1677,6 +1704,40 @@
       "output": "ash_mantle",
       "count": 1,
       "minProfessionLevel": 4
+    },
+    "forge_station": {
+      "name": "Arkanschmiede",
+      "profession": "engineering",
+      "inputs": {
+        "ore": 6,
+        "wood": 4
+      },
+      "output": "forge_station",
+      "count": 1,
+      "minProfessionLevel": 2
+    },
+    "loom_station": {
+      "name": "Industriewebstuhl",
+      "profession": "building",
+      "inputs": {
+        "wood": 6,
+        "ore": 2
+      },
+      "output": "loom_station",
+      "count": 1,
+      "minProfessionLevel": 2
+    },
+    "alchemy_station": {
+      "name": "Destillationsanlage",
+      "profession": "engineering",
+      "inputs": {
+        "ore": 4,
+        "herb": 4,
+        "wood": 2
+      },
+      "output": "alchemy_station",
+      "count": 1,
+      "minProfessionLevel": 2
     }
   },
   "services": {
@@ -2275,6 +2336,23 @@
       "rewards": {
         "reset_stone": 1
       }
+    },
+    {
+      "id": "workshop_builder",
+      "name": "Produktionsnetz: Eigene Arkanschmiede",
+      "type": "profession",
+      "event": "craft",
+      "item": "forge_station",
+      "required": 1,
+      "prerequisite": "artisan",
+      "minLevel": 5,
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "navigation": {
+        "x": -8,
+        "z": 6
+      }
     }
   ],
   "pet": {
@@ -2371,5 +2449,36 @@
       "x": -78,
       "z": 78
     }
-  ]
+  ],
+  "housingMaxFloors": 3,
+  "housingFloorWood": 20,
+  "housingFloorCoins": 60,
+  "housingFloorHeight": 3.6,
+  "housingMaxWorkOrders": 6,
+  "productionSeconds": 120,
+  "workstationProfessions": {
+    "table": [
+      "mining",
+      "herbalism",
+      "woodcutting",
+      "smithing",
+      "tailoring",
+      "alchemy",
+      "engineering",
+      "cooking",
+      "building",
+      "animal_breeding"
+    ],
+    "forge": [
+      "smithing",
+      "engineering"
+    ],
+    "loom": [
+      "tailoring"
+    ],
+    "alchemy": [
+      "alchemy",
+      "cooking"
+    ]
+  }
 }

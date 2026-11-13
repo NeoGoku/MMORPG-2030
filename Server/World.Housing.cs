@@ -13,6 +13,13 @@ public sealed partial class World
             Need(s.Inventory.GetValueOrDefault("oak_chair")>0,"Ein Eichenstuhl gehört zur Einführungsquest.");Take(s,"wood",3);
             w.Homes[target]=new HomeState{Owner=c.Id,RentUntil=Utc+604800};return "Wohnquest abgeschlossen. Wohnung erhalten; erste Mietwoche frei. Eingang links an der Südseite.";
         }
+        if(kind=="home_stairs"){
+            Need(w.Homes.TryGetValue(target,out var stairHome)&&MayVisit(w,stairHome,c.Id),"Kein gültiges Besuchsrecht.");
+            Need(Distance(s.X,s.Z,def!.X-7,def.Z+3)<=1.8,"Treppenaufgang im Südwesten besuchen.");
+            var floor=Number(text,0,stairHome!.Floors-1);Need(Math.Abs(floor-s.Floor)==1,"Nur benachbarte Geschosse über die Treppe wechseln.");
+            Need(s.Floor==0||s.HomeId==target,"Falsches Gebäude.");
+            s.Floor=floor;s.HomeId=floor>0?target:"";return "Gemeinsames Geschoss betreten: "+floor;
+        }
         Need(w.Homes.TryGetValue(target,out var home)&&home.Owner==c.Id,"Nur der Eigentümer darf diese Wohnung verwalten.");var h=home!;
         if(kind=="home_rent"){
             var periods=Math.Max(1,(Utc-h.RentUntil)/604800+1);Need(periods<=520,"Mietrückstand zu groß.");Coins(s,-checked((int)periods*10));h.RentUntil=Math.Max(Utc,h.RentUntil)+604800;return "Miete bezahlt. Möbel und Lager bleiben auch bei Rückstand erhalten.";
@@ -24,10 +31,12 @@ public sealed partial class World
             return "Besuchsrechte aktualisiert.";
         }
         Need(Math.Abs(s.X-def!.X)<8.8&&Math.Abs(s.Z-def.Z)<5.8,"Diese Aktion benötigt Anwesenheit in deiner Wohnung.");
-        if(kind is not ("home_take" or "home_remove" or "home_gear_take" or "home_cancel"))Need(h.RentUntil>Utc,"Miete überfällig. Am Wohnamt oder im Menü bezahlen.");
+        if(kind is not ("home_take" or "home_remove" or "home_gear_take" or "home_cancel" or "home_work_cancel"))Need(h.RentUntil>Utc,"Miete überfällig. Am Wohnamt oder im Menü bezahlen.");
+        if(kind.StartsWith("home_work_"))return WorkshopAction(h,s,kind,text);
         switch(kind){
             case "home_gear_put":Need(s.Gear.ContainsKey(text)&&!s.EquippedGear.Values.Contains(text)&&h.GearStorage.Count<48,"Instanz ablegen oder Lager voll.");h.GearStorage[text]=s.Gear[text];s.Gear.Remove(text);return "Instanz sicher eingelagert.";
             case "home_gear_take":Need(h.GearStorage.ContainsKey(text)&&CharacterRules.Slots(s,Catalog)<Catalog.InventorySlots&&!s.Gear.ContainsKey(text),"Instanz fehlt oder Inventar voll.");s.Gear[text]=h.GearStorage[text];h.GearStorage.Remove(text);return "Instanz zurückgenommen.";
+            case "home_floor":Need(h.Floors<Catalog.HousingMaxFloors&&s.Floor==0,"Maximale Geschosszahl erreicht; Ausbau vom Erdgeschoss.");Take(s,"wood",checked(Catalog.HousingFloorWood*h.Floors));Coins(s,-checked(Catalog.HousingFloorCoins*h.Floors));h.Floors++;return "Zusätzliches gemeinsames Geschoss mit Treppenaufgang gebaut.";
             case "home_expand":Need(h.Rooms==1,"Zweites Zimmer bereits offen.");Take(s,"wood",8);Coins(s,-20);h.Rooms=2;return "Angrenzendes Zimmer geöffnet: gleiche Welt, zusätzliche Fläche.";
             case "home_place":case "home_move":
                 var parts=text.Split('|');Need(parts.Length==4,"Möbel-ID/Item, X, Z und Drehung fehlen.");
@@ -36,33 +45,31 @@ public sealed partial class World
                 x=double.Parse(parts[1],CultureInfo.InvariantCulture);z=double.Parse(parts[2],CultureInfo.InvariantCulture);yaw=double.Parse(parts[3],CultureInfo.InvariantCulture);
                 Need(Math.Abs(x-def.X)<7.5&&Math.Abs(z-def.Z)<4.5&&(h.Rooms>1||x<def.X-1.2)&&Distance(x,z,def.X-4,def.Z+5)>2,"Möbel innerhalb freier eigener Wohnfläche platzieren; Eingang freihalten.");
                 var id=kind=="home_place"?Guid.NewGuid().ToString("N"):parts[0];
+                Need(kind=="home_place"||!StationBusy(h,id),"Belegte Anlage zuerst abholen oder stornieren.");
                 var movingItem=kind=="home_place"?parts[0]:h.Furniture.GetValueOrDefault(id)?.Item??"";Need(Catalog.Items.TryGetValue(movingItem,out var movingDef),"Unbekanntes Möbel.");var radius=movingDef!.FurnitureRadius;
                 Need(Math.Abs(x-def.X)+radius<8.5&&Math.Abs(z-def.Z)+radius<5.5&&Distance(x,z,def.X-4,def.Z+5)>2+radius,"Möbelgröße oder Eingang blockiert.");
-                Need(players.Values.All(player=>Distance(player.X,player.Z,x,z)>radius+.45),"Keinen Spieler mit Möbeln einschließen.");
-                Need(!h.Furniture.Any(f=>f.Key!=id&&Distance(f.Value.X,f.Value.Z,x,z)<radius+Catalog.Items[f.Value.Item].FurnitureRadius+.25),"Möbel überschneiden sich.");
-                if(kind=="home_place"){Need(Catalog.Items.TryGetValue(parts[0],out var furnitureDef)&&furnitureDef.FurnitureKind!=""&&h.Furniture.Count<30,"Nur vorhandene Möbel, maximal 30.");Take(s,parts[0],1);h.Furniture[id]=new FurnitureState{Item=parts[0]};}
-                Need(h.Furniture.ContainsKey(id),"Möbel nicht gefunden.");h.Furniture[id].X=x;h.Furniture[id].Z=z;h.Furniture[id].Yaw=Math.IEEERemainder(yaw,Math.Tau);return "Möbelposition synchronisiert und gespeichert.";
-            case "home_remove":Need(h.Furniture.TryGetValue(text,out var furniture),"Möbel nicht gefunden.");Give(s,furniture!.Item,1);h.Furniture.Remove(text);return "Möbel ohne Duplikation zurück im Inventar.";
+                Need(Distance(x,z,def.X-7,def.Z+3)>2+radius,"Treppenaufgang freihalten.");
+                Need(players.Values.All(player=>player.Data.State.Floor!=s.Floor||Distance(player.X,player.Z,x,z)>radius+.45),"Keinen Spieler mit Möbeln einschließen.");
+                Need(!h.Furniture.Any(f=>f.Key!=id&&f.Value.Floor==s.Floor&&Distance(f.Value.X,f.Value.Z,x,z)<radius+Catalog.Items[f.Value.Item].FurnitureRadius+.25),"Möbel überschneiden sich.");
+                if(kind=="home_place"){Need(Catalog.Items.TryGetValue(parts[0],out var furnitureDef)&&furnitureDef.FurnitureKind!=""&&h.Furniture.Count<30*h.Floors,"Nur vorhandene Möbel, maximal 30.");Take(s,parts[0],1);h.Furniture[id]=new FurnitureState{Floor=s.Floor,Item=parts[0]};}
+                Need(h.Furniture.TryGetValue(id,out var moving)&&moving.Floor==s.Floor,"Möbel nicht gefunden.");h.Furniture[id].X=x;h.Furniture[id].Z=z;h.Furniture[id].Yaw=Math.IEEERemainder(yaw,Math.Tau);return "Möbelposition synchronisiert und gespeichert.";
+            case "home_remove":Need(!StationBusy(h,text),"Belegte Anlage zuerst abholen oder stornieren.");Need(h.Furniture.TryGetValue(text,out var furniture)&&furniture.Floor==s.Floor,"Möbel nicht gefunden.");Give(s,furniture!.Item,1);h.Furniture.Remove(text);return "Möbel ohne Duplikation zurück im Inventar.";
             case "home_put":case "home_take":
                 var transfer=text.Split('|');Need(transfer.Length==2,"Item und Menge fehlen.");var count=Number(transfer[1],1,99);var item=transfer[0];Need(Catalog.Items.ContainsKey(item),"Unbekanntes Item.");
                 if(kind=="home_put"){Need(!s.Equipment.Values.Contains(item),"Ausgerüstetes Item ablegen.");Take(s,item,count);Need(h.Storage.GetValueOrDefault(item)+count<=999,"Lagerlimit 999 je Item.");h.Storage[item]=h.Storage.GetValueOrDefault(item)+count;}
                 else{Need(h.Storage.GetValueOrDefault(item)>=count,"Lagerbestand fehlt.");Give(s,item,count);h.Storage[item]-=count;if(h.Storage[item]==0)h.Storage.Remove(item);}return "Wohnungslager aktualisiert.";
             case "home_produce":
-                Need(h.Production is null&&h.Furniture.Values.Any(f=>f.Item=="oak_table"),"Freie Produktion und platzierter Arbeitstisch erforderlich.");
-                Need(Catalog.Recipes.TryGetValue(text,out var recipe),"Rezept unbekannt.");var r=recipe!;
-                Need(1+s.Professions.GetValueOrDefault(r.Profession)/Catalog.ProfessionLevelXp>=r.MinProfessionLevel&&(r.Tool==""||s.Inventory.GetValueOrDefault(r.Tool)>0),"Berufsstufe oder Werkzeug fehlt.");
-                foreach(var material in r.Inputs)Take(s,material.Key,material.Value);
-                h.Production=new ProductionJob{Inputs=new(r.Inputs),Recipe=text,Item=r.Output,Count=r.Count,Profession=r.Profession,ReadyAt=Utc+Catalog.ProductionSeconds};return "Materialien gebunden; Werkstatt arbeitet auch offline.";
+                Need(h.Production is null&&h.WorkOrders.Count<Catalog.HousingMaxWorkOrders&&h.Furniture.Any(f=>f.Value.Item=="oak_table"&&f.Value.Floor==s.Floor&&!h.WorkOrders.ContainsKey(f.Key)),"Freie Produktion und platzierter Arbeitstisch erforderlich.");
+                Need(!h.WorkOrders.Any(j=>h.Furniture.TryGetValue(j.Key,out var f)&&f.Item=="oak_table"&&f.Floor==s.Floor),"Arbeitstisch auf diesem Geschoss bereits belegt.");
+                h.Production=BeginWork(s,text);return "Materialien gebunden; Werkstatt arbeitet auch offline.";
             case "home_cancel":
-                Need(h.Production is not null&&h.Production.Inputs.Count>0,"Dieser Auftrag hat keine erstattbare Materialliste; fertigstellen und abholen.");
-                foreach(var material in h.Production!.Inputs)Give(s,material.Key,material.Value);
-                h.Production=null;return "Auftrag abgebrochen; gebundene Materialien einmalig zurückgegeben.";
+                Need(h.Production is not null&&h.Production.Floor==s.Floor,"Kein Auftrag auf diesem Geschoss.");RefundWork(s,h.Production!);h.Production=null;return "Originalmaterialien einmalig zurückgegeben.";
             case "home_collect":
-                Need(h.Production is not null&&h.Production.ReadyAt<=Utc,"Keine fertige Produktion.");var job=h.Production!;Give(s,job.Item,job.Count);s.Professions[job.Profession]=s.Professions.GetValueOrDefault(job.Profession)+Catalog.ProfessionCraftXp;CharacterRules.Progress(s,"craft",job.Recipe,Catalog);h.Production=null;return "Produktion einmalig abgeholt.";
+                Need(h.Production is not null&&h.Production.Floor==s.Floor,"Keine Produktion auf diesem Geschoss.");FinishWork(s,h.Production!);h.Production=null;return "Produktion einmalig abgeholt.";
             case "home_craft":Need(CharacterRules.Craft(s,text,Catalog),"Rezept, Material oder Inventarplatz fehlt.");CharacterRules.Progress(s,"craft",text,Catalog);return "An eigener Werkstatt hergestellt.";
             case "home_breed":Need(PetRules.Breed(s,text,Catalog),"Zucht braucht zwei erwachsene Pets und Futter.");return "Wohnungs-Zuchtbereich genutzt.";
-            case "home_plant":Need(h.HarvestAt==0,"Garten bereits bepflanzt.");Take(s,"herb",1);h.HarvestAt=Utc+300;return "Garten angelegt. Ernte in fünf echten Minuten, auch nach Neustart.";
-            case "home_harvest":Need(h.HarvestAt>0&&h.HarvestAt<=Utc,"Noch keine reife Ernte.");Give(s,"herb",3);h.HarvestAt=0;return "Gartenertrag einmalig erhalten.";
+            case "home_plant":Need(s.Floor==0&&h.HarvestAt==0,"Garten bereits bepflanzt.");Take(s,"herb",1);h.HarvestAt=Utc+300;return "Garten angelegt. Ernte in fünf echten Minuten, auch nach Neustart.";
+            case "home_harvest":Need(s.Floor==0&&h.HarvestAt>0&&h.HarvestAt<=Utc,"Noch keine reife Ernte.");Give(s,"herb",3);h.HarvestAt=0;return "Gartenertrag einmalig erhalten.";
             default:throw new GameRuleException("Unbekannte Wohnaktion.");
         }
     }

@@ -5,6 +5,7 @@ namespace MMORPG.Server;
 // This is intentionally single-world-server persistence, not a multi-shard architecture.
 public sealed class SharedWorld
 {
+    public string LastCommit {get;set;}="";
     public Dictionary<string,StallState> Stalls {get;set;}=[];
     public long Version {get;set;}
     public Dictionary<string,HomeState> Homes {get;set;}=[];
@@ -14,9 +15,11 @@ public sealed class SharedWorld
     public Dictionary<string,long> ArenaRewards {get;set;}=[];
     public static T Copy<T>(T value)=>JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
 }
-public sealed class ProductionJob {public Dictionary<string,int> Inputs {get;set;}=[];public string Recipe {get;set;}="";public string Item {get;set;}="";public string Profession {get;set;}="";public int Count {get;set;}public long ReadyAt {get;set;}}
+public sealed class ProductionJob {public int Floor {get;set;}public Dictionary<string,int> Inputs {get;set;}=[];public string Recipe {get;set;}="";public string Item {get;set;}="";public string Profession {get;set;}="";public int Count {get;set;}public long ReadyAt {get;set;}}
 public sealed class HomeState
 {
+    public int Floors {get;set;}=1;
+    public Dictionary<string,ProductionJob> WorkOrders {get;set;}=[];
     public ProductionJob? Production {get;set;}
     public string Owner {get;set;}="";
     public HashSet<string> Visitors {get;set;}=[];
@@ -30,6 +33,7 @@ public sealed class HomeState
 }
 public sealed class FurnitureState
 {
+    public int Floor {get;set;}
     public string Item {get;set;}="oak_chair";public double X {get;set;}public double Z {get;set;}public double Yaw {get;set;}
 }
 public sealed class GuildState

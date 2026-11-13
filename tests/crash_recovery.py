@@ -88,6 +88,8 @@ async def main():
             await ws.send(json.dumps(dict(type="action", seq=3, kind="save_now")))
             await snapshot(ws, lambda s: s["self"]["message"] == "Charakterzustand dauerhaft bestätigt.")
             confirmed = api("/api/characters", token=token)[0]
+            receipt = confirmed["lastCommit"]
+            assert len(receipt) == 64 and api("/api/commits/" + receipt, token=token)["committed"]
             # SIGKILL, no WebSocket disconnect or hosted-service shutdown checkpoint.
             process.kill()
             process.wait(timeout=10)
@@ -102,6 +104,7 @@ async def main():
                 assert error.code == 401
             token = api("/api/login", credentials)["token"]
             restored = api("/api/characters", token=token)[0]
+            assert api("/api/commits/" + receipt, token=token)["committed"]
             assert restored == confirmed, "Persisted character document changed across SIGKILL"
             async with websockets.connect(BASE.replace("http", "ws", 1) + "/ws") as replay:
                 await replay.send(json.dumps(dict(type="auth", ticket=unused)))

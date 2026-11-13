@@ -13,6 +13,7 @@ func _draw() -> void:
     draw_style_box(style(),Rect2(Vector2.ZERO,size));draw_arc(Vector2(80,80),72,0,TAU,48,Color("b8d3c1"),1)
     for group in ["players","monsters"]:
         for entity in state.get(group,[]):
+            if group=="players" and int(entity.get("floor",0))!=int(player.get("floor",0)):continue
             var pos:=point(entity.x,entity.z)
             if pos.distance_to(Vector2(80,80))<72:draw_circle(pos,3,Color("f08e74") if group=="monsters" else Color("7eb4dc"))
     for marker in [Vector2(-3,6),Vector2(8,6),Vector2(-8,6),Vector2(30,24),Vector2(30,12)]:

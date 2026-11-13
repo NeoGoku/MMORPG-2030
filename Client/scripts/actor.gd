@@ -211,7 +211,7 @@ func apply_state(state: Dictionary, selected: bool) -> void:
             if worn_feet:worn_feet.visible=gear.has("feet")
             if worn_accessory:worn_accessory.visible=gear.has("accessory")
 
-    target_position = Vector3(state.x, .18, state.z)
+    target_position = Vector3(state.x, .18+float(state.get("elevation",0)), state.z)
     if state.has("yaw"):
         target_yaw = state.yaw
     dead = state.get("dead", false)

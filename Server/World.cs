@@ -69,6 +69,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         lock(gate) {
             cellsDirty=true;
             if(!Accept(id,seq,out var p)||p.Hp<=0)return;
+            if(p.Data.State.Floor!=0&&(kind is "target" or "attack" or "loot" or "skill" or "gather" or "interact" or "farm_start" or "world_transit" or "transit" or "forest_transit" or "teleport")){p.Message="Diese Aktion benötigt das Erdgeschoss / die Außenwelt.";return;}
             if(ArenaAction(p,kind,target,text))return;
             if(CommunityAction(p,kind,target,text))return;
             if(SocialAction(p,kind,target,text)||TradeAction(p,kind,target,text))return;
@@ -103,7 +104,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
             cellsDirty=true;
             time+=dt;tick++;
             foreach(var p in players.Values) {
-                if(p.Hp<=0){StopFarm(p);if(p.Cooldowns.GetValueOrDefault("death:charged")!=p.Respawn){p.Exp=Math.Max(0,p.Exp-p.Exp*Math.Clamp(Catalog.DeathExpPercent,0,100)/100);p.Cooldowns["death:charged"]=p.Respawn;}if(time>=p.Respawn){p.Hp=CharacterRules.MaxHp(p.Data,Catalog);p.X=district.Spawn.X;p.Z=district.Spawn.Z;p.Message="An der Stadtwache wiederbelebt.";}continue;}
+                if(p.Hp<=0){StopFarm(p);if(p.Cooldowns.GetValueOrDefault("death:charged")!=p.Respawn){p.Exp=Math.Max(0,p.Exp-p.Exp*Math.Clamp(Catalog.DeathExpPercent,0,100)/100);p.Cooldowns["death:charged"]=p.Respawn;}if(time>=p.Respawn){p.Hp=CharacterRules.MaxHp(p.Data,Catalog);ResetInterior(p);p.X=district.Spawn.X;p.Z=district.Spawn.Z;p.Message="An der Stadtwache wiederbelebt.";}continue;}
                 FarmTick(p,dt);
                 var moving=time-p.LastInput<=.25&&(Math.Abs(p.Dx)+Math.Abs(p.Dz)>.01);
                 if(moving){Move(p,p.Dx*R.Speed*ArenaSpeed(p)*dt,p.Dz*R.Speed*ArenaSpeed(p)*dt);p.Yaw=Math.Atan2(-p.Dx,-p.Dz);}
@@ -152,19 +153,19 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         lock(gate) {
             if(cellsDirty){playerCells.Rebuild(players.Values.Select(v=>(v.Id,v.X,v.Z)));monsterCells.Rebuild(monsters.Values.Select(v=>(v.Spawn.Id,v.X,v.Z)));cellsDirty=false;}
             var p=players[id];
-            return new("snapshot",tick,playerCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>players[key]).Where(v=>v.Id==id||Distance(v.X,v.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(v=>new PlayerView(v.Id,v.X,v.Z,v.Yaw,VisibleHp(v),VisibleMaxHp(v),v.Level,v.AttackSerial,v.HurtSerial,v.LastDamage,v.Target,v.Attacking,v.Hp<=0,v.Data.Name,v.Data.ClassId,v.SkillSerial,v.Data.Appearance,v.Data.State.Equipment.Concat(v.Data.State.EquippedGear.Where(e=>v.Data.State.Gear.ContainsKey(e.Value)).Select(e=>new KeyValuePair<string,string>(e.Key,v.Data.State.Gear[e.Value].Item))).GroupBy(e=>e.Key).ToDictionary(e=>e.Key,e=>e.Last().Value))).ToArray(),
+            return new("snapshot",tick,playerCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>players[key]).Where(v=>v.Id==id||Distance(v.X,v.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(v=>new PlayerView(v.Id,v.X,v.Z,v.Yaw,VisibleHp(v),VisibleMaxHp(v),v.Level,v.AttackSerial,v.HurtSerial,v.LastDamage,v.Target,v.Attacking,v.Hp<=0,v.Data.Name,v.Data.ClassId,v.SkillSerial,v.Data.Appearance,v.Data.State.Equipment.Concat(v.Data.State.EquippedGear.Where(e=>v.Data.State.Gear.ContainsKey(e.Value)).Select(e=>new KeyValuePair<string,string>(e.Key,v.Data.State.Gear[e.Value].Item))).GroupBy(e=>e.Key).ToDictionary(e=>e.Key,e=>e.Last().Value),Elevation(v),v.Data.State.Floor)).ToArray(),
                 monsterCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>monsters[key]).Where(m=>Distance(m.X,m.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(m=>new MonsterView(m.Spawn.Id,m.Spawn.Name,m.X,m.Z,m.Hp,MaxMonsterHp(m),m.AttackSerial,m.HurtSerial,m.LastDamage,m.Hp<=0,m.Spawn.Level,m.Spawn.Boss,Math.Max(0,m.WarningUntil-time),m.WarningX,m.WarningZ,m.Spawn.Family)).ToArray(),
                 loot.Values.Where(l=>l.Owner==id&&Distance(l.X,l.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(l=>new LootView(l.Id,l.MonsterId,l.X,l.Z)).ToArray(),
                 new(p.Quest,p.Kills,p.Exp,p.Level,p.StatPoints,p.Coins,p.Scrap,p.Message,CharacterView(p)),
-                players.Values.Where(v=>v.Data.State.Pet.Active&&(v.Id==id||Distance(v.PetX,v.PetZ,p.X,p.Z)<=Catalog.InterestRadius)).Select(v=>new PetView(v.Id,v.PetX,v.PetZ,v.Data.State.Pet.Level,v.Data.State.Pet.Mode,v.Data.State.Pet.Hp,v.Data.State.Pet.Evolution)).ToArray(),SocialView(p),SummonViews(p),new {phase=(time%Catalog.DaySeconds)/Catalog.DaySeconds,weather=new[]{"klar","Regen","Nebel"}[(int)(time/Catalog.WeatherSeconds)%3]},CommunityView(p),ArenaView(p));
+                players.Values.Where(v=>v.Data.State.Pet.Active&&(v.Id==id||Distance(v.PetX,v.PetZ,p.X,p.Z)<=Catalog.InterestRadius)).Select(v=>new PetView(v.Id,v.PetX,v.PetZ,v.Data.State.Pet.Level,v.Data.State.Pet.Mode,v.Data.State.Pet.Hp,v.Data.State.Pet.Evolution,Elevation(v))).ToArray(),SocialView(p),SummonViews(p),new {phase=(time%Catalog.DaySeconds)/Catalog.DaySeconds,weather=new[]{"klar","Regen","Nebel"}[(int)(time/Catalog.WeatherSeconds)%3]},CommunityView(p),ArenaView(p));
         }
     }
     public override async Task StopAsync(CancellationToken cancellationToken){await base.StopAsync(cancellationToken);lock(gate){Checkpoint(true);}}
     protected override async Task ExecuteAsync(CancellationToken stoppingToken){using var timer=new PeriodicTimer(TimeSpan.FromMilliseconds(50));while(await timer.WaitForNextTickAsync(stoppingToken))Step(.05);}
 }
-public sealed record PlayerView(string Id,double X,double Z,double Yaw,int Hp,int MaxHp,int Level,int AttackSerial,int HurtSerial,int LastDamage,string Target,bool Attacking,bool Dead,string Name="Reisender",string ClassId="Shield Sword",int SkillSerial=0,string Appearance="default",Dictionary<string,string>? Equipment=null);
+public sealed record PlayerView(string Id,double X,double Z,double Yaw,int Hp,int MaxHp,int Level,int AttackSerial,int HurtSerial,int LastDamage,string Target,bool Attacking,bool Dead,string Name="Reisender",string ClassId="Shield Sword",int SkillSerial=0,string Appearance="default",Dictionary<string,string>? Equipment=null,double Elevation=0,int Floor=0);
 public sealed record MonsterView(string Id,string Name,double X,double Z,int Hp,int MaxHp,int AttackSerial,int HurtSerial,int LastDamage,bool Dead,int Level=1,bool Boss=false,double Warning=0,double WarningX=0,double WarningZ=0,string Family="");
 public sealed record LootView(string Id,string MonsterId,double X,double Z);
 public sealed record SelfView(string Quest,int Kills,int Exp,int Level,int StatPoints,int Coins,int Scrap,string Message,object? Character=null);
 public sealed record WorldView(string Type,long Tick,PlayerView[] Players,MonsterView[] Monsters,LootView[] Loot,SelfView Self,PetView[] Pets,object? Social=null,SummonView[]? Summons=null,object? Environment=null,object? Community=null,object? Arena=null);
-public sealed record PetView(string Owner,double X,double Z,int Level,string Mode,int Hp=100,int Evolution=0);
+public sealed record PetView(string Owner,double X,double Z,int Level,string Mode,int Hp=100,int Evolution=0,double Elevation=0);

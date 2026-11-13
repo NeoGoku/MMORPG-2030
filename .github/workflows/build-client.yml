@@ -105,6 +105,7 @@ jobs:
           timeout 30s godot --headless --path Client --script res://tests/m5_smoke.gd 2>&1 | tee logs/m5.log
           timeout 30s godot --headless --path Client --script res://tests/m6_smoke.gd 2>&1 | tee logs/m6.log
           timeout 30s godot --headless --path Client --script res://tests/m7_world_smoke.gd 2>&1 | tee logs/m7.log
+          timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/m8_housing_smoke.gd 2>&1 | tee logs/m8-housing.log
           timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/scene_smoke.gd 2>&1 | tee logs/scene.log
           timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/online_scene_smoke.gd 2>&1 | tee logs/online-scene.log
           timeout 60s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/m3_ui_smoke.gd 2>&1 | tee logs/m3-ui.log
@@ -121,6 +122,13 @@ jobs:
         with:
           name: MMORPG-${{ matrix.artifact }}
           path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: matrix.target == 'Web'
+        with:
+          name: MMORPG-M8-housing-preview
+          path: logs/m8-housing.png
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@v4

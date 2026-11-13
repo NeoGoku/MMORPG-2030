@@ -58,7 +58,7 @@ public sealed partial class World
                 }else if(kind=="chat_party"){
                     if(party is null){p.Message="Keine Gruppe.";break;}
                     recipients=party.Members.Keys.Where(players.ContainsKey).ToHashSet();
-                }else recipients=players.Values.Where(v=>Distance(p.X,p.Z,v.X,v.Z)<=Catalog.LocalChatRadius).Select(v=>v.Id).ToHashSet();
+                }else recipients=players.Values.Where(v=>SameLayer(p,v)&&Distance(p.X,p.Z,v.X,v.Z)<=Catalog.LocalChatRadius).Select(v=>v.Id).ToHashSet();
                 chatDeadlines[p.Id]=time+.75;
                 chat.Enqueue(new(++chatSequence,kind,p.Id,p.Data.Name,text,recipients));while(chat.Count>200)chat.Dequeue();break;
             default:return false;
@@ -96,7 +96,7 @@ public sealed partial class World
     {
         monster.Respawn=time+R.MonsterRespawnSeconds;killer.Attacking=false;
         var party=PartyOf(killer.Id);
-        var eligible=players.Values.Where(p=>p.Id==killer.Id||(party is not null&&party.Members.ContainsKey(p.Id)&&p.Hp>0&&Distance(p.X,p.Z,monster.X,monster.Z)<=Catalog.PartyExpRadius)).OrderBy(p=>p.Id).ToArray();
+        var eligible=players.Values.Where(p=>p.Id==killer.Id||(party is not null&&party.Members.ContainsKey(p.Id)&&SameLayer(p,killer)&&p.Hp>0&&Distance(p.X,p.Z,monster.X,monster.Z)<=Catalog.PartyExpRadius)).OrderBy(p=>p.Id).ToArray();
         for(var i=0;i<eligible.Length;i++){
             var p=eligible[i];var pool=R.KillExp*monster.Spawn.Level;var amount=pool/eligible.Length+(i<pool%eligible.Length?1:0);
             GrantExp(p,amount);GrantPetExp(p);
