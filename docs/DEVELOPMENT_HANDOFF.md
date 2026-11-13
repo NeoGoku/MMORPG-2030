@@ -1,6 +1,6 @@
 # Current M8 handoff — 2026-11-13
 
-Branch `codex/m8-recovery-housing`, base PR #11 / `d3a251f3ac19f2a1f1ce5cf9947ec894abfcefed`; no merges. Three sequential production packages: canonical durable receipts/migration 003, shared persistent floors with stair/access guards, and six-slot physical workshop production. Matching protocol **v10**; back up the entire database and do not run v9 writers against new housing documents. [Actual scope and controls](M8_CONTENT.md).
+Branch `codex/m8-recovery-housing`, [open PR #12](https://github.com/NeoGoku/MMORPG-2030/pull/12), base PR #11 / `d3a251f3ac19f2a1f1ce5cf9947ec894abfcefed`; no merges. Production source `66fbd5fa3a389ee41e2a1fc2b512d608432cbb57`. Commits: `dc5fc03` receipts, `0a927ed` floors, `719bd24` stations, `66fbd5f` compatibility/operations guards. Three sequential production packages: canonical durable receipts/migration 003, shared persistent floors with stair/access guards, and six-slot physical workshop production. Matching protocol **v10**; back up the entire database and do not run v9 writers against new housing documents. [Actual scope and controls](M8_CONTENT.md).
 
 Local targeted actual-PostgreSQL cases passed; actual SIGKILL/re-login also preserves owned receipt. Headless client assertions pass with dummy-renderer mesh warnings; real-renderer/platform evidence is deferred to final CI, whose exact source/results/artifacts will be recorded here and in the new PR.
 
@@ -75,3 +75,18 @@ M8 package 2: up to three configurable physical housing floors with interaction-
 M8 package 3: forge/loom/distillation furniture, mastery recipes and workshop quest; up to six parallel UTC-deadline jobs bound to physical same-floor stations. Original input escrow, busy-station move/removal lock, recipe/proximity/ownership/capacity validation and once-only item/profession/farm XP collection. Actual PostgreSQL targeted cases passed for parallel start, incompatible recipe rejection, duplicate commands, reopened-world collection/cancellation and full-inventory recovery. Existing single-slot jobs remain collectible/cancellable by original rules. Provisional costs/caps in game.json; protocol v10. Rendered floor/station preview and all platforms deferred to one final CI batch.
 
 M8 integration: three implemented packages described in M8_CONTENT.md. All M8 targeted PostgreSQL cases passed, including overlapping-XZ cross-floor trade rejection and production capacity recovery. Existing M7 world/classes/economy preserved. Source/PR/CI final evidence is recorded in the current handoff header. Fully asynchronous persistence, prolonged-outage reconciliation, receipt archival/load and physical device acceptance remain partial.
+
+## M8 client build evidence
+Verified source `66fbd5fa3a389ee41e2a1fc2b512d608432cbb57`: [Android/Windows/Web and rendered housing checks all passed](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152208). Actual software-GL preview downloaded and visually inspected: shared upper-floor cutaway, furniture and station models render. The earlier local dummy-renderer warnings are not a physical-device qualification. No final semi-realistic art claim.
+
+Artifacts expire 2026-11-27, matching protocol v10:
+- [Android debug APK inside ZIP](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152208/artifacts/14043341599)
+- [Windows](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152208/artifacts/14043636278)
+- [Web](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152208/artifacts/14042951859)
+- [Rendered housing/station preview](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152208/artifacts/14042951863)
+Server/PostgreSQL/crash/restore/package run: https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152295 ; final outcome follows below/in PR #12.
+
+## Final M8 server / integration evidence
+All relevant final jobs succeeded for source `66fbd5fa3a389ee41e2a1fc2b512d608432cbb57`: [server/PostgreSQL/network/crash/receipt restore/package](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152295) and [Android/Windows/Web/rendered housing](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152208). [Server with content, migrations 001–003 and SOURCE_COMMIT](https://github.com/NeoGoku/MMORPG-2030/actions/runs/43435152295/artifacts/14041923624), expires 2026-11-27. This final evidence commit changes documentation only; no duplicate platform builds.
+
+PR #12 remains open; no merges/deployment/paid resources. Next exact task: bounded asynchronous acknowledged save queue, durable handling of pending/uncertain outcomes through prolonged outages, then receipt retention/load qualification and broader city/housing content. Current exact-write receipts are verified; full sustained-outage and unconfirmed-tick durability remain partial. Physical Android/crossplay-device and capacity qualification remain untested.
