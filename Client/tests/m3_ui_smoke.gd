@@ -31,6 +31,16 @@ func run() -> void:
         if scene.pet_nodes.size()==1:break
         await physics_frame
     if not check(scene.pet_nodes.size()==1,"Server pet appears in rendered client"):return
+    scene._intent("appearance","female|2|1|3|2|1")
+    for i in range(100):
+        if scene.world.self.character.get("appearance","")=="female|2|1|3|2|1":break
+        await physics_frame
+    if not check(scene.world.self.character.get("appearance","")=="female|2|1|3|2|1","Appearance editor intent persists and synchronizes"):return
+    if not check(scene.avatars[scene.local_id].appearance_key=="female|2|1|3|2|1","Public avatar consumes synchronized appearance"):return
+    scene.graphics_options.apply_profile(0)
+    if not check(scene.camera.far==75,"Mobile low profile changes actual render distance"):return
+    scene.graphics_options.apply_profile(1)
+    if not check(scene.minimap.state.players.size()>0,"Minimap consumes real world entities"):return
     var original: Vector2=scene.hud.skill_buttons[0].position
     scene.hud.move_layout("skill1|left")
     if not check(scene.hud.skill_buttons[0].position.x==original.x-12,"User can reposition skill touch control"):return

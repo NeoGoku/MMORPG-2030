@@ -371,7 +371,7 @@ func tick(dt: float) -> void:
     elif pet.mode=="buff":buff=maxf(buff,4)
     elif pet.mode=="gather":
         for node in catalog.nodes:
-            if Vector2(sim.player.x-node.x,sim.player.z-node.z).length()<=5 and cooldowns.get("gather:"+node.id,0)<=0:
+            if 1+int(professions.get(node.profession,0))/int(catalog.professionLevelXp)>=int(node.get("minProfessionLevel",1)) and Vector2(sim.player.x-node.x,sim.player.z-node.z).length()<=5 and cooldowns.get("gather:"+node.id,0)<=0:
                 var old: int=pet.inventory.get(node.item,0)
                 pet.inventory[node.item]=old+1
                 var count:=0

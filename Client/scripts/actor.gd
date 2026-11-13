@@ -2,6 +2,9 @@ extends Node3D
 
 var appearance_key:=""
 var worn_weapon: MeshInstance3D
+var worn_head: MeshInstance3D
+var worn_feet: MeshInstance3D
+var worn_accessory: MeshInstance3D
 var worn_chest: MeshInstance3D
 var kind := "player"
 var monster_variant := "drone"
@@ -46,6 +49,9 @@ func _ready() -> void:
         worn_weapon=model.get_node("equipped_blade");worn_weapon.visible=false
         _part(model,"equipped_chest",BoxMesh.new(),Vector3(0,1.35,0),Vector3(.8,.65,.5),Color("64788d"))
         worn_chest=model.get_node("equipped_chest");worn_chest.visible=false
+        _part(model,"equipped_head",BoxMesh.new(),Vector3(0,2.24,0),Vector3(.57,.27,.53),Color("7d8790"));worn_head=model.get_node("equipped_head");worn_head.visible=false
+        _part(model,"equipped_feet",BoxMesh.new(),Vector3(0,.16,-.07),Vector3(.65,.25,.48),Color("796652"));worn_feet=model.get_node("equipped_feet");worn_feet.visible=false
+        _part(model,"equipped_accessory",SphereMesh.new(),Vector3(0,1.64,-.3),Vector3(.15,.15,.1),Color("a5b9db"),true);worn_accessory=model.get_node("equipped_accessory");worn_accessory.visible=false
     name_label = _label(display_name, Vector3(0, 2.65, 0), Color("e7eee3"), 26)
     hp_label = _label("", Vector3(0, 2.35, 0), tint, 22)
     ring = MeshInstance3D.new()
@@ -201,6 +207,9 @@ func apply_state(state: Dictionary, selected: bool) -> void:
         if gear is Dictionary:
             if worn_weapon:worn_weapon.visible=gear.has("weapon")
             if worn_chest:worn_chest.visible=gear.has("chest")
+            if worn_head:worn_head.visible=gear.has("head")
+            if worn_feet:worn_feet.visible=gear.has("feet")
+            if worn_accessory:worn_accessory.visible=gear.has("accessory")
 
     target_position = Vector3(state.x, .18, state.z)
     if state.has("yaw"):

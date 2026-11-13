@@ -130,7 +130,7 @@ public sealed partial class World
         if(pet.Mode=="heal")p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+Catalog.PetHeal+pet.Level+pet.Traits.GetValueOrDefault("affinity",1)+pet.Evolution*2);
         else if(pet.Mode=="buff")p.BuffUntil=Math.Max(p.BuffUntil,time+4);
         else if(pet.Mode=="gather"){
-            var node=Catalog.Nodes.FirstOrDefault(n=>Distance(p.X,p.Z,n.X,n.Z)<=5&&p.Cooldowns.GetValueOrDefault("gather:"+n.Id)<=time);
+            var node=Catalog.Nodes.FirstOrDefault(n=>1+p.Data.State.Professions.GetValueOrDefault(n.Profession)/Catalog.ProfessionLevelXp>=n.MinProfessionLevel&&Distance(p.X,p.Z,n.X,n.Z)<=5&&p.Cooldowns.GetValueOrDefault("gather:"+n.Id)<=time);
             if(node is not null&&PetRules.AddBag(pet,node.Item,Catalog)){p.Cooldowns["gather:"+node.Id]=time+5;p.Data.State.Professions[node.Profession]=p.Data.State.Professions.GetValueOrDefault(node.Profession)+Catalog.ProfessionGatherXp;}
         }
         else if(pet.Mode=="loot"){
