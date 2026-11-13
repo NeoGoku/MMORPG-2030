@@ -36,4 +36,16 @@ CI ergänzt echte PostgreSQL-, HTTP/WebSocket- und gerenderte Account-/Skill-/Ch
 
 [Genauer Funktionsstand und Grenzen](docs/IMPLEMENTATION_STATUS.md) · [GDD](docs/GDD.md) · [Architektur/Protokoll](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md) · [Asset-Herkunft](docs/ASSETS.md).
 
-Housing/Innenräume/Möbelplatzierung, Gilden/PvP, Reparaturen/Verkaufsstände/Auktionshaus, neue Dungeon-/Bossregionen, vollständiges Welt-Streaming und Produktionsskalierung sind noch nicht implementiert. Eigene prozedurale Assets; keine kostenpflichtigen Dienste.
+Historischer M4-Stand: Housing, Gilden/PvP und Auktionen waren noch offen. Der folgende M5-Abschnitt und der aktuelle Implementierungsstatus beschreiben die inzwischen ergänzten Funktionen. Reparaturen/Verkaufsstände, vollständiges Welt-Streaming und Produktionsskalierung bleiben offen. Eigene prozedurale Assets; keine kostenpflichtigen Dienste.
+
+## M5: gemeinsame Wohnungen, Gilden, Börse und Arena
+
+**Wohnen / Gilde / Börse** öffnet die neuen Touchmenüs. Elin steht bei **(30,24)**. Wohnquest annehmen, einen Eichenstuhl bauen und drei zusätzliche Holz sammeln, dann eine freie Lindenhof-Wohnung wählen. Reale Eingänge liegen links an der Südseite; keine privaten Instanzen. In der Wohnung Stuhl platzieren/drehen/entfernen, Lager/Werkstatt/Zucht/Garten nutzen und Besucher oder Gilde zulassen. Ein angrenzendes Zimmer lässt sich ausbauen. Miete manuell wöchentlich zahlen; ein Rückstand zerstört keine Items.
+
+Beim selben Register Gilde gründen, einladen und Ränge verwalten. Materialaufträge bringen Gilden-EXP/Energie; Offiziere verwalten das Lager und aktivieren den PvE-Segen. Ein echtes Gildenhaus kann aus Lagermaterialien erworben werden. Die **Auktionsbörse (30,12)** erlaubt Items einstellen, suchen, kaufen, zurücknehmen und Erlöse abholen, auch wenn der Verkäufer offline ist. Preise sind Gesamtpreise; fünf Prozent/minimal eine Münze Gebühr.
+
+Die markierte **Arena (-50,35)** nutzt angenommene Duelle oder bereite Gruppenteams mit normierten Matchwerten. Gilden-Gruppenteams kämpfen ebenfalls nur hier. Ein gemeinsamer Arena-Angriff ist implementiert; vollständige Klassen-PvP-Balance fehlt. Forfeit/Disconnect/Zonenaustritt gibt keine Belohnung.
+
+Im Industriegebiet und den offenen **Tiefwerken** warten fünf neue Gegner/Questziele und AUR-IX. Warnkreis verlassen oder den Schaden gemeinsam tragen; mehrere Angreifer brechen seine Kooperationsrüstung. Der Kern wird zur Schmiedewaffe verarbeitet. Optionaler Transit bei (0,-40) setzt Stufe 5 und Miras abgeschlossenen Auftrag voraus. Die Welt bleibt zu Fuß zusammenhängend.
+
+Passender **v5-Server** nötig. [M5-Betrieb, Grenzen und vorläufige Regeln](docs/M5_OPERATIONS.md). Neue Häuser streamen nach Entfernung; dies ist noch kein vollständiges Welt-Streaming. Housing hat derzeit vier Wohnungen, zwei Räume/eine Etage und Stühle. Erweiterte Stockwerke, territoriale Gildenkriege, umfassende PvP-Skills, Reparaturen/Stände und Produktionsgrafik bleiben offen. Die M5-Erweiterung ersetzt die oben als M4 beschriebenen Grenzen nur dort, wo der aktuelle [Implementierungsstatus](docs/IMPLEMENTATION_STATUS.md) echte Funktionen ausweist.

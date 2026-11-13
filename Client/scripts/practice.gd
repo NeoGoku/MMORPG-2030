@@ -18,9 +18,9 @@ func _init() -> void:
         "coins": 0, "scrap": 0, "quest": "available", "kills": 0, "target": "", "attacking": false,
         "attackSerial": 0, "hurtSerial": 0, "lastDamage": 0, "nextAttack": 0.0, "respawn": 0.0,
         "message": "Sprich mit Mira bei der Stadtwache. Geh zum goldenen Zeichen."}
-    for spawn in data.monsters:
+    for spawn in data.monsters+data.get("encounters",[]):
         monsters.append({"id": spawn.id, "name": spawn.name, "x": spawn.x, "z": spawn.z,
-            "homeX": spawn.x, "homeZ": spawn.z,"reach":spawn.get("reach",2),"speed":spawn.get("speed",1.8),"damageType":spawn.get("damageType","physical"), "hp": rules.monsterHp, "maxHp": rules.monsterHp,
+            "homeX": spawn.x, "homeZ": spawn.z,"reach":spawn.get("reach",2),"speed":spawn.get("speed",1.8),"damageType":spawn.get("damageType","physical"), "level":spawn.get("level",1),"boss":spawn.get("boss",false),"warning":0.0,"warningX":0.0,"warningZ":0.0,"nextWave":0.0,"hp": spawn.get("hp",rules.monsterHp), "maxHp": spawn.get("hp",rules.monsterHp),
             "attackSerial": 0, "hurtSerial": 0, "lastDamage": 0, "nextAttack": 0.0, "respawn": 0.0})
 
     m3 = Progression.new(self)
@@ -33,7 +33,7 @@ func _distance(a: Dictionary, b: Dictionary) -> float:
 func _walkable(x: float, z: float) -> bool:
     if absf(x) > data.bounds - .45 or absf(z) > data.bounds - .45:
         return false
-    for b in data.buildings:
+    for b in data.buildings+data.get("walls",[]):
         if absf(x - b.x) < b.width / 2.0 + .45 and absf(z - b.z) < b.depth / 2.0 + .45:
             return false
     return true
@@ -81,7 +81,7 @@ func act(kind: String, target: String = "") -> void:
                 player.message = "Mira: Gute Arbeit!" if player.quest == "complete" else "Mira: Noch %d Drohnen im Nordhof." % (rules.questKills - player.kills)
         "loot":
             for drop in drops:
-                if (target.is_empty() or target == drop.id) and _distance(player, drop) <= 3 and m3.add("scrap",1):
+                if (target.is_empty() or target == drop.id) and _distance(player, drop) <= 3 and m3.add("boss_core" if drop.monsterId=="worldboss-1" else "scrap",1):
                     player.coins += rules.lootCoins
                     player.scrap += rules.lootScrap
                     player.message = "Beute: +4 Münzen, +1 Drohnenschrott."
@@ -115,21 +115,7 @@ func step(dt: float, direction: Vector2) -> void:
                 player.yaw = atan2(player.x - m.x, player.z - m.z)
                 player.nextAttack = time + rules.attackSeconds/(1.4 if m3.effects.get("haste",0)>0 else 1.0)
                 player.attackSerial += 1
-                m.hp = maxi(0, int(m.hp - m3.attack()))
-                m.hurtSerial += 1
-                m.lastDamage = m3.attack()
-                if m.hp == 0:
-                    m.respawn = time + rules.monsterRespawnSeconds
-                    player.attacking = false
-                    _exp(int(rules.killExp))
-                    m3.reward_pet()
-                    if player.quest == "active":
-                        player.kills += 1
-                        if player.kills >= rules.questKills:
-                            player.quest = "ready"
-                    drop_sequence += 1
-                    drops.append({"id": "drop-%d" % drop_sequence, "monsterId": m.id, "x": m.x, "z": m.z, "expires": time + 90})
-                    player.message = "Drohne besiegt. +20 EXP. Beute in der Nähe einsammeln."
+                m3._hit(m,m3.attack())
         elif target_monster.is_empty():
             player.attacking = false
             player.target = ""
@@ -143,10 +129,20 @@ func step(dt: float, direction: Vector2) -> void:
         var m: Dictionary = monsters[i]
         if m.hp <= 0:
             if time >= m.respawn:
-                m.hp = rules.monsterHp
+                m.hp = m.maxHp
                 m.x = m.homeX
                 m.z = m.homeZ
             continue
+        if m.get("boss",false):
+            if m.warning>0:
+                m.warning=maxf(0,m.warning-dt)
+                if m.warning==0:
+                    if Vector2(player.x-m.warningX,player.z-m.warningZ).length()<5:
+                        player.hp=maxi(0,player.hp-30);player.hurtSerial+=1;player.lastDamage=30
+                        if player.hp==0:player.respawn=time+rules.playerRespawnSeconds;player.attacking=false
+                    m.nextWave=time+6
+            elif time>=m.nextWave and _distance(player,m)<rules.aggroRange:
+                m.warning=2.5;m.warningX=player.x;m.warningZ=player.z
         var distance := _distance(player, m)
         var home_distance := Vector2(player.x - m.homeX, player.z - m.homeZ).length()
         if player.hp > 0 and (distance < rules.aggroRange or m.get("aggro",0)>0) and home_distance < 18:
@@ -179,7 +175,7 @@ func step(dt: float, direction: Vector2) -> void:
             if dist > .1:
                 _move(m, (patrol_x - m.x) / dist * dt, (m.homeZ - m.z) / dist * dt)
             if Vector2(m.x - m.homeX, m.z - m.homeZ).length() < 2:
-                m.hp = rules.monsterHp
+                m.hp = m.maxHp
     for drop in drops.duplicate():
         if drop.expires < time:
             drops.erase(drop)
@@ -191,7 +187,7 @@ func snapshot() -> Dictionary:
     p.dead = p.hp <= 0
     p.classId=m3.class_id
     p.name=m3.nickname
-    var enemies: Array = monsters.duplicate(true)
+    var enemies: Array = monsters.filter(func(m):return _distance(player,m)<=m3.catalog.interestRadius).duplicate(true)
     for m in enemies:
         m.dead = m.hp <= 0
     return {"environment":{"phase":fmod(time,m3.catalog.daySeconds)/m3.catalog.daySeconds,"weather":["klar","Regen","Nebel"][int(time/m3.catalog.weatherSeconds)%3]},"summons":m3.summons.duplicate(true),"pets":m3.pets(), "type": "snapshot", "tick": tick, "players": [p], "monsters": enemies, "loot": drops.duplicate(true),

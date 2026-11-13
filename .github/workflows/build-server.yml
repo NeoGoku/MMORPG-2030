@@ -60,6 +60,7 @@ jobs:
           done
           python tests/accounts.py
           python tests/social.py
+          python tests/m5_network.py
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

@@ -65,6 +65,19 @@ func run() -> void:
     scene.social_panel.tab="Handel";scene.social_panel._show_tab()
     if not check(scene.social_panel.offer_item.item_count>0 and scene.social_panel.trade_box.visible,"Trade inventory and confirmation controls render"):return
     scene.social_panel.hide()
+    scene.community_panel.show();scene.community_panel.tab="Wohnen";scene.community_panel.rebuild()
+    if not check(scene.community_panel.homes.item_count==4,"Touch housing menu lists actual shared physical units"):return
+    scene.community_panel.tab="Gilde";scene.community_panel.rebuild()
+    if not check(scene.community_panel.names is LineEdit,"Guild creation is touch editable"):return
+    scene.community_panel.tab="Auktion";scene.community_panel.rebuild()
+    if not check(scene.community_panel.items.item_count>0 and scene.community_panel.price.max_value==100000,"Auction menu binds real inventory and bounded price"):return
+    scene.community_panel.tab="Arena";scene.community_panel.rebuild()
+    if not check(scene.community_panel.peers is OptionButton,"Arena selects real online peers"):return
+    scene.community_city.update_world(scene.world,Vector3(40,0,34))
+    if not check(scene.community_city.chunks.has("home-1"),"Physical housing chunk is actually created"):return
+    scene.community_city.update_world(scene.world,Vector3(-80,0,-80))
+    if not check(not scene.community_city.chunks.has("home-1"),"Distant housing chunk is unloaded"):return
+    scene.community_panel.hide()
     scene.menu.tab="Skills";scene.menu.show();scene.menu._rebuild()
     await RenderingServer.frame_post_draw
     if not OS.get_environment("M3_SCREENSHOT").is_empty():root.get_texture().get_image().save_png(OS.get_environment("M3_SCREENSHOT"))
@@ -73,5 +86,5 @@ func run() -> void:
     if not check(not scene.online and scene.practice.m3.class_id=="Archer","Separate local slot/class switch preserves offline play"):return
     scene.queue_free()
     await process_frame
-    print("PASS: account lobby, owned character slot/class, auth ticket, rendered pet, M4 skill binding/chat/trade UI and local slot separation")
+    print("PASS: account lobby, owned character slot/class, auth ticket, rendered pet, M4/M5 skill/chat/housing/guild/auction/arena UI and housing streaming and local slot separation")
     quit()

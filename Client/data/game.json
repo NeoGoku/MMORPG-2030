@@ -1066,6 +1066,26 @@
       "attack": 0,
       "defense": 0,
       "heal": 0
+    },
+    "arena_token": {
+      "name": "Arenamarke",
+      "stack": 99,
+      "price": 0,
+      "rarity": "Rare"
+    },
+    "boss_core": {
+      "name": "AUR-IX-Kern",
+      "stack": 20,
+      "price": 40,
+      "rarity": "Rare"
+    },
+    "ward_blade": {
+      "name": "Kernwächterklinge",
+      "stack": 1,
+      "price": 100,
+      "rarity": "Rare",
+      "slot": "weapon",
+      "attack": 12
     }
   },
   "professions": [
@@ -1171,6 +1191,16 @@
       },
       "output": "evolution_shard",
       "count": 1
+    },
+    "ward_blade": {
+      "name": "Kernwächterklinge",
+      "profession": "smithing",
+      "inputs": {
+        "boss_core": 1,
+        "ore": 5
+      },
+      "output": "ward_blade",
+      "count": 1
     }
   },
   "services": {
@@ -1250,6 +1280,28 @@
       "prerequisite": "herbs",
       "coins": 15,
       "exp": 25
+    },
+    {
+      "id": "deep_sentinel",
+      "name": "Tiefwerke: Sentinel bergen",
+      "type": "world",
+      "event": "kill",
+      "item": "sentinel-1",
+      "required": 2,
+      "coins": 20,
+      "exp": 80,
+      "prerequisite": ""
+    },
+    {
+      "id": "core_guardian",
+      "name": "Kernhüter bezwingen",
+      "type": "world",
+      "event": "kill",
+      "item": "worldboss-1",
+      "required": 1,
+      "coins": 40,
+      "exp": 150,
+      "prerequisite": ""
     }
   ],
   "pet": {

@@ -71,7 +71,7 @@ func _process(delta: float) -> void:
         if not message is Dictionary:
             continue
         if message.get("type") == "welcome":
-            if message.get("version") != 4 or not message.get("id") is String:
+            if message.get("version") != 5 or not message.get("id") is String:
                 disconnect_from_server()
                 state_changed.emit("Incompatible server protocol")
                 return

@@ -5,6 +5,10 @@ const Practice = preload("res://scripts/practice.gd")
 const Actor = preload("res://scripts/actor.gd")
 const SocialPanel = preload("res://scripts/social_panel.gd")
 var social_panel = SocialPanel.new()
+const CommunityPanel=preload("res://scripts/community_panel.gd")
+const CommunityCity=preload("res://scripts/community_city.gd")
+var community_panel=CommunityPanel.new()
+var community_city=CommunityCity.new()
 var summon_nodes: Dictionary = {}
 const Lobby = preload("res://scripts/lobby.gd")
 const CharacterMenu = preload("res://scripts/character_menu.gd")
@@ -48,6 +52,11 @@ func _ready() -> void:
     menu.intent.connect(_intent)
     hud.add_child(social_panel)
     social_panel.intent.connect(_social_intent)
+    add_child(community_city)
+    hud.add_child(community_panel)
+    community_panel.intent.connect(_social_intent)
+    var world_button=hud._button(hud,"Wohnen / Gilde / Börse",Rect2(22,258,240,44),"online")
+    world_button.pressed.connect(func():community_panel.visible=not community_panel.visible;community_panel.rebuild())
     var social_button=hud._button(hud,"Gruppe / Chat / Handel",Rect2(22,206,240,44),"online")
     social_button.pressed.connect(func():social_panel.visible=not social_panel.visible;social_panel._refresh_view())
     hud.online_panel.queue_free()
@@ -74,6 +83,9 @@ func _ready() -> void:
     npc.position = Vector3(practice.data.npc.x,.18,practice.data.npc.z)
     npc.target_position = npc.position
     add_child(npc)
+    var elin=Actor.new()
+    elin.kind="npc";elin.tint=Color("719a86");elin.display_name="Elin · Wohnamt / Gildenregister"
+    elin.position=Vector3(30,.18,24);elin.target_position=elin.position;add_child(elin)
     _services()
     _receive_world(practice.snapshot())
     camera_rig.position = Vector3(local_player.x,2.0,local_player.z)
@@ -120,7 +132,7 @@ func _clear_dynamic() -> void:
 
 func _physics_process(delta: float) -> void:
     var input := Vector2.ZERO
-    if not hud.online_panel.visible and not menu.visible and not social_panel.visible:
+    if not hud.online_panel.visible and not menu.visible and not social_panel.visible and not community_panel.visible:
         input = hud.joystick.direction
         input += Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)), float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
     if not DisplayServer.window_is_focused():
@@ -159,6 +171,8 @@ func _receive_world(state: Dictionary) -> void:
     _sync_pets(state.get("pets",[]))
     _sync_summons(state.get("summons",[]))
     social_panel.update_state(state,online)
+    community_panel.update_state(state,online)
+    if not local_player.is_empty():community_city.update_world(state,Vector3(local_player.x,0,local_player.z))
     if not local_player.is_empty():$City.apply_environment(state.get("environment",{}),Vector3(local_player.x,0,local_player.z))
     hud.update_state(state,local_player,online)
     if not local_player.is_empty():
@@ -173,9 +187,10 @@ func _sync_actors(states: Array, nodes: Dictionary, kind: String, selected: Stri
         if not nodes.has(state.id):
             var actor = Actor.new()
             actor.kind = kind
+            actor.monster_variant="boss" if state.get("boss",false) else ("golem" if state.get("level",1)>1 else "drone")
             actor.class_id=state.get("classId",practice.m3.class_id if state.id==local_id else "Shield Sword")
             actor.tint = Color("58cdb3") if state.id == local_id else Color("719ed4")
-            actor.display_name = ("Du · "+state.get("name","Reisender")) if state.id == local_id else (state.get("name","Reisender "+state.id.substr(0,4)) if kind == "player" else "Wachdrohne · St. 1")
+            actor.display_name = ("Du · "+state.get("name","Reisender")) if state.id == local_id else (state.get("name","Reisender "+state.id.substr(0,4)) if kind == "player" else state.get("name","Gegner")+" · St. "+str(state.get("level",1)))
             actor.position = Vector3(state.x,.18,state.z)
             add_child(actor)
             nodes[state.id] = actor
@@ -249,7 +264,7 @@ func _action(kind: String) -> void:
         _receive_world(practice.snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and not event.echo and not hud.online_panel.visible and not menu.visible and not social_panel.visible:
+    if event is InputEventKey and event.pressed and not event.echo and not hud.online_panel.visible and not menu.visible and not social_panel.visible and not community_panel.visible:
         match event.physical_keycode:
             KEY_TAB: _action("target"); get_viewport().set_input_as_handled()
             KEY_SPACE: _action("attack")

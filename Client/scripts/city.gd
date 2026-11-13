@@ -9,15 +9,15 @@ var batches: Dictionary = {}
 var materials: Dictionary = {}
 
 func _ready() -> void:
-    _box(Vector3(0, -.25, 0), Vector3(116, .5, 116), Color("67736b"))
-    _box(Vector3(0, .015, 0), Vector3(15, .12, 112), Color("b7b5a5"))
-    _box(Vector3(0, .09, 0), Vector3(10, .08, 112), Color("35434b"))
+    _box(Vector3(0, -.25, 0), Vector3(184, .5, 184), Color("67736b"))
+    _box(Vector3(0, .015, 0), Vector3(15, .12, 180), Color("b7b5a5"))
+    _box(Vector3(0, .09, 0), Vector3(10, .08, 180), Color("35434b"))
     _box(Vector3(0, .10, 1), Vector3(65, .08, 7), Color("35434b"))
-    for z in range(-50, 57, 5):
+    for z in range(-85, 89, 5):
         if abs(z - 1) > 5:
             _box(Vector3(0, .16, z), Vector3(.12, .015, 2), Color("e1d9b3"))
     for x in [-5.0, 5.0]:
-        _box(Vector3(x, .17, 0), Vector3(.15, .15, 112), Color("e2dbca"))
+        _box(Vector3(x, .17, 0), Vector3(.15, .15, 180), Color("e2dbca"))
     for x in range(-5, 6, 2):
         _box(Vector3(x, .16, 3), Vector3(.7, .02, 2), Color("e5dfcb"))
     # A welcoming stone plaza and the northern drone yard.
@@ -52,10 +52,10 @@ func _ready() -> void:
     _sign("N O R D T O R  /  2 0 3 0", Vector3(0, 5.03, -2.65), .025, Color("e7e4c9"))
     _sign("NORDHOF  ·  DROHNENSPERRZONE", Vector3(0, .3, -5.2), .013, Color("edc37c"), Vector3(-PI/2, 0, 0))
     # District perimeter and distant skyline (no areas beyond the playable boundary).
-    for x in [-57, 57]:
-        _box(Vector3(x, 1, 0), Vector3(.5, 2, 114), Color("89958a"))
-    for z in [-57, 57]:
-        _box(Vector3(0, 1, z), Vector3(114, 2, .5), Color("89958a"))
+    for x in [-91, 91]:
+        _box(Vector3(x, 1, 0), Vector3(.5, 2, 182), Color("89958a"))
+    for z in [-91, 91]:
+        _box(Vector3(0, 1, z), Vector3(182, 2, .5), Color("89958a"))
     for i in range(12):
         var x: float = -46 + i * 8.5
         var height: float = 12 + (i * 7 % 15)
