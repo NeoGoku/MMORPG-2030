@@ -74,3 +74,12 @@ Players can place named persistent stalls in the marked trade zone, escrow stack
 Building recipes now produce placeable tables, shelves and lamps as well as chairs, with stored item kind, model, footprint/door/occupant checks and conserved removal. NPC purchase is now explicitly catalogue-whitelisted: only listed vendor stock may be bought, preventing crafted/boss/zero-price reward items from being minted through forged buy intents. Expired stalls no longer permanently exhaust the active-stand cap; escrow remains recoverable.
 
 Issue #8 verification update: actual PostgreSQL reopen cases for guild gear/offline auctions passed locally; rendered creation-preview/quest guidance and touch stall open→list→close journey passed. Final source uses protocol v8; platform/network evidence and exact source commit will be recorded in the batch PR. Physical-device acceptance deferred per issue. Full alpha remains partial.
+
+## Cycle 2 — persistence operations
+Orderly hosted-server stop now checkpoints connected characters and pending disconnect saves after the tick loop stops. Isolated restore helper refuses existing/non-prefixed targets and never drops production data. CI dumps PostgreSQL after account/economy integration, restores to a new DB and compares complete character/shared-world document fingerprints. Abrupt kill/crash still has the existing five-second checkpoint window; zero-loss crash durability and queued persistence are not claimed.
+
+## Cycle 2 — persistent workshop production
+Placed oak table enables one queued recipe job per apartment. Start validates profession/tool/material requirements and atomically binds inputs; real UTC deadline continues offline. Collection validates capacity, grants output/profession/quest progress once and clears the persisted job. This is one workshop slot, not a full production-chain/floor system.
+
+## Cycle 2 — region authority
+Data-driven shared dungeon/forest regions now enforce minimum character levels on movement and join/reconnect. Qualified characters remain in the same open world; no channels or private instances. Original low-level city/hunt remains accessible. Region names appear in character UI. Full world streaming/content expansion remains partial.

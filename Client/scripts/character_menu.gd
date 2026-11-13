@@ -68,6 +68,7 @@ func _rebuild() -> void:
     if info.is_empty():return
     match tab:
         "Charakter":
+            _text("Region: "+str(info.get("region","Nordtor")))
             _text("%s · %s · Angriff %d · Schutz %d\nMana %d / %d"%[info.name,info.classId,info.attack,info.defense,info.mana,info.maxMana])
             for key in catalog.attributes:_action("%s: %d  [+1 Statpunkt]"%[key,info.attributes.get(key,0)],"stat",key)
             _text("Farm-EXP %s / %s (Kosten wachsen exponentiell)"%[info.farmXp,info.farmCost])

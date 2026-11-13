@@ -33,6 +33,8 @@ func _distance(a: Dictionary, b: Dictionary) -> float:
 func _walkable(x: float, z: float) -> bool:
     if absf(x) > data.bounds - .45 or absf(z) > data.bounds - .45:
         return false
+    for region in data.get("regions",[]):
+        if Vector2(x-region.x,z-region.z).length()<region.radius and player.level<region.minLevel:return false
     for b in data.buildings+data.get("walls",[]):
         if absf(x - b.x) < b.width / 2.0 + .45 and absf(z - b.z) < b.depth / 2.0 + .45:
             return false

@@ -47,3 +47,10 @@ Completed adjacent slices (aggregate P0/P1/P2 goals above remain open where broa
 Evidence/CI/artifact commit links are recorded in the batch PR and IMPLEMENTATION_STATUS.md. No whole-feature percentage or 50–100-player qualification implied. Physical Android acceptance remains deferred until a release milestone.
 
 Next highest priorities: process-crash/backup-restore acceptance and queued persistence; guildhouse/physical housing floor model; production/stall listing UX with expiry visibility; class PvP balance and multi-device cases; richer NPC/story navigation. Do not repeat completed appearance/guild-storage implementation as missing work.
+
+## Cycle 2 — persistence/workshop/region batch
+- [x] Graceful hosted-server stop checkpoints last connected-character state; focused scenario verifies pre-interval movement is stored.
+- [x] Isolated restore helper and CI archive restore/document fingerprint comparison added (final CI outcome in batch PR).
+- [x] Persistent one-slot housing workshop job binds materials, respects recipe mastery/tool checks and grants output once after UTC deadline/recreated world.
+- [x] Shared dungeon/forest minimum-level gates apply to movement and reconnect, with region UI.
+- [ ] Abrupt-process-kill zero-loss durability, queued persistence and full restore/outage operational qualification remain open.
