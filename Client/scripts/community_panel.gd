@@ -123,9 +123,10 @@ func rebuild() -> void:
             for pet in pets:
                 var pet_id: String=pet.id
                 button("Zucht mit Pet "+pet_id.left(8),func():emit_action("home_breed",selected(homes),pet_id))
+            button("Produktion abbrechen / Materialien zurück",func():emit_action("home_cancel",selected(homes)))
             button("Fertige Werkstattproduktion abholen",func():emit_action("home_collect",selected(homes)))
             for home in community.get("homes",[]):
-                if home.get("production") is Dictionary:text("Produktion: %s · noch %.0f s"%[home.production.recipe,maxf(0,home.production.readyAt-Time.get_unix_time_from_system())])
+                if home.get("production") is Dictionary:text("Produktion: %s · noch %.0f s"%[home.production.recipe,maxf(0,home.production.readyAt-community.get("serverUtc",Time.get_unix_time_from_system()))])
             button("Garten: 1 Kraut pflanzen (5 Minuten)",func():emit_action("home_plant",selected(homes)))
             button("Garten: reife Ernte abholen",func():emit_action("home_harvest",selected(homes)))
         "Gilde":

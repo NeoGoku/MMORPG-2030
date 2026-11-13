@@ -61,6 +61,10 @@ jobs:
           python tests/accounts.py
           python tests/social.py
           python tests/m5_network.py
+      - name: Hard-process-crash acknowledged persistence
+        env:
+          CRASH_LOG: crash-server.log
+        run: python tests/crash_recovery.py
       - name: Isolated PostgreSQL backup restore drill
         env:
           PGHOST: 127.0.0.1
@@ -83,3 +87,4 @@ jobs:
           path: |
             server.log
             auth-server.log
+            crash-server.log

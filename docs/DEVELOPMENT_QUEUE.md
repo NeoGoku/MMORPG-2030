@@ -59,3 +59,7 @@ Next highest priorities: process-crash/backup-restore acceptance and queued pers
 - [x] Party-wide atomic routine checkpoint batches, bounded retry backoff and forced final shutdown attempt.
 - [x] Explicit save-now commit confirmation; RAM backend clearly remains nondurable.
 - [ ] Crash-proof acknowledged simulation, asynchronous durable save queue and multi-process leases remain open. Do not infer zero-loss crash persistence from checkpoint confirmation.
+
+- [x] Reconnect flushes pending owned disconnect state; blocks stale reconnect while save fails.
+- [x] Production cancellation refunds original persisted inputs once; legacy jobs remain collectible.
+- [x] Local actual PostgreSQL SIGKILL/restart confirms whole acknowledged character document, fresh login and old-ticket rejection; CI drill added.

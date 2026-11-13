@@ -10,7 +10,13 @@ public sealed partial class World
     private readonly double wallStart=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()/1000.0;
     public string? JoinCharacter(CharacterRecord record)
     {
-        lock(gate){cellsDirty=true;if(players.Count>=100||players.ContainsKey(record.Id)||pendingSaves.ContainsKey(record.Id))return null;
+        lock(gate){cellsDirty=true;if(players.Count>=100||players.ContainsKey(record.Id))return null;
+            // Never reconnect from the older SQL row while a newer disconnect snapshot is pending.
+            if(pendingSaves.TryGetValue(record.Id,out var pending)){
+                if(pending.AccountId!=record.AccountId)return null;
+                try{Store.Save(pending);pendingSaves.Remove(record.Id);}
+                catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){return null;}
+            }
             if(record.AccountId!=""){var latest=Store.Get(record.Id);if(latest is null||latest.AccountId!=record.AccountId)return null;record=latest;}
             PetRules.CompleteAll(record,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);
             var p=new Player(record.Id,record.State.X,record.State.Z,100);Import(p,record);

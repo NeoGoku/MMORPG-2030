@@ -41,9 +41,9 @@ async def main():
         await send('A','chat_party','','Gruppenkanal')
         await wait(lambda:any(c['text']=='Gruppenkanal' for c in states['B']['social']['chat']))
         assert not any(c['text']=='Gruppenkanal' for c in states['C']['social']['chat'])
-        await send('A','trade_open',ids['B']);await wait(lambda:states['B']['social']['trade'] is not None)
+        await send('A','trade_open',ids['B']);await wait(lambda:all(states[n]['social']['trade'] is not None for n in 'AB'))
         await send('A','trade_offer','','potion|1|0');await send('B','trade_offer','','|0|5')
-        await wait(lambda:any(o['coins']==5 for o in states['A']['social']['trade']['offers']))
+        await wait(lambda:all(any(o['coins']==5 for o in states[n]['social']['trade']['offers']) and any(o['count']==1 for o in states[n]['social']['trade']['offers']) for n in 'AB'))
         await send('A','trade_confirm');await wait(lambda:any(o['owner']==ids['A'] and o['confirmed'] for o in states['A']['social']['trade']['offers']))
         assert states['A']['self']['coins']==20
         await send('B','trade_confirm');await wait(lambda:states['A']['self']['coins']==25 and states['B']['self']['coins']==15)

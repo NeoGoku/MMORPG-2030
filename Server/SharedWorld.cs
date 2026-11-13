@@ -14,7 +14,7 @@ public sealed class SharedWorld
     public Dictionary<string,long> ArenaRewards {get;set;}=[];
     public static T Copy<T>(T value)=>JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
 }
-public sealed class ProductionJob {public string Recipe {get;set;}="";public string Item {get;set;}="";public string Profession {get;set;}="";public int Count {get;set;}public long ReadyAt {get;set;}}
+public sealed class ProductionJob {public Dictionary<string,int> Inputs {get;set;}=[];public string Recipe {get;set;}="";public string Item {get;set;}="";public string Profession {get;set;}="";public int Count {get;set;}public long ReadyAt {get;set;}}
 public sealed class HomeState
 {
     public ProductionJob? Production {get;set;}
