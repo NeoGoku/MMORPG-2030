@@ -69,3 +69,5 @@ Dieses Issue-#8-Paket benötigt einen passenden **v8-Server**. Vorherige v7-Absc
 
 ### Entwicklungszyklus 2
 Ein platzierter Eichentisch erlaubt eine Werkstattproduktion pro Wohnung: Material wird sofort gebunden, Fertigstellung läuft offline, Abholung erfolgt einmalig über das Wohnmenü. Tiefwerke benötigen Stufe 5, Grünsaum Stufe 10, auch nach Wiederverbindung. Geordnetes Serverende speichert nochmals; harte Abbrüche behalten das dokumentierte Checkpoint-Risiko. `ops/restore-isolated.sh` stellt Archive ausschließlich in eine neue `mmorpg_restore_…`-Datenbank wieder her.
+
+M7: Im Charaktermenü kann der aktuelle Zustand ausdrücklich gespeichert werden. Bestätigung erscheint erst nach erfolgreichem Store-Commit; RAM-Testbetrieb bleibt ausdrücklich flüchtig. Gruppen-Checkpoints speichern gemeinsam und wiederholen Fehler mit begrenztem Abstand. Passender **v9-Server** nötig; harte Crashes können weiterhin unbestätigte Ticks verlieren.

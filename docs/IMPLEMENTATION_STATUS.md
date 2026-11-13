@@ -83,3 +83,6 @@ Placed oak table enables one queued recipe job per apartment. Start validates pr
 
 ## Cycle 2 — region authority
 Data-driven shared dungeon/forest regions now enforce minimum character levels on movement and join/reconnect. Qualified characters remain in the same open world; no channels or private instances. Original low-level city/hunt remains accessible. Region names appear in character UI. Full world streaming/content expansion remains partial.
+
+## M7 persistence continuation
+Routine checkpoint writes connected party members together using the existing optimistic SaveBatch transaction (party cap ten), so shared combat progression is not checkpointed one member at a time. Failed routine writes use bounded exponential retry delay; orderly shutdown forces a final attempt. Explicit save-now action reports success only after store commit and exposes last confirmed tick. A hard crash can still lose unconfirmed ticks; no zero-loss or asynchronous save-queue claim.

@@ -68,6 +68,8 @@ func _rebuild() -> void:
     if info.is_empty():return
     match tab:
         "Charakter":
+            _action("Online-Zustand jetzt speichern / bestätigen","save_now","")
+            _text("Bestätigter Tick: %d · aktueller Tick: %d"%[info.get("savedTick",0),info.get("currentTick",0)])
             _text("Region: "+str(info.get("region","Nordtor")))
             _text("%s · %s · Angriff %d · Schutz %d\nMana %d / %d"%[info.name,info.classId,info.attack,info.defense,info.mana,info.maxMana])
             for key in catalog.attributes:_action("%s: %d  [+1 Statpunkt]"%[key,info.attributes.get(key,0)],"stat",key)

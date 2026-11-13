@@ -18,7 +18,7 @@ async def main():
             if value.get('type')=='snapshot':states[name]=value
     async def connect(name):
         ticket=api('/api/ticket',dict(characterId=ids[name]),tokens[name])['ticket'];ws=await websockets.connect(BASE.replace('http','ws',1)+'/ws');sockets[name]=ws;seq[name]=0;sent[name]=asyncio.get_running_loop().time()
-        await ws.send(json.dumps(dict(type='auth',ticket=ticket)));assert json.loads(await ws.recv())['version']==8;tasks.append(asyncio.create_task(watch(name,ws)))
+        await ws.send(json.dumps(dict(type='auth',ticket=ticket)));assert json.loads(await ws.recv())['version']==9;tasks.append(asyncio.create_task(watch(name,ws)))
     async def act(name,kind,target='',text=''):
         seq[name]+=1;sent[name]=asyncio.get_running_loop().time();await sockets[name].send(json.dumps(dict(type='action',seq=seq[name],kind=kind,target=target,text=text)))
     async def go(name,x,z):

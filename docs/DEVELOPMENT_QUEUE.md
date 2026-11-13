@@ -54,3 +54,8 @@ Next highest priorities: process-crash/backup-restore acceptance and queued pers
 - [x] Persistent one-slot housing workshop job binds materials, respects recipe mastery/tool checks and grants output once after UTC deadline/recreated world.
 - [x] Shared dungeon/forest minimum-level gates apply to movement and reconnect, with region UI.
 - [ ] Abrupt-process-kill zero-loss durability, queued persistence and full restore/outage operational qualification remain open.
+
+## M7 next persistence slice
+- [x] Party-wide atomic routine checkpoint batches, bounded retry backoff and forced final shutdown attempt.
+- [x] Explicit save-now commit confirmation; RAM backend clearly remains nondurable.
+- [ ] Crash-proof acknowledged simulation, asynchronous durable save queue and multi-process leases remain open. Do not infer zero-loss crash persistence from checkpoint confirmation.

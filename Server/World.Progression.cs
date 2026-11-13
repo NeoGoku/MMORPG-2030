@@ -28,12 +28,20 @@ public sealed partial class World
     private void CommitAction(Player p,CharacterRecord previous,int oldHp,Dictionary<string,Drop> oldLoot,Dictionary<string,Monster> oldMonsters,Dictionary<string,CharacterRecord> oldPeers,Dictionary<string,Summon> oldSummons,FarmState oldFarm)
     {
         if(p.Data.AccountId=="")return;
-        try{Store.SaveBatch(oldPeers.Keys.Select(id=>players[id]).Where(v=>v.Data.AccountId!="").Select(Export).Append(Export(p)).ToArray());}catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){Import(p,previous);foreach(var peer in oldPeers)Import(players[peer.Key],peer.Value);p.Hp=oldHp;p.Farm=oldFarm;loot.Clear();foreach(var item in oldLoot)loot[item.Key]=item.Value;monsters.Clear();foreach(var item in oldMonsters)monsters[item.Key]=item.Value;summons.Clear();foreach(var item in oldSummons)summons[item.Key]=item.Value;p.Message="Speichern fehlgeschlagen; Aktion zurückgesetzt. Bitte erneut versuchen.";}
+        try{Store.SaveBatch(oldPeers.Keys.Select(id=>players[id]).Where(v=>v.Data.AccountId!="").Select(Export).Append(Export(p)).ToArray());p.SavedTick=tick;foreach(var id in oldPeers.Keys)players[id].SavedTick=tick;if(p.Message=="Aktion erfolgreich: save_now")p.Message=Store.Durable?"Charakterzustand dauerhaft bestätigt.":"RAM-Test: nur flüchtig gespeichert.";}catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){Import(p,previous);foreach(var peer in oldPeers)Import(players[peer.Key],peer.Value);p.Hp=oldHp;p.Farm=oldFarm;loot.Clear();foreach(var item in oldLoot)loot[item.Key]=item.Value;monsters.Clear();foreach(var item in oldMonsters)monsters[item.Key]=item.Value;summons.Clear();foreach(var item in oldSummons)summons[item.Key]=item.Value;p.Message="Speichern fehlgeschlagen; Aktion zurückgesetzt. Bitte erneut versuchen.";}
     }
-    private void Checkpoint()
+    private double checkpointRetryAt;private int checkpointFailures;
+    private void Checkpoint(bool force=false)
     {
-        foreach(var p in players.Values.Where(p=>p.Data.AccountId!=""))try{Store.Save(Export(p));}catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){p.Message="Datenbank nicht erreichbar; letzter Checkpoint noch ausstehend.";}
-        foreach(var pair in pendingSaves.ToArray())try{Store.Save(pair.Value);pendingSaves.Remove(pair.Key);}catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){}
+        if(!force&&time<checkpointRetryAt)return;
+        var failed=false;
+        foreach(var group in players.Values.Where(p=>p.Data.AccountId!="").GroupBy(p=>PartyOf(p.Id)?.Id??p.Id)){
+            var members=group.ToArray();
+            try{Store.SaveBatch(members.Select(Export).ToArray());foreach(var p in members)p.SavedTick=tick;}
+            catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){failed=true;foreach(var p in members)p.Message="Speicherung ausstehend; letzter bestätigter Stand unverändert.";}
+        }
+        foreach(var pair in pendingSaves.ToArray())try{Store.Save(pair.Value);pendingSaves.Remove(pair.Key);}catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){failed=true;}
+        checkpointFailures=failed?Math.Min(5,checkpointFailures+1):0;checkpointRetryAt=failed?time+Math.Min(30,Math.Pow(2,checkpointFailures)):time;
     }
     private bool Near(Player p,string service)=>Catalog.Services.TryGetValue(service,out var point)&&Distance(p.X,p.Z,point.X,point.Z)<=3;
     private bool ExtendedAction(Player p,string kind,string target)
@@ -47,6 +55,7 @@ public sealed partial class World
             case "gear_legacy_remove":ok=c.Equipment.Remove(target);break;
             case "gear_remove":ok=c.EquippedGear.Remove(target);break;
             case "gear_repair":ok=Near(p,"merchant")&&GearRules.Repair(c,target,Catalog);break;
+            case "save_now":ok=true;break;
             case "slot":
                 var binding=target.Split('|');
                 if(binding.Length==2&&int.TryParse(binding[0],out var index)&&index>=0&&index<6&&Catalog.Classes[p.Data.ClassId].Skills.Any(s=>s.Id==binding[1])){while(c.SkillBar.Count<6)c.SkillBar.Add("skill1");c.SkillBar[index]=binding[1];ok=true;}break;
@@ -141,7 +150,7 @@ public sealed partial class World
     private object CharacterView(Player p)
     {
         var c=CharacterRules.Clone(Export(p)).State;
-        return new{region=RegionName(p),id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,navigation=CharacterRules.Navigation(c,q,Catalog),progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
+        return new{savedTick=p.SavedTick,currentTick=tick,region=RegionName(p),id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,navigation=CharacterRules.Navigation(c,q,Catalog),progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
             focus=c.Focus,resource=Catalog.Classes[p.Data.ClassId].Resource,passive=Catalog.Classes[p.Data.ClassId].Passive,passiveActive=p.Level>=Catalog.Classes[p.Data.ClassId].PassiveLevel,mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }
