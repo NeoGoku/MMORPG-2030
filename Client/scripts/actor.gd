@@ -1,5 +1,11 @@
 extends Node3D
 
+var appearance_key:=""
+var worn_weapon: MeshInstance3D
+var worn_head: MeshInstance3D
+var worn_feet: MeshInstance3D
+var worn_accessory: MeshInstance3D
+var worn_chest: MeshInstance3D
 var kind := "player"
 var monster_variant := "drone"
 var class_id := "Shield Sword"
@@ -24,6 +30,7 @@ var dead := false
 var _attack_serial := 0
 var _hurt_serial := 0
 var floating: Array = []
+static var draw_distance:=60.0
 static var materials: Dictionary = {}
 
 func _ready() -> void:
@@ -32,10 +39,19 @@ func _ready() -> void:
         _part(model,"spirit",SphereMesh.new(),Vector3(0,1.1,0),Vector3(.7,.9,.7),Color("82dccb"),true)
         _part(model,"core",SphereMesh.new(),Vector3(0,1.1,-.3),Vector3(.2,.2,.2),Color("fff2aa"),true)
     elif kind == "monster":
-        if monster_variant=="drone":_drone()
+        if monster_variant in ["boar","spirit","tree"]:_creature()
+        elif monster_variant=="drone":_drone()
         else:_golem()
     else:
         _human()
+    if kind=="player":
+        _part(model,"equipped_blade",BoxMesh.new(),Vector3(.65,1.1,-.25),Vector3(.12,1.1,.18),Color("c8d5dc"))
+        worn_weapon=model.get_node("equipped_blade");worn_weapon.visible=false
+        _part(model,"equipped_chest",BoxMesh.new(),Vector3(0,1.35,0),Vector3(.8,.65,.5),Color("64788d"))
+        worn_chest=model.get_node("equipped_chest");worn_chest.visible=false
+        _part(model,"equipped_head",BoxMesh.new(),Vector3(0,2.24,0),Vector3(.57,.27,.53),Color("7d8790"));worn_head=model.get_node("equipped_head");worn_head.visible=false
+        _part(model,"equipped_feet",BoxMesh.new(),Vector3(0,.16,-.07),Vector3(.65,.25,.48),Color("796652"));worn_feet=model.get_node("equipped_feet");worn_feet.visible=false
+        _part(model,"equipped_accessory",SphereMesh.new(),Vector3(0,1.64,-.3),Vector3(.15,.15,.1),Color("a5b9db"),true);worn_accessory=model.get_node("equipped_accessory");worn_accessory.visible=false
     name_label = _label(display_name, Vector3(0, 2.65, 0), Color("e7eee3"), 26)
     hp_label = _label("", Vector3(0, 2.35, 0), tint, 22)
     ring = MeshInstance3D.new()
@@ -103,6 +119,22 @@ func _human() -> void:
         _part(model,"shield",BoxMesh.new(),Vector3(-.65,1.18,-.10),Vector3(.13,1.05 if class_id=="Tank" else .75,.7),Color("bca16a"))
         if class_id=="Tank":_part(model,"helmet",BoxMesh.new(),Vector3(0,2.25,.02),Vector3(.58,.25,.53),Color("6b8492"))
 
+func _creature() -> void:
+    if monster_variant=="boar":
+        _part(model,"body",SphereMesh.new(),Vector3(0,.85,0),Vector3(1.4,.9,2),Color("786353"))
+        _part(model,"snout",BoxMesh.new(),Vector3(0,.8,-1),Vector3(.65,.4,.5),Color("a18b74"))
+        for side in [-1,1]:
+            for z in [-.6,.6]:_part(model,"foot",BoxMesh.new(),Vector3(side*.45,.35,z),Vector3(.25,.7,.25),Color("4c4843"))
+            _part(model,"tusk",CylinderMesh.new(),Vector3(side*.3,.9,-1.1),Vector3(.08,.6,.08),Color("ddd0ab"))
+    elif monster_variant=="spirit":
+        _part(model,"spirit",SphereMesh.new(),Vector3(0,1.3,0),Vector3(.9,1.8,.9),Color("78aaa1"),true)
+        for side in [-1,1]:_part(model,"wing",SphereMesh.new(),Vector3(side*.8,1.6,0),Vector3(1,.25,.5),Color("b5d5b8"),true)
+    else:
+        _part(model,"trunk",CylinderMesh.new(),Vector3(0,1.5,0),Vector3(1.2,3,1.2),Color("6b6650"))
+        _part(model,"crown",SphereMesh.new(),Vector3(0,3.4,0),Vector3(3,2.2,2.5),Color("48765f"))
+        for side in [-1,1]:_part(model,"root",BoxMesh.new(),Vector3(side*.9,.5,0),Vector3(1.7,.5,1),Color("79745a"))
+        _part(model,"heart",SphereMesh.new(),Vector3(0,1.8,-.6),Vector3(.5,.6,.3),Color("b8dd89"),true)
+
 func _golem() -> void:
     var boss: bool=monster_variant=="boss"
     _part(model,"reactor",SphereMesh.new(),Vector3(0,1.5,0),Vector3(1.5,1.3,1.2) if boss else Vector3(1,.9,.8),Color("444f65"))
@@ -155,6 +187,30 @@ func _label(text: String, pos: Vector3, color: Color, font_size: int) -> Label3D
     return label
 
 func apply_state(state: Dictionary, selected: bool) -> void:
+    if kind=="player":
+        var value: String=state.get("appearance","default")
+        if value!=appearance_key:
+            appearance_key=value
+            var parts:=value.split("|")
+            if parts.size()==6:
+                var skin=[Color("d8b8a0"),Color("b78a67"),Color("825c46"),Color("533b32")][int(parts[4])]
+                for key in ["head","eyes"]:
+                    var node=model.get_node_or_null(key)
+                    if node and key=="head":node.material_override=_material(skin,false);node.scale.x=.42+.04*int(parts[1])
+                var hair=model.get_node_or_null("hair")
+                if hair:hair.scale.y=.18+.07*int(parts[3]);hair.material_override=_material([Color("292a32"),Color("9c744b"),Color("b7bec4"),Color("583d61")][int(parts[3])],false)
+                model.scale=Vector3((.94 if parts[0]=="female" else 1.0)+.05*int(parts[2]),.94+.04*int(parts[2]),1)
+                var tattoo=model.get_node_or_null("tattoo")
+                if tattoo:tattoo.queue_free()
+                if int(parts[5])>0:_part(model,"tattoo",BoxMesh.new(),Vector3(.29,1.54,-.23),Vector3(.1,.06*int(parts[5]),.03),Color("3e6e7c"))
+        var gear=state.get("equipment",{})
+        if gear is Dictionary:
+            if worn_weapon:worn_weapon.visible=gear.has("weapon")
+            if worn_chest:worn_chest.visible=gear.has("chest")
+            if worn_head:worn_head.visible=gear.has("head")
+            if worn_feet:worn_feet.visible=gear.has("feet")
+            if worn_accessory:worn_accessory.visible=gear.has("accessory")
+
     target_position = Vector3(state.x, .18, state.z)
     if state.has("yaw"):
         target_yaw = state.yaw
@@ -180,7 +236,7 @@ func _process(delta: float) -> void:
     var camera:=get_viewport().get_camera_3d()
     if camera:
         var distance:=global_position.distance_to(camera.global_position)
-        model.visible=distance<60
+        model.visible=distance<draw_distance
         name_label.visible=distance<28 and not dead
         hp_label.visible=distance<28 and not dead
     timer += delta

@@ -52,6 +52,9 @@ func peer_picker() -> OptionButton:
 func item_picker() -> OptionButton:
     var choose:=option()
     for item in state.get("self",{}).get("character",{}).get("inventory",{}):choose.add_item(catalog.items[item].name+" · "+item);choose.set_item_metadata(choose.item_count-1,item)
+    for id in state.get("self",{}).get("character",{}).get("gear",{}):
+        var gear: Dictionary=state.self.character.gear[id]
+        choose.add_item(catalog.items[gear.item].name+" · Zustand "+str(gear.condition));choose.set_item_metadata(choose.item_count-1,id)
     return choose
 func rebuild() -> void:
     for child in content.get_children():content.remove_child(child);child.queue_free()
@@ -94,6 +97,14 @@ func rebuild() -> void:
             button("ID-Besucher entfernen",func():emit_action("home_visit",selected(homes),names.text+"|remove"))
             button("Gildenbesuche erlauben",func():emit_action("home_visit",selected(homes),"guild|allow"))
             button("Gildenbesuche sperren",func():emit_action("home_visit",selected(homes),"guild|remove"))
+            for id in state.get("self",{}).get("character",{}).get("gear",{}):
+                var gear_id: String=id
+                button("Instanz einlagern: "+id.left(6),func():emit_action("home_gear_put",selected(homes),gear_id))
+            for home in community.get("homes",[]):
+                if home.get("gearStorage") is Dictionary:
+                    for id in home.gearStorage:
+                        var gear_id: String=id;var home_id: String=home.id
+                        button("Instanz aus Lager: "+id.left(6),func():emit_action("home_gear_take",home_id,gear_id))
             items=item_picker();amount=spin(1,99,1)
             button("Ausgewähltes Item ins Wohnungslager",func():emit_action("home_put",selected(homes),selected(items)+"|%d"%amount.value))
             for home in community.get("homes",[]):
@@ -141,6 +152,9 @@ func rebuild() -> void:
             button("Suche senden, danach Anzeige aktualisieren",func():emit_action("market_search","",names.text))
             items=item_picker();amount=spin(1,99,1);amount.prefix="Menge: "
             price=spin(1,100000,10);price.prefix="Gesamtpreis: "
+            for pet in state.get("self",{}).get("character",{}).get("ownedPets",[]):
+                var pet_id: String=pet.id
+                button("Pet Stufe %d einstellen: %s (nicht ausgewählt / kein Training)"%[pet.level,pet_id.left(6)],func():emit_action("market_pet",pet_id,str(int(price.value))))
             button("Verbindlich einstellen",func():emit_action("market_list","",selected(items)+"|%d|%d"%[amount.value,price.value]))
             text("Offene Erlöse: %d Münzen"%community.get("proceeds",0))
             button("Verkaufserlöse abholen",func():emit_action("market_claim"))
@@ -149,11 +163,12 @@ func rebuild() -> void:
             button("Nächste Seite, danach aktualisieren",func():emit_action("market_page",str(int(community.get("marketPage",0))+1)))
             for offer in community.get("auctions",[]):
                 var listing_id: String=offer.id
-                button("Kaufen: %s × %d · %d Münzen"%[catalog.items[offer.item].name,offer.count,offer.price],func():emit_action("market_buy",listing_id))
+                button("Kaufen: %s × %d · %d Münzen"%[("Pet Stufe "+str(offer.petLevel)) if offer.get("petLevel",0)>0 else catalog.items[offer.item].name,offer.count,offer.price],func():emit_action("market_buy",listing_id))
             for offer in community.get("ownAuctions",[]):
                 var listing_id: String=offer.id
                 button("Eigenes Angebot zurücknehmen: %s × %d"%[catalog.items[offer.item].name,offer.count],func():emit_action("market_cancel",listing_id))
         "Arena":
+            button("Grünsaum-Transit: (0,90), Stufe 10 / Rückweg (0,112)",func():emit_action("forest_transit"))
             button("Tiefwerk-Transit benutzen: bei (0,-40), St. 5 + Miras Auftrag",func():emit_action("transit"))
             text("PvP ist ausschließlich in der markierten Arena möglich. Normierte Match-HP und Angriffe sind vom PvE-Fortschritt getrennt.")
             peers=peer_picker()
@@ -163,5 +178,9 @@ func rebuild() -> void:
             button("Auswahl zum Arenaduell fordern",func():emit_action("arena_invite",selected(peers)))
             button("Duellanfrage der Auswahl annehmen",func():emit_action("arena_accept",selected(peers)))
             button("Auswahl angreifen (nur aktives Match / Reichweite)",func():emit_action("arena_hit",selected(peers)))
+            var class_id: String=state.get("self",{}).get("character",{}).get("classId","Shield Sword")
+            for skill in catalog.classes[class_id].skills:
+                var skill_id: String=skill.id
+                button("Arena-Skill: "+skill.name+" · 20 Energie",func():emit_action("arena_skill",skill_id,selected(peers)))
             button("Match aufgeben",func():emit_action("arena_leave"))
             text(str(state.get("arena",{})))

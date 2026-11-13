@@ -47,7 +47,7 @@ public sealed partial class World
         if(Distance(p.X,p.Z,target.X,target.Z)>R.AttackRange){p.Attacking=false;SteerFarm(p,target.X,target.Z,dt);}
         else{
             p.Attacking=true;
-            var skill=Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Enabled&&s.MinLevel<=p.Level&&s.Kind=="damage"&&p.Mana>=s.Cost&&p.Cooldowns.GetValueOrDefault(s.Id)<=time);
+            var skill=Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Enabled&&s.MinLevel<=p.Level&&(s.Kind is "damage" or "dot" or "aoe" or "drain")&&p.Data.State.Focus>=s.FocusCost&&p.Mana>=s.Cost&&p.Cooldowns.GetValueOrDefault(s.Id)<=time);
             if(skill is not null)Cast(p,skill.Id);
         }
     }

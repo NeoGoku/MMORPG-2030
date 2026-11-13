@@ -2,7 +2,7 @@ namespace MMORPG.Server;
 
 public sealed partial class World
 {
-    private sealed record Offer(string Item,int Count,int Coins);
+    private sealed record Offer(string Item,int Count,int Coins,GearState? Gear=null);
     private sealed class Trade(string a,string b,double expires)
     {
         public string A=a,B=b;public double Expires=expires;
@@ -22,10 +22,10 @@ public sealed partial class World
                 if(trade is null){p.Message="Kein Handel.";break;}
                 var parts=text.Split('|');
                 if(parts.Length!=3||!int.TryParse(parts[1],out var count)||!int.TryParse(parts[2],out var coins)||count<0||count>99||coins<0||coins>100000||coins>p.Coins||
-                    (parts[0]!=""&&(!Catalog.Items.ContainsKey(parts[0])||count==0||p.Data.State.Inventory.GetValueOrDefault(parts[0])<count||p.Data.State.Equipment.Values.Contains(parts[0])))||(parts[0]==""&&count!=0)){
+                    (parts[0]!=""&&((!Catalog.Items.ContainsKey(parts[0])&&!p.Data.State.Gear.ContainsKey(parts[0]))||count==0||(p.Data.State.Gear.ContainsKey(parts[0])?count!=1||p.Data.State.EquippedGear.Values.Contains(parts[0]):p.Data.State.Inventory.GetValueOrDefault(parts[0])<count)||p.Data.State.Equipment.Values.Contains(parts[0])))||(parts[0]==""&&count!=0)){
                     p.Message="Ungültiges Angebot oder ausgerüsteter Gegenstand.";break;
                 }
-                trade.Offers[p.Id]=new(parts[0],count,coins);trade.Confirmed.Clear();trade.Expires=time+120;p.Message="Angebot aktualisiert; Bestätigungen zurückgesetzt.";break;
+                trade.Offers[p.Id]=new(parts[0],count,coins,p.Data.State.Gear.TryGetValue(parts[0],out var offeredGear)?SharedWorld.Copy(offeredGear):null);trade.Confirmed.Clear();trade.Expires=time+120;p.Message="Angebot aktualisiert; Bestätigungen zurückgesetzt.";break;
             case "trade_confirm":
                 if(trade is null)break;
                 trade.Confirmed.Add(p.Id);
@@ -45,6 +45,10 @@ public sealed partial class World
     private bool RemoveOffer(CharacterState c,Offer offer)
     {
         if(c.Coins<offer.Coins)return false;
+        if(offer.Gear is not null){
+            if(!c.Gear.TryGetValue(offer.Item,out var current)||c.EquippedGear.Values.Contains(offer.Item)||current.Item!=offer.Gear.Item||current.Condition!=offer.Gear.Condition)return false;
+            c.Gear.Remove(offer.Item);c.Coins-=offer.Coins;return true;
+        }
         if(offer.Item!=""){
             if(c.Inventory.GetValueOrDefault(offer.Item)<offer.Count||c.Equipment.Values.Contains(offer.Item))return false;
             c.Inventory[offer.Item]-=offer.Count;if(c.Inventory[offer.Item]==0)c.Inventory.Remove(offer.Item);
@@ -54,12 +58,13 @@ public sealed partial class World
     private bool ReceiveOffer(CharacterState c,Offer offer)
     {
         if(c.Coins>int.MaxValue-offer.Coins)return false;
+        if(offer.Gear is not null){if(CharacterRules.Slots(c,Catalog)>=Catalog.InventorySlots||c.Gear.ContainsKey(offer.Item))return false;c.Gear[offer.Item]=SharedWorld.Copy(offer.Gear);c.Coins+=offer.Coins;return true;}
         if(offer.Item!=""&&!CharacterRules.Add(c,offer.Item,offer.Count,Catalog))return false;
         c.Coins+=offer.Coins;return true;
     }
     private object? TradeView(Player p)
     {
         var trade=TradeOf(p.Id);if(trade is null)return null;
-        return new {partner=trade.A==p.Id?trade.B:trade.A,remaining=Math.Max(0,trade.Expires-time),offers=trade.Offers.Select(o=>new {owner=o.Key,item=o.Value.Item,count=o.Value.Count,coins=o.Value.Coins,confirmed=trade.Confirmed.Contains(o.Key)}).ToArray()};
+        return new {partner=trade.A==p.Id?trade.B:trade.A,remaining=Math.Max(0,trade.Expires-time),offers=trade.Offers.Select(o=>new {owner=o.Key,item=o.Value.Gear?.Item??o.Value.Item,instanceId=o.Value.Gear is null?null:o.Value.Item,condition=o.Value.Gear?.Condition,count=o.Value.Count,coins=o.Value.Coins,confirmed=trade.Confirmed.Contains(o.Key)}).ToArray()};
     }
 }

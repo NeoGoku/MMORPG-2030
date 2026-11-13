@@ -107,10 +107,14 @@ func _refresh_view() -> void:
     offer_label.text="Zwei angemeldete Spieler in 5 m Reichweite. Beide bestätigen dasselbe Angebot."
     if trade is Dictionary:
         offer_label.text="Handel · %.0f s\n"%trade.remaining
-        for offer in trade.offers:offer_label.text+="%s: %s × %d + %d Münzen · %s\n"%[offer.owner.left(6),offer.item,offer.count,offer.coins,"bestätigt" if offer.confirmed else "offen"]
+        for offer in trade.offers:offer_label.text+="%s: %s × %d + %d Münzen · %s\n"%[offer.owner.left(6),offer.item+(" · Zustand %d"%offer.condition if offer.get("condition")!=null else ""),offer.count,offer.coins,"bestätigt" if offer.confirmed else "offen"]
     var selected_item: String=str(offer_item.get_item_metadata(offer_item.selected)) if offer_item.item_count>0 else ""
     offer_item.clear();offer_item.add_item("Kein Gegenstand");offer_item.set_item_metadata(0,"")
     var character: Dictionary=last_state.get("self",{}).get("character",{})
     for item in character.get("inventory",{}):
         offer_item.add_item("%s × %d"%[catalogue.items[item].name,character.inventory[item]]);offer_item.set_item_metadata(offer_item.item_count-1,item)
         if item==selected_item:offer_item.select(offer_item.item_count-1)
+
+    for id in character.get("gear",{}):
+        var instance: Dictionary=character.gear[id]
+        offer_item.add_item(catalogue.items[instance.item].name+" · Zustand "+str(instance.condition));offer_item.set_item_metadata(offer_item.item_count-1,id)

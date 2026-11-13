@@ -39,3 +39,24 @@ All remaining GDD goals remain on the roadmap. No menu or data definition alone 
 
 ## M6 integration update (2026-11-13)
 Implemented with focused tests: guild-only chat, leader hall release, auction pagination/expiry retaining escrow, gated item/stat-point quest rewards and UTC daily objectives, consumable rare stat reset, level-cap prestige and configurable death EXP loss. Touch controls connect the online actions; local reset/prestige are temporary. Protocol v6. See DEVELOPMENT_HANDOFF.md for rule proposals, exact continuation and qualification categories. This does not declare the full MMORPG alpha complete; all M5 gaps not explicitly replaced remain open.
+
+## Continuation package 1
+Appearance editing and public avatar reconciliation (gender/face/body/hair/skin/tattoo choices), distinct gear instances with equip/unequip/condition/repair and actual damage contributions. Existing pristine item stacks stay valid; explicit unpack converts one stack item to one unique instance without deleting legacy saves. Instance transfer/storage is addressed separately before claiming full economy integration. Models remain procedural, not final semi-realistic art. PR #8 unavailable (404); continuation uses latest available #6.
+
+## Continuation package 2
+Eight configurable class resources with skill expenditure, passive unlocks affecting attack/defense/healing/summons, normal-hit resource gain/regeneration and resource visibility. Monster threat now accumulates damage instead of every hit replacing the target; explicit taunts retain priority. Class-specific PvP skill balancing remains open; arena still isolates normalized match values. Formulas are provisional game.json data.
+
+## Continuation package 3
+Connected Grünsaum forest/bridge/open root ruins with four level-10–15 encounters and a second worldboss, gated fast travel with unrestricted return, vegetation/ruin presentation. Boss below half HP uses stronger/faster warned blasts. Player/monster snapshot candidates use a reusable 24 m spatial cell index, retaining exact distance checks and one shared world. This is not a measured 100-player capacity claim or complete async asset streaming.
+
+## Continuation package 4
+Recipe mastery requirements/tool hook, advanced resource nodes tied to gathering levels, new class-constrained weapons/head/feet/accessory items, Epic/Legendary recipe outputs with boss materials, eight class practice quests and chained forest/profession objectives. Original recipe paths retained. Broader narrative/factions and final balance remain open.
+
+## Continuation package 5
+Distinct equipment condition/identity now survives direct two-confirmation trade, auction escrow and owner housing storage. Equipped instances are rejected for transfer; capacity is revalidated and the existing atomic save boundaries are used. Inactive, unselected pets without training can be auctioned with identity/traits/lineage intact; duplicate purchases cannot mint a second pet. Housing floors/expanded furniture catalogue and stalls remain open.
+
+## Continuation package 6
+Arena class skill intents now spend separate normalized energy and use fixed configurable PvP damage, cooldowns, heals/group heals, buffs/guard, DoT/slow/cleanse, movement and temporary summon attacks/explosion. These reuse match ownership/range/team checks, never PvE farm stats. Farming selects affordable class damage/AoE/DoT/drain skills. Territory wars/rankings and comprehensive live balance remain incomplete.
+
+## Continuation package 7
+North-up minimap with real player/monster/service positions, equipment overlays and appearance variations, forest/ruin geometry, and persistent low/balanced/far graphics profiles controlling 3D scale, frame cap, shadows and actor sight. Six equipped skill buttons dispatch normalized class skills during arena matches. No measured device-performance or semi-realistic production-art claim.

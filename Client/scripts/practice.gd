@@ -20,7 +20,7 @@ func _init() -> void:
         "message": "Sprich mit Mira bei der Stadtwache. Geh zum goldenen Zeichen."}
     for spawn in data.monsters+data.get("encounters",[]):
         monsters.append({"id": spawn.id, "name": spawn.name, "x": spawn.x, "z": spawn.z,
-            "homeX": spawn.x, "homeZ": spawn.z,"reach":spawn.get("reach",2),"speed":spawn.get("speed",1.8),"damageType":spawn.get("damageType","physical"), "level":spawn.get("level",1),"boss":spawn.get("boss",false),"warning":0.0,"warningX":0.0,"warningZ":0.0,"nextWave":0.0,"hp": spawn.get("hp",rules.monsterHp), "maxHp": spawn.get("hp",rules.monsterHp),
+            "homeX": spawn.x, "homeZ": spawn.z,"reach":spawn.get("reach",2),"speed":spawn.get("speed",1.8),"damageType":spawn.get("damageType","physical"), "family":spawn.get("family",""),"level":spawn.get("level",1),"boss":spawn.get("boss",false),"warning":0.0,"warningX":0.0,"warningZ":0.0,"nextWave":0.0,"hp": spawn.get("hp",rules.monsterHp), "maxHp": spawn.get("hp",rules.monsterHp),
             "attackSerial": 0, "hurtSerial": 0, "lastDamage": 0, "nextAttack": 0.0, "respawn": 0.0})
 
     m3 = Progression.new(self)

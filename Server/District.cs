@@ -12,7 +12,7 @@ public sealed class Building
 public sealed class Spawn
 {
     public string Id { get; set; } = ""; public string Name { get; set; } = "";
-    public int Hp {get;set;} public int Level {get;set;}=1;public bool Boss {get;set;}
+    public string Family {get;set;}="";public int Hp {get;set;} public int Level {get;set;}=1;public bool Boss {get;set;}
     public string DamageType {get;set;}="physical";public double Reach {get;set;}=2;public double Speed {get;set;}=1.8;
     public double X { get; set; } public double Z { get; set; }
 }

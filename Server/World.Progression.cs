@@ -10,7 +10,7 @@ public sealed partial class World
     private readonly double wallStart=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()/1000.0;
     public string? JoinCharacter(CharacterRecord record)
     {
-        lock(gate){if(players.Count>=100||players.ContainsKey(record.Id)||pendingSaves.ContainsKey(record.Id))return null;
+        lock(gate){cellsDirty=true;if(players.Count>=100||players.ContainsKey(record.Id)||pendingSaves.ContainsKey(record.Id))return null;
             if(record.AccountId!=""){var latest=Store.Get(record.Id);if(latest is null||latest.AccountId!=record.AccountId)return null;record=latest;}
             PetRules.CompleteAll(record,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);
             var p=new Player(record.Id,record.State.X,record.State.Z,100);Import(p,record);
@@ -41,6 +41,12 @@ public sealed partial class World
         if(FarmAction(p,kind,target))return true;
         var c=Export(p).State;var ok=false;
         switch(kind){
+            case "appearance":if(AppearanceRules.Valid(target)){p.Data.Appearance=target;ok=true;}break;
+            case "gear_unpack":ok=GearRules.Unpack(c,target,Catalog);break;
+            case "gear_equip":ok=GearRules.Equip(p.Data,target,Catalog);break;
+            case "gear_legacy_remove":ok=c.Equipment.Remove(target);break;
+            case "gear_remove":ok=c.EquippedGear.Remove(target);break;
+            case "gear_repair":ok=Near(p,"merchant")&&GearRules.Repair(c,target,Catalog);break;
             case "slot":
                 var binding=target.Split('|');
                 if(binding.Length==2&&int.TryParse(binding[0],out var index)&&index>=0&&index<6&&Catalog.Classes[p.Data.ClassId].Skills.Any(s=>s.Id==binding[1])){while(c.SkillBar.Count<6)c.SkillBar.Add("skill1");c.SkillBar[index]=binding[1];ok=true;}break;
@@ -50,11 +56,11 @@ public sealed partial class World
             case "farm_stat":ok=CharacterRules.FarmPoint(c,Catalog);break;
             case "buy":ok=Near(p,"merchant")&&CharacterRules.Buy(c,target,Catalog);break;
             case "sell":ok=Near(p,"merchant")&&CharacterRules.Sell(c,target,Catalog);break;
-            case "equip":ok=CharacterRules.Equip(c,target,Catalog);break;
+            case "equip":ok=CharacterRules.Equip(c,target,Catalog,p.Data.ClassId);break;
             case "craft":ok=Near(p,"workbench")&&CharacterRules.Craft(c,target,Catalog);if(ok)CharacterRules.Progress(c,"craft",target,Catalog);break;
             case "gather":
                 var node=Catalog.Nodes.FirstOrDefault(n=>n.Id==target);
-                if(node is not null&&Distance(p.X,p.Z,node.X,node.Z)<=3&&p.Cooldowns.GetValueOrDefault("gather:"+target)<=time&&CharacterRules.Add(c,node.Item,1,Catalog)){
+                if(node is not null&&1+c.Professions.GetValueOrDefault(node.Profession)/Catalog.ProfessionLevelXp>=node.MinProfessionLevel&&Distance(p.X,p.Z,node.X,node.Z)<=3&&p.Cooldowns.GetValueOrDefault("gather:"+target)<=time&&CharacterRules.Add(c,node.Item,1,Catalog)){
                     p.Cooldowns["gather:"+target]=time+5;c.Professions[node.Profession]=c.Professions.GetValueOrDefault(node.Profession)+Catalog.ProfessionGatherXp;c.FarmXp=(BigInteger.Parse(c.FarmXp)+10).ToString();CharacterRules.Progress(c,"gather",target,Catalog);ok=true;
                 }break;
             case "claim":ok=Near(p,"merchant")&&CharacterRules.Claim(c,target,Catalog,p.Data.ClassId);break;
@@ -66,6 +72,7 @@ public sealed partial class World
             case "pet_train":ok=Near(p,"workbench")&&PetRules.Train(c,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);break;
             case "pet_select":ok=PetRules.Select(c,target);break;
             case "pet_take":ok=PetRules.TakeBag(c,Catalog);break;
+            case "forest_transit":if(Distance(p.X,p.Z,0,90)<=3&&p.Level>=10){p.X=0;p.Z=112;ok=true;}else if(Distance(p.X,p.Z,0,112)<=3){p.X=0;p.Z=90;ok=true;}break;
             case "transit":if(Distance(p.X,p.Z,0,-40)<=3&&p.Level>=5&&p.Quest=="complete"){p.X=0;p.Z=-59;ok=true;}else if(Distance(p.X,p.Z,0,-59)<=3){p.X=0;p.Z=-40;ok=true;}break;
             case "teleport":if(Near(p,"teleporter")||Near(p,"return")){p.X=district.Spawn.X;p.Z=p.Z<30?Catalog.Services["return"].Z:district.Spawn.Z;ok=true;}break;
             case "skill":return Cast(p,target);
@@ -78,15 +85,15 @@ public sealed partial class World
     {
         if(ArenaOf(p.Id) is not null){p.Message="Arena verwendet normierte Match-Angriffe; PvE-Skills sind hier gesperrt.";return true;}
         var skill=Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id&&s.Enabled&&p.Level>=s.MinLevel);
-        if(skill is null||p.Mana<skill.Cost||p.Cooldowns.GetValueOrDefault(id)>time){p.Message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv.";return true;}
+        if(skill is null||p.Data.State.Focus<skill.FocusCost||p.Mana<skill.Cost||p.Cooldowns.GetValueOrDefault(id)>time){p.Message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv.";return true;}
         var needsTarget=skill.Kind is "damage" or "dot" or "slow" or "break" or "drain" or "taunt";
         monsters.TryGetValue(p.Target,out var enemy);
         if(needsTarget&&(enemy is null||enemy.Hp<=0||Distance(p.X,p.Z,enemy.X,enemy.Z)>skill.Range)){p.Message="Lebendes Ziel außerhalb der Skill-Reichweite.";return true;}
         if(skill.Kind=="explode"&&!summons.ContainsKey(p.Id)){p.Message="Zuerst eine eigene Kreatur beschwören.";return true;}
-        p.Mana-=skill.Cost;p.Cooldowns[id]=time+skill.Cooldown;p.SkillSerial++;p.AttackSerial++;CharacterRules.Progress(p.Data.State,"skill",id,Catalog);
+        GearRules.Use(p.Data.State);p.Data.State.Focus-=skill.FocusCost;p.Mana-=skill.Cost;p.Cooldowns[id]=time+skill.Cooldown;p.SkillSerial++;p.AttackSerial++;CharacterRules.Progress(p.Data.State,"skill",id,Catalog);
         switch(skill.Kind){
-            case "heal":p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+(int)skill.Power+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
-            case "party_heal":foreach(var ally in FriendlyTargets(p,15))ally.Hp=Math.Min(CharacterRules.MaxHp(ally.Data,Catalog),ally.Hp+(int)skill.Power+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
+            case "heal":p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+(int)skill.Power+ClassRules.Healing(p.Data,Catalog)+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
+            case "party_heal":foreach(var ally in FriendlyTargets(p,15))ally.Hp=Math.Min(CharacterRules.MaxHp(ally.Data,Catalog),ally.Hp+(int)skill.Power+ClassRules.Healing(p.Data,Catalog)+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
             case "buff":p.BuffUntil=time+skill.Duration;break;
             case "party_buff":foreach(var ally in FriendlyTargets(p,15))ally.BuffUntil=time+skill.Duration;break;
             case "hot":p.Cooldowns["status:hot"]=time+skill.Duration;break;
@@ -123,7 +130,7 @@ public sealed partial class World
         if(pet.Mode=="heal")p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+Catalog.PetHeal+pet.Level+pet.Traits.GetValueOrDefault("affinity",1)+pet.Evolution*2);
         else if(pet.Mode=="buff")p.BuffUntil=Math.Max(p.BuffUntil,time+4);
         else if(pet.Mode=="gather"){
-            var node=Catalog.Nodes.FirstOrDefault(n=>Distance(p.X,p.Z,n.X,n.Z)<=5&&p.Cooldowns.GetValueOrDefault("gather:"+n.Id)<=time);
+            var node=Catalog.Nodes.FirstOrDefault(n=>1+p.Data.State.Professions.GetValueOrDefault(n.Profession)/Catalog.ProfessionLevelXp>=n.MinProfessionLevel&&Distance(p.X,p.Z,n.X,n.Z)<=5&&p.Cooldowns.GetValueOrDefault("gather:"+n.Id)<=time);
             if(node is not null&&PetRules.AddBag(pet,node.Item,Catalog)){p.Cooldowns["gather:"+node.Id]=time+5;p.Data.State.Professions[node.Profession]=p.Data.State.Professions.GetValueOrDefault(node.Profession)+Catalog.ProfessionGatherXp;}
         }
         else if(pet.Mode=="loot"){
@@ -134,8 +141,8 @@ public sealed partial class World
     private object CharacterView(Player p)
     {
         var c=CharacterRules.Clone(Export(p)).State;
-        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
-            mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
+        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
+            focus=c.Focus,resource=Catalog.Classes[p.Data.ClassId].Resource,passive=Catalog.Classes[p.Data.ClassId].Passive,passiveActive=p.Level>=Catalog.Classes[p.Data.ClassId].PassiveLevel,mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }
 }

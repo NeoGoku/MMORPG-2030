@@ -4,6 +4,7 @@ var sim
 var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/game.json"))
 var class_id := "Shield Sword"
 var nickname := "Reisender"
+var focus:=100.0
 var mana := 100.0
 var attributes: Dictionary = {}
 var inventory: Dictionary = {"potion": 2}
@@ -36,13 +37,14 @@ func _init(owner_sim) -> void:
         professions[key] = 0
 
 func attack() -> int:
-    var value: int = int(catalog.baseAttack) + mini(prestige,100) + int(attributes[catalog.classes[class_id].attribute]) + (int(catalog.buffAttack) if buff > 0 else 0) - (int(catalog.statusPenalty) if effects.get("weaken",0)>0 else 0)
+    var passive: int=int(catalog.classes[class_id].get("passiveAttack",0)) if sim.player.level>=catalog.classes[class_id].get("passiveLevel",5) else 0
+    var value: int = passive+int(catalog.baseAttack) + mini(prestige,100) + int(attributes[catalog.classes[class_id].attribute]) + (int(catalog.buffAttack) if buff > 0 else 0) - (int(catalog.statusPenalty) if effects.get("weaken",0)>0 else 0)
     for item in equipment.values():
         value += int(catalog.items[item].get("attack",0))
     return value
 
 func defense() -> int:
-    var value: int = attributes.armor
+    var value: int = attributes.armor+(int(catalog.classes[class_id].get("passiveDefense",0)) if sim.player.level>=5 else 0)
     for item in equipment.values():
         value += int(catalog.items[item].get("defense",0))
     return value
@@ -137,7 +139,7 @@ func action(kind: String, target: String) -> bool:
         "craft":
             if near("workbench") and catalog.recipes.has(target):
                 var recipe: Dictionary = catalog.recipes[target]
-                var enough := true
+                var enough: bool=1+int(professions.get(recipe.profession,0))/int(catalog.professionLevelXp)>=int(recipe.get("minProfessionLevel",1))
                 for item in recipe.inputs:
                     if inventory.get(item,0) < recipe.inputs[item]: enough = false
                 if enough:
@@ -153,7 +155,7 @@ func action(kind: String, target: String) -> bool:
                     else: inventory = previous
         "gather":
             for node in catalog.nodes:
-                if node.id == target and Vector2(p.x-node.x,p.z-node.z).length() <= 3 and cooldowns.get("gather:"+target,0)<=0 and add(node.item,1):
+                if node.id == target and 1+int(professions.get(node.profession,0))/int(catalog.professionLevelXp)>=int(node.get("minProfessionLevel",1)) and Vector2(p.x-node.x,p.z-node.z).length() <= 3 and cooldowns.get("gather:"+target,0)<=0 and add(node.item,1):
                     professions[node.profession] += catalog.professionGatherXp
                     farm_xp += 10
                     cooldowns["gather:"+target] = 5.0
@@ -264,7 +266,7 @@ func cast(id: String) -> bool:
     var p: Dictionary=sim.player
     for skill in catalog.classes[class_id].skills:
         if skill.id!=id:continue
-        if not skill.enabled or p.level<skill.minLevel or mana<skill.cost or cooldowns.get(id,0)>0:
+        if not skill.enabled or p.level<skill.minLevel or focus<skill.get("focusCost",0) or mana<skill.cost or cooldowns.get(id,0)>0:
             p.message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv."
             return true
         var enemy: Dictionary={}
@@ -276,6 +278,7 @@ func cast(id: String) -> bool:
         if skill.kind=="explode" and summons.is_empty():
             p.message="Zuerst eine Kreatur beschwören."
             return true
+        focus-=skill.get("focusCost",0)
         mana-=skill.cost
         cooldowns[id]=skill.cooldown
         p.attackSerial+=1
@@ -348,6 +351,7 @@ func tick(dt: float) -> void:
     tick_effects(dt)
     for key in cooldowns: cooldowns[key] = maxf(0,cooldowns[key]-dt)
     buff = maxf(0,buff-dt)
+    focus=minf(100,focus+dt*catalog.classes[class_id].get("resourceRegen",2))
     mana = minf(catalog.baseMana+attributes.wisdom*catalog.wisdomMana,mana+dt*catalog.manaRegen)
     if pet.exp >= pet.level*catalog.petExpPerLevel:
         pet.exp -= pet.level*catalog.petExpPerLevel
@@ -367,7 +371,7 @@ func tick(dt: float) -> void:
     elif pet.mode=="buff":buff=maxf(buff,4)
     elif pet.mode=="gather":
         for node in catalog.nodes:
-            if Vector2(sim.player.x-node.x,sim.player.z-node.z).length()<=5 and cooldowns.get("gather:"+node.id,0)<=0:
+            if 1+int(professions.get(node.profession,0))/int(catalog.professionLevelXp)>=int(node.get("minProfessionLevel",1)) and Vector2(sim.player.x-node.x,sim.player.z-node.z).length()<=5 and cooldowns.get("gather:"+node.id,0)<=0:
                 var old: int=pet.inventory.get(node.item,0)
                 pet.inventory[node.item]=old+1
                 var count:=0
@@ -406,7 +410,7 @@ func view() -> Dictionary:
         q.progress = quest_progress.get(q.id,0)
         q.claimed = claimed.has(q.id)
         q.unlocked = q.prerequisite=="" or claimed.has(q.prerequisite)
-    return {"id":"local","name":nickname,"classId":class_id,"prestige":prestige,"attributes":attributes.duplicate(),"inventory":inventory.duplicate(),"equipment":equipment.duplicate(),"professions":professions.duplicate(),"quests":quests,"mana":int(mana),"nextLevelExp":sim.player.level*catalog.levelExpBase,"maxMana":catalog.baseMana+attributes.wisdom*catalog.wisdomMana,"attack":attack(),"defense":defense(),"farmXp":str(farm_xp),"farmCost":str(farm_cost()),"automation":automation.duplicate(true),"pet":pet.duplicate(true),"ownedPets":owned_pets.duplicate(true),"persistent":false,"skills":skills,"skillbook":book}
+    return {"id":"local","name":nickname,"classId":class_id,"prestige":prestige,"attributes":attributes.duplicate(),"inventory":inventory.duplicate(),"equipment":equipment.duplicate(),"professions":professions.duplicate(),"quests":quests,"focus":int(focus),"resource":catalog.classes[class_id].get("resource","Focus"),"passive":catalog.classes[class_id].get("passive",""),"passiveActive":sim.player.level>=5,"mana":int(mana),"nextLevelExp":sim.player.level*catalog.levelExpBase,"maxMana":catalog.baseMana+attributes.wisdom*catalog.wisdomMana,"attack":attack(),"defense":defense(),"farmXp":str(farm_xp),"farmCost":str(farm_cost()),"automation":automation.duplicate(true),"pet":pet.duplicate(true),"ownedPets":owned_pets.duplicate(true),"persistent":false,"skills":skills,"skillbook":book}
 
 func pets() -> Array:
     return [{"owner":"local","x":pet_position.x,"z":pet_position.y,"level":pet.level,"mode":pet.mode,"hp":pet.hp,"evolution":pet.evolution}] if pet.active else []

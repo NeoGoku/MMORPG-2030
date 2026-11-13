@@ -9,7 +9,7 @@ var batches: Dictionary = {}
 var materials: Dictionary = {}
 
 func _ready() -> void:
-    _box(Vector3(0, -.25, 0), Vector3(184, .5, 184), Color("67736b"))
+    _box(Vector3(0, -.25, 0), Vector3(284, .5, 284), Color("67736b"))
     _box(Vector3(0, .015, 0), Vector3(15, .12, 180), Color("b7b5a5"))
     _box(Vector3(0, .09, 0), Vector3(10, .08, 180), Color("35434b"))
     _box(Vector3(0, .10, 1), Vector3(65, .08, 7), Color("35434b"))
@@ -52,10 +52,10 @@ func _ready() -> void:
     _sign("N O R D T O R  /  2 0 3 0", Vector3(0, 5.03, -2.65), .025, Color("e7e4c9"))
     _sign("NORDHOF  ·  DROHNENSPERRZONE", Vector3(0, .3, -5.2), .013, Color("edc37c"), Vector3(-PI/2, 0, 0))
     # District perimeter and distant skyline (no areas beyond the playable boundary).
-    for x in [-91, 91]:
-        _box(Vector3(x, 1, 0), Vector3(.5, 2, 182), Color("89958a"))
-    for z in [-91, 91]:
-        _box(Vector3(0, 1, z), Vector3(182, 2, .5), Color("89958a"))
+    for x in [-141, 141]:
+        _box(Vector3(x, 1, 0), Vector3(.5, 2, 282), Color("89958a"))
+    for z in [-141, 141]:
+        _box(Vector3(0, 1, z), Vector3(282, 2, .5), Color("89958a"))
     for i in range(12):
         var x: float = -46 + i * 8.5
         var height: float = 12 + (i * 7 % 15)

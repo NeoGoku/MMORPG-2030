@@ -27,7 +27,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -41,7 +42,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -55,7 +57,8 @@
           "minLevel": 2,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -69,7 +72,8 @@
           "minLevel": 3,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -83,7 +87,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -97,7 +102,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -111,7 +117,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -125,9 +132,17 @@
           "minLevel": 16,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Schatten",
+      "resourceRegen": 3,
+      "passive": "Dunkle Macht",
+      "passiveLevel": 5,
+      "passiveAttack": 3,
+      "passiveDefense": 0,
+      "passiveHeal": 0
     },
     "Light Mage": {
       "attribute": "wisdom",
@@ -144,7 +159,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -158,7 +174,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -172,7 +189,8 @@
           "minLevel": 2,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -186,7 +204,8 @@
           "minLevel": 3,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -200,7 +219,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -214,7 +234,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -228,7 +249,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -242,9 +264,17 @@
           "minLevel": 16,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Licht",
+      "resourceRegen": 4,
+      "passive": "Lichtkanal",
+      "passiveLevel": 5,
+      "passiveAttack": 0,
+      "passiveDefense": 0,
+      "passiveHeal": 4
     },
     "Archer": {
       "attribute": "dexterity",
@@ -261,7 +291,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -275,7 +306,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -289,7 +321,8 @@
           "minLevel": 2,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -303,7 +336,8 @@
           "minLevel": 3,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -317,7 +351,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -331,7 +366,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -345,7 +381,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 8,
-          "status": "back"
+          "status": "back",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -359,9 +396,17 @@
           "minLevel": 16,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Ausdauer",
+      "resourceRegen": 5,
+      "passive": "Sicherer Schuss",
+      "passiveLevel": 5,
+      "passiveAttack": 3,
+      "passiveDefense": 0,
+      "passiveHeal": 0
     },
     "Shield Sword": {
       "attribute": "strength",
@@ -378,7 +423,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -392,7 +438,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -406,7 +453,8 @@
           "minLevel": 2,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -420,7 +468,8 @@
           "minLevel": 3,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -434,7 +483,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -448,7 +498,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -462,7 +513,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -476,9 +528,17 @@
           "minLevel": 16,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Entschlossenheit",
+      "resourceRegen": 2,
+      "passive": "Schildhaltung",
+      "passiveLevel": 5,
+      "passiveAttack": 0,
+      "passiveDefense": 3,
+      "passiveHeal": 0
     },
     "Dual Swords": {
       "attribute": "agility",
@@ -495,7 +555,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -509,7 +570,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -523,7 +585,8 @@
           "minLevel": 2,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -537,7 +600,8 @@
           "minLevel": 3,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -551,7 +615,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -565,7 +630,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -579,7 +645,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -593,9 +660,17 @@
           "minLevel": 16,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Momentum",
+      "resourceRegen": 4,
+      "passive": "Klingenfluss",
+      "passiveLevel": 5,
+      "passiveAttack": 3,
+      "passiveDefense": 0,
+      "passiveHeal": 0
     },
     "Healer": {
       "attribute": "wisdom",
@@ -612,7 +687,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -626,7 +702,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -640,7 +717,8 @@
           "minLevel": 2,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -654,7 +732,8 @@
           "minLevel": 3,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -668,7 +747,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -682,7 +762,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -696,7 +777,8 @@
           "minLevel": 12,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -710,9 +792,17 @@
           "minLevel": 16,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Gnade",
+      "resourceRegen": 5,
+      "passive": "Heilkunst",
+      "passiveLevel": 5,
+      "passiveAttack": 0,
+      "passiveDefense": 0,
+      "passiveHeal": 4
     },
     "Creature Summoner": {
       "attribute": "intelligence",
@@ -729,7 +819,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -743,7 +834,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -757,7 +849,8 @@
           "minLevel": 2,
           "radius": 0,
           "duration": 30,
-          "status": "wolf"
+          "status": "wolf",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -771,7 +864,8 @@
           "minLevel": 3,
           "radius": 0,
           "duration": 30,
-          "status": "wisp"
+          "status": "wisp",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -785,7 +879,8 @@
           "minLevel": 5,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -799,7 +894,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -813,7 +909,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 30,
-          "status": "golem"
+          "status": "golem",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -827,9 +924,17 @@
           "minLevel": 16,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Bindung",
+      "resourceRegen": 3,
+      "passive": "Seelenbindung",
+      "passiveLevel": 5,
+      "passiveAttack": 3,
+      "passiveDefense": 0,
+      "passiveHeal": 0
     },
     "Tank": {
       "attribute": "vitality",
@@ -846,7 +951,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill2",
@@ -860,7 +966,8 @@
           "minLevel": 1,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 0
         },
         {
           "id": "skill3",
@@ -874,7 +981,8 @@
           "minLevel": 2,
           "radius": 5,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 15
         },
         {
           "id": "skill4",
@@ -888,7 +996,8 @@
           "minLevel": 3,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 20
         },
         {
           "id": "skill5",
@@ -902,7 +1011,8 @@
           "minLevel": 5,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 25
         },
         {
           "id": "skill6",
@@ -916,7 +1026,8 @@
           "minLevel": 8,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 30
         },
         {
           "id": "skill7",
@@ -930,7 +1041,8 @@
           "minLevel": 12,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 35
         },
         {
           "id": "skill8",
@@ -944,9 +1056,17 @@
           "minLevel": 16,
           "radius": 0,
           "duration": 8,
-          "status": ""
+          "status": "",
+          "focusCost": 40
         }
-      ]
+      ],
+      "resource": "Zorn",
+      "resourceRegen": 2,
+      "passive": "Bollwerk",
+      "passiveLevel": 5,
+      "passiveAttack": 0,
+      "passiveDefense": 3,
+      "passiveHeal": 0
     }
   },
   "items": {
@@ -1085,13 +1205,120 @@
       "price": 100,
       "rarity": "Rare",
       "slot": "weapon",
-      "attack": 12
+      "attack": 12,
+      "minLevel": 5,
+      "classes": [
+        "Shield Sword",
+        "Dual Swords",
+        "Tank"
+      ]
     },
     "reset_stone": {
       "name": "Seltener Resetstein",
       "stack": 20,
       "price": 80,
       "rarity": "Rare"
+    },
+    "ancient_ore": {
+      "name": "Altes Erz",
+      "stack": 99,
+      "price": 12,
+      "rarity": "Rare"
+    },
+    "moon_herb": {
+      "name": "Mondkraut",
+      "stack": 99,
+      "price": 12,
+      "rarity": "Rare"
+    },
+    "heartwood": {
+      "name": "Herzholz",
+      "stack": 99,
+      "price": 12,
+      "rarity": "Rare"
+    },
+    "root_core": {
+      "name": "Wurzelkern",
+      "stack": 99,
+      "price": 12,
+      "rarity": "Rare"
+    },
+    "arcane_staff": {
+      "name": "Arkanstab",
+      "slot": "weapon",
+      "attack": 10,
+      "defense": 0,
+      "classes": [
+        "Dark Mage",
+        "Light Mage",
+        "Healer",
+        "Creature Summoner"
+      ],
+      "rarity": "Rare",
+      "minLevel": 5,
+      "stack": 1,
+      "price": 100
+    },
+    "ranger_bow": {
+      "name": "Jägerbogen",
+      "slot": "weapon",
+      "attack": 10,
+      "defense": 0,
+      "classes": [
+        "Archer"
+      ],
+      "rarity": "Rare",
+      "minLevel": 5,
+      "stack": 1,
+      "price": 100
+    },
+    "iron_helm": {
+      "name": "Eisenhelm",
+      "slot": "head",
+      "attack": 0,
+      "defense": 4,
+      "classes": [],
+      "rarity": "Rare",
+      "minLevel": 5,
+      "stack": 1,
+      "price": 100
+    },
+    "trail_boots": {
+      "name": "Pfadstiefel",
+      "slot": "feet",
+      "attack": 0,
+      "defense": 3,
+      "classes": [],
+      "rarity": "Rare",
+      "minLevel": 5,
+      "stack": 1,
+      "price": 100
+    },
+    "moon_ring": {
+      "name": "Mondring",
+      "slot": "accessory",
+      "attack": 4,
+      "defense": 2,
+      "classes": [],
+      "rarity": "Epic",
+      "minLevel": 10,
+      "stack": 1,
+      "price": 100
+    },
+    "root_blade": {
+      "name": "Wurzelklinge",
+      "slot": "weapon",
+      "attack": 20,
+      "defense": 2,
+      "classes": [
+        "Shield Sword",
+        "Dual Swords",
+        "Tank"
+      ],
+      "rarity": "Legendary",
+      "minLevel": 15,
+      "stack": 1,
+      "price": 100
     }
   },
   "professions": [
@@ -1207,6 +1434,73 @@
       },
       "output": "ward_blade",
       "count": 1
+    },
+    "arcane_staff": {
+      "name": "Arkanstab",
+      "profession": "engineering",
+      "inputs": {
+        "wood": 4,
+        "ore": 3
+      },
+      "output": "arcane_staff",
+      "count": 1,
+      "minProfessionLevel": 2
+    },
+    "ranger_bow": {
+      "name": "Jägerbogen",
+      "profession": "engineering",
+      "inputs": {
+        "wood": 5,
+        "ore": 2
+      },
+      "output": "ranger_bow",
+      "count": 1,
+      "minProfessionLevel": 2
+    },
+    "iron_helm": {
+      "name": "Eisenhelm",
+      "profession": "smithing",
+      "inputs": {
+        "ore": 5
+      },
+      "output": "iron_helm",
+      "count": 1,
+      "minProfessionLevel": 2
+    },
+    "trail_boots": {
+      "name": "Pfadstiefel",
+      "profession": "tailoring",
+      "inputs": {
+        "wood": 4,
+        "herb": 3
+      },
+      "output": "trail_boots",
+      "count": 1,
+      "minProfessionLevel": 2
+    },
+    "moon_ring": {
+      "name": "Mondring",
+      "profession": "engineering",
+      "inputs": {
+        "ancient_ore": 3,
+        "moon_herb": 2,
+        "boss_core": 1
+      },
+      "output": "moon_ring",
+      "count": 1,
+      "minProfessionLevel": 3
+    },
+    "root_blade": {
+      "name": "Wurzelklinge",
+      "profession": "smithing",
+      "inputs": {
+        "root_core": 2,
+        "boss_core": 2,
+        "ancient_ore": 5
+      },
+      "output": "root_blade",
+      "count": 1,
+      "minProfessionLevel": 5
     }
   },
   "services": {
@@ -1251,6 +1545,33 @@
       "item": "wood",
       "x": -8,
       "z": 24
+    },
+    {
+      "id": "ancient_ore",
+      "name": "Alte Erzkluft",
+      "profession": "mining",
+      "item": "ancient_ore",
+      "x": -18,
+      "z": 102,
+      "minProfessionLevel": 2
+    },
+    {
+      "id": "moon_herb",
+      "name": "Mondkräuter",
+      "profession": "herbalism",
+      "item": "moon_herb",
+      "x": 19,
+      "z": 108,
+      "minProfessionLevel": 2
+    },
+    {
+      "id": "heartwood",
+      "name": "Herzholzstamm",
+      "profession": "woodcutting",
+      "item": "heartwood",
+      "x": -18,
+      "z": 116,
+      "minProfessionLevel": 2
     }
   ],
   "quests": [
@@ -1337,6 +1658,236 @@
       "exp": 100,
       "rewards": {
         "reset_stone": 1
+      }
+    },
+    {
+      "id": "class_dark_mage",
+      "name": "Meisterübung: Dark Mage",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Dark Mage",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_light_mage",
+      "name": "Meisterübung: Light Mage",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Light Mage",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_archer",
+      "name": "Meisterübung: Archer",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Archer",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_shield_sword",
+      "name": "Meisterübung: Shield Sword",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Shield Sword",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_dual_swords",
+      "name": "Meisterübung: Dual Swords",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Dual Swords",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_healer",
+      "name": "Meisterübung: Healer",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Healer",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_creature_summoner",
+      "name": "Meisterübung: Creature Summoner",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Creature Summoner",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "class_tank",
+      "name": "Meisterübung: Tank",
+      "type": "class",
+      "event": "skill",
+      "item": "skill3",
+      "required": 10,
+      "prerequisite": "class_training",
+      "minLevel": 5,
+      "classId": "Tank",
+      "coins": 20,
+      "exp": 100,
+      "points": 1,
+      "rewards": {
+        "potion": 2
+      }
+    },
+    {
+      "id": "forest_path",
+      "name": "Grünsaum: Gestörte Wildnis",
+      "type": "side",
+      "event": "kill",
+      "item": "wild-1",
+      "required": 5,
+      "prerequisite": "deep_sentinel",
+      "minLevel": 10,
+      "coins": 30,
+      "exp": 150,
+      "rewards": {
+        "ancient_ore": 2
+      }
+    },
+    {
+      "id": "root_heart",
+      "name": "Das Herz der Ruinen",
+      "type": "world",
+      "event": "kill",
+      "item": "worldboss-forest",
+      "required": 1,
+      "prerequisite": "forest_path",
+      "minLevel": 10,
+      "coins": 50,
+      "exp": 300,
+      "rewards": {
+        "moon_ring": 1
+      }
+    },
+    {
+      "id": "master_arcane_staff",
+      "name": "Werkmeister: Arkanstab",
+      "type": "profession",
+      "event": "craft",
+      "item": "arcane_staff",
+      "required": 3,
+      "prerequisite": "artisan",
+      "minLevel": 5,
+      "coins": 20,
+      "exp": 75,
+      "points": 1,
+      "rewards": {
+        "heartwood": 1
+      }
+    },
+    {
+      "id": "master_ranger_bow",
+      "name": "Werkmeister: Jägerbogen",
+      "type": "profession",
+      "event": "craft",
+      "item": "ranger_bow",
+      "required": 3,
+      "prerequisite": "artisan",
+      "minLevel": 5,
+      "coins": 20,
+      "exp": 75,
+      "points": 1,
+      "rewards": {
+        "heartwood": 1
+      }
+    },
+    {
+      "id": "master_iron_helm",
+      "name": "Werkmeister: Eisenhelm",
+      "type": "profession",
+      "event": "craft",
+      "item": "iron_helm",
+      "required": 3,
+      "prerequisite": "artisan",
+      "minLevel": 5,
+      "coins": 20,
+      "exp": 75,
+      "points": 1,
+      "rewards": {
+        "heartwood": 1
+      }
+    },
+    {
+      "id": "master_trail_boots",
+      "name": "Werkmeister: Pfadstiefel",
+      "type": "profession",
+      "event": "craft",
+      "item": "trail_boots",
+      "required": 3,
+      "prerequisite": "artisan",
+      "minLevel": 5,
+      "coins": 20,
+      "exp": 75,
+      "points": 1,
+      "rewards": {
+        "heartwood": 1
       }
     }
   ],
