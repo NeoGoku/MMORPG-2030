@@ -18,7 +18,7 @@ async def main():
     async with websockets.connect(URL) as a, websockets.connect(URL) as b:
         wa, wb = json.loads(await a.recv()), json.loads(await b.recv())
         assert wa['type'] == wb['type'] == 'welcome'
-        assert wa['version'] == 9 and wa['id'] != wb['id']
+        assert wa['version'] == 10 and wa['id'] != wb['id']
         aid, bid = wa['id'], wb['id']
         initial = await snapshot(b, lambda s: len(s['players']) == 2)
         origin = next(p for p in initial['players'] if p['id'] == aid)

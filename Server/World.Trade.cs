@@ -35,7 +35,7 @@ public sealed partial class World
                 var oa=trade.Offers[a.Id];var ob=trade.Offers[b.Id];
                 if(!RemoveOffer(ca.State,oa)||!RemoveOffer(cb.State,ob)||!ReceiveOffer(ca.State,ob)||!ReceiveOffer(cb.State,oa)){trades.Remove(trade);p.Message="Handel abgebrochen: Besitz, Währung oder Inventarplatz geändert.";break;}
                 try{Store.SaveBatch([ca,cb]);Import(a,ca);Import(b,cb);a.Message=b.Message="Handel atomar abgeschlossen.";}
-                catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){a.Message=b.Message="Handel nicht gespeichert; keine Übertragung.";}
+                catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){a.Message=b.Message="Handelsbestätigung fehlt. Neu verbinden und Bestand prüfen.";}
                 trades.Remove(trade);break;
             case "trade_cancel":if(trade is not null)trades.Remove(trade);p.Message="Handel abgebrochen.";break;
             default:return false;

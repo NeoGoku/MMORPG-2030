@@ -1,6 +1,6 @@
 using MMORPG.Server;
 
-if(args.Contains("--m8")){CommitReceiptTests.Run();HousingFloorTests.Run();return;}
+if(args.Contains("--m8")){CommitReceiptTests.Run();HousingFloorTests.Run();WorkshopTests.Run();return;}
 
 var district = District.Load(args.Length > 0 ? args[0] : "Client/data/district.json");
 var world = new World(district);
@@ -98,3 +98,5 @@ WorldContentTests.Run();
 CommitReceiptTests.Run();
 
 HousingFloorTests.Run();
+
+WorkshopTests.Run();

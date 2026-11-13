@@ -17,6 +17,8 @@ public sealed class GameCatalog
     public Dictionary<string,Recipe> Recipes {get;set;}=[];public List<string> Professions {get;set;}=[];public List<ResourceNode> Nodes {get;set;}=[];public Dictionary<string,Point> Services {get;set;}=[];public List<QuestDef> Quests {get;set;}=[];
     public List<OutpostDef> Outposts {get;set;}=[];
     public IEnumerable<Point> ServiceLocations(string service)=>Outposts.Where(o=>o.Service==service).Cast<Point>().Concat(Services.TryGetValue(service,out var point)?new[]{point}:Array.Empty<Point>());
+    public int HousingMaxWorkOrders {get;set;}=6;
+    public Dictionary<string,List<string>> WorkstationProfessions {get;set;}=new(){{"table",new(){"mining","herbalism","woodcutting","smithing","tailoring","alchemy","engineering","cooking","building","animal_breeding"}},{"forge",new(){"smithing","engineering"}},{"loom",new(){"tailoring"}},{"alchemy",new(){"alchemy","cooking"}}};
     public int HousingMaxFloors {get;set;}=3;public int HousingFloorWood {get;set;}=20;public int HousingFloorCoins {get;set;}=60;public double HousingFloorHeight {get;set;}=3.6;
     public int ProductionSeconds {get;set;}=120;
     public int MaxStalls {get;set;}=100;public int StallSeconds {get;set;}=86400;

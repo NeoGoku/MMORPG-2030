@@ -72,7 +72,7 @@ func rebuild() -> void:
             button("Einführungsquest bei Elin annehmen",func():emit_action("home_intro"))
             button("Ausgewählte freie Wohnung erhalten",func():emit_action("home_claim",selected(homes)))
             button("Miete: 10 Münzen je Woche / Rückstand begleichen",func():emit_action("home_rent",selected(homes)))
-            button("Zusätzliches Geschoss: Holz/Münzen × vorhandene Etagen",func():emit_action("home_floor",selected(homes)))
+            button("Geschoss: %d Holz + %d Münzen × vorhandene Etagen"%[catalog.get("housingFloorWood",20),catalog.get("housingFloorCoins",60)],func():emit_action("home_floor",selected(homes)))
             var current_floor: int=state.get("self",{}).get("character",{}).get("floor",0)
             text("Aktuelles Geschoss: %d · Wechsel am Treppenaufgang (Haus-X−7, Haus-Z+3)"%current_floor)
             button("Treppe hinauf",func():emit_action("home_stairs",selected(homes),str(current_floor+1)))
@@ -126,6 +126,23 @@ func rebuild() -> void:
                 var recipe_id: String=recipe
                 button("Wohnungswerkstatt: "+catalog.recipes[recipe].name,func():emit_action("home_craft",selected(homes),recipe_id))
                 button("Offline-Produktion: "+catalog.recipes[recipe].name+" (Arbeitstisch / Material wird gebunden)",func():emit_action("home_produce",selected(homes),recipe_id))
+            for home in community.get("homes",[]):
+                if home.owner!=own_id:continue
+                for station in home.get("furniture",[]):
+                    if int(station.get("floor",0))!=current_floor:continue
+                    var kind: String=catalog.items[station.item].get("furnitureKind","")
+                    if not catalog.get("workstationProfessions",{}).has(kind):continue
+                    var station_id: String=station.id;var house_id: String=home.id
+                    text("Anlage: "+catalog.items[station.item].name+" · "+station_id.left(6))
+                    var recipes:=OptionButton.new();content.add_child(recipes)
+                    for recipe in catalog.recipes:
+                        if catalog.recipes[recipe].profession in catalog.workstationProfessions[kind]:
+                            recipes.add_item(catalog.recipes[recipe].name);recipes.set_item_metadata(recipes.item_count-1,recipe)
+                    button("Auftrag an dieser Anlage starten (3 m)",func():emit_action("home_work_start",house_id,station_id+"|"+selected(recipes)))
+                    var job=home.get("workOrders",{}).get(station_id)
+                    if job is Dictionary:text("%s · noch %.0f s"%[job.recipe,maxf(0,job.readyAt-community.get("serverUtc",0))])
+                    button("Erzeugnis abholen",func():emit_action("home_work_collect",house_id,station_id))
+                    button("Auftrag stornieren / Originalmaterial zurück",func():emit_action("home_work_cancel",house_id,station_id))
             var pets: Array=state.get("self",{}).get("character",{}).get("ownedPets",[])
             for pet in pets:
                 var pet_id: String=pet.id

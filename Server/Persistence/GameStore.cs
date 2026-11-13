@@ -73,9 +73,10 @@ public sealed class PostgresGameStore : IGameStore,IDisposable
     public SharedWorld LoadWorld(){using var db=source.OpenConnection();using var cmd=new NpgsqlCommand("SELECT document::text,version FROM shared_world WHERE id=1",db);using var r=cmd.ExecuteReader();if(!r.Read())throw new GameRuleException("Welt fehlt.");var w=JsonSerializer.Deserialize<SharedWorld>(r.GetString(0))!;w.Version=r.GetInt64(1);return w;}
     public void SaveWorld(SharedWorld world,IReadOnlyList<CharacterRecord> batch)=>SaveTransaction(batch,world);
     public void SaveBatch(IReadOnlyList<CharacterRecord> batch)=>SaveTransaction(batch,null);
-    public bool CommitExists(string account,string id){using var db=source.OpenConnection();using var cmd=new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM commit_receipts WHERE operation_id=$1 AND $2=ANY(account_ids))",db);cmd.Parameters.AddWithValue(id);cmd.Parameters.AddWithValue(account);return (bool)cmd.ExecuteScalar()!;}
+    public bool CommitExists(string account,string id){using var db=source.OpenConnection();using var tx=db.BeginTransaction();LockOperation(db,tx,id);using var cmd=new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM commit_receipts WHERE operation_id=$1 AND $2=ANY(account_ids))",db,tx);cmd.Parameters.AddWithValue(id);cmd.Parameters.AddWithValue(account);return (bool)cmd.ExecuteScalar()!;}
     private bool ResolveReceipt(string id,IReadOnlyList<CharacterRecord> batch,SharedWorld? world)
-    {using var db=source.OpenConnection();return ResolveReceipt(db,null,id,batch,world);}
+    {using var db=source.OpenConnection();using var tx=db.BeginTransaction();LockOperation(db,tx,id);return ResolveReceipt(db,tx,id,batch,world);}
+    private static void LockOperation(NpgsqlConnection db,NpgsqlTransaction tx,string id){using var cmd=new NpgsqlCommand("SELECT pg_advisory_xact_lock(hashtextextended($1,2030))",db,tx);cmd.Parameters.AddWithValue(id);cmd.ExecuteNonQuery();}
     private static bool ResolveReceipt(NpgsqlConnection db,NpgsqlTransaction? tx,string id,IReadOnlyList<CharacterRecord> batch,SharedWorld? world)
     {
         using var exists=new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM commit_receipts WHERE operation_id=$1)",db,tx);exists.Parameters.AddWithValue(id);if(!(bool)exists.ExecuteScalar()!)return false;
@@ -89,6 +90,7 @@ public sealed class PostgresGameStore : IGameStore,IDisposable
         if(batch.Any(c=>c.State.Coins<0))throw new GameRuleException("Ungültige Währung.");
         var operation=CommitIdentity.For(batch,shared);
         using var db=source.OpenConnection();using var tx=db.BeginTransaction();
+        LockOperation(db,tx,operation);
         using(var receipt=new NpgsqlCommand("INSERT INTO commit_receipts(operation_id,account_ids) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING operation_id",db,tx)){
             receipt.Parameters.AddWithValue(operation);receipt.Parameters.AddWithValue(batch.Select(c=>c.AccountId).Distinct().ToArray());
             if(receipt.ExecuteScalar() is null){if(!ResolveReceipt(db,tx,operation,batch,shared))throw new GameRuleException("Commit nicht auflösbar.");CommitIdentity.Confirm(batch,shared,operation);return;}
@@ -107,6 +109,7 @@ public sealed class PostgresGameStore : IGameStore,IDisposable
         catch(NpgsqlException){
             // A lost response is not proof of rollback. Resolve only the exact payload;
             // never rerun a purchase, transfer or generated-identity action here.
+            tx.Dispose();db.Close();
             if(!ResolveReceipt(operation,batch,shared))throw;
         }
         CommitIdentity.Confirm(batch,shared,operation);

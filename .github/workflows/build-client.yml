@@ -125,6 +125,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@v4
+        if: matrix.target == 'Web'
+        with:
+          name: MMORPG-M8-housing-preview
+          path: logs/m8-housing.png
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: logs-${{ matrix.artifact }}

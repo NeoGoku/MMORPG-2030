@@ -129,6 +129,19 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
                     elif kind=="shelf":
                         for x in [-.7,.7]:box(chair,Vector3(x,1,0),Vector3(.15,2,.55),Color("796047"))
                         for y in [.2,.8,1.4,1.9]:box(chair,Vector3(0,y,0),Vector3(1.5,.12,.55),Color("947a5b"))
+                    elif kind=="forge":
+                        box(chair,Vector3(0,.7,0),Vector3(1.5,1.4,1.4),Color("56656d"))
+                        box(chair,Vector3(0,.7,.73),Vector3(.9,.6,.04),Color("d18a51"))
+                        box(chair,Vector3(.5,2,0),Vector3(.35,1.3,.35),Color("42515b"))
+                    elif kind=="loom":
+                        for x in [-.7,.7]:box(chair,Vector3(x,1,0),Vector3(.15,2,.8),Color("8f7252"))
+                        box(chair,Vector3(0,1.3,0),Vector3(1.3,1.1,.12),Color("a8b6ad"))
+                        for y in [.8,1.1,1.4,1.7]:box(chair,Vector3(0,y,.1),Vector3(1.3,.03,.05),Color("647c84"))
+                    elif kind=="alchemy":
+                        box(chair,Vector3(0,.8,0),Vector3(1.7,.2,1.3),Color("60777c"))
+                        box(chair,Vector3(-.4,1.3,0),Vector3(.5,.8,.5),Color("75b6ae"))
+                        box(chair,Vector3(.4,1.2,0),Vector3(.4,.6,.4),Color("aea06d"))
+                        box(chair,Vector3(0,.4,0),Vector3(.4,.8,.5),Color("475c68"))
                     else:
                         box(chair,Vector3(0,1,0),Vector3(.12,2,.12),Color("62777f"));box(chair,Vector3(0,2,0),Vector3(.6,.4,.6),Color("a9decf"))
                 furniture[item.id]=chair

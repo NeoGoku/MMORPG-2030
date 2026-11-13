@@ -19,6 +19,7 @@ public sealed class ProductionJob {public int Floor {get;set;}public Dictionary<
 public sealed class HomeState
 {
     public int Floors {get;set;}=1;
+    public Dictionary<string,ProductionJob> WorkOrders {get;set;}=[];
     public ProductionJob? Production {get;set;}
     public string Owner {get;set;}="";
     public HashSet<string> Visitors {get;set;}=[];

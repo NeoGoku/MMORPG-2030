@@ -18,7 +18,7 @@ public sealed partial class World
             Store.SaveWorld(w,[c]);sharedState=w;Import(p,c);p.SavedTick=tick;p.Message=message;if(kind=="home_stairs"){StopFarm(p);p.Target="";}
             // Revocation/rent changes must eject an already-present unauthorized visitor as well.
             foreach(var visitor in players.Values)if(!HomeAccess(visitor,visitor.X,visitor.Z)){ResetInterior(visitor);visitor.X=district.Spawn.X;visitor.Z=district.Spawn.Z;visitor.Dx=visitor.Dz=0;visitor.Message="Besuchsrecht fehlt oder wurde widerrufen.";}
-        }catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){p.Message=e is GameRuleException?e.Message:"Datenbankfehler: keine Übertragung gespeichert.";}
+        }catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){p.Message=e is GameRuleException?e.Message:"Datenbankantwort fehlt; Commitstatus unbestätigt. Neu verbinden und Bestand prüfen.";}
         return true;
     }
     private static void Need(bool ok,string message){if(!ok)throw new GameRuleException(message);}
@@ -57,7 +57,7 @@ public sealed partial class World
                 w.Homes.TryGetValue(d.Id,out var h);var mine=h?.Owner==p.Id;
                 return new{id=d.Id,name=d.Name,x=d.X,z=d.Z,guildHall=d.GuildHall,owner=h?.Owner??"",floors=h?.Floors??1,floorHeight=Catalog.HousingFloorHeight,rooms=h?.Rooms??1,rentUntil=h?.RentUntil??0,
                     furniture=h?.Furniture.Select(f=>new{id=f.Key,floor=f.Value.Floor,item=f.Value.Item,x=f.Value.X,z=f.Value.Z,yaw=f.Value.Yaw}).ToArray(),
-                    gearStorage=mine?h?.GearStorage:null,production=mine?h?.Production:null,storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
+                    gearStorage=mine?h?.GearStorage:null,workOrders=mine?h?.WorkOrders:null,production=mine?h?.Production:null,storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
             guild=guild is null?null:new{name=guild.Name,leader=guild.Leader,members=guild.Members,level=1+guild.Exp/100,exp=guild.Exp,quest=guild.Quest,influence=guild.Influence,gearStorage=guild.GearStorage,storage=guild.Storage,buffUntil=guild.BuffUntil,hall=guild.Hall},
             guildInvites=w.Guilds.Where(g=>g.Value.Invitations.GetValueOrDefault(p.Id)>Utc).Select(g=>new{id=g.Key,name=g.Value.Name}).ToArray(),
             marketPage=p.MarketPage,marketPages=pages,

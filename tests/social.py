@@ -30,7 +30,7 @@ async def main():
             suffix=secrets.token_hex(5);token=api('/api/register',dict(username='s_'+suffix,password='Social-Test-Only-Password-123!'))['token']
             c=api('/api/characters',dict(slot=0,name='Spieler'+name,classId='Shield Sword'),token);ticket=api('/api/ticket',dict(characterId=c['id']),token)['ticket']
             ws=await websockets.connect(BASE.replace('http','ws',1)+'/ws');sockets.append(ws);seq[name]=0
-            await ws.send(json.dumps(dict(type='auth',ticket=ticket)));welcome=json.loads(await ws.recv());assert welcome['version']==9;ids[name]=welcome['id'];readers.append(asyncio.create_task(watch(name,ws)))
+            await ws.send(json.dumps(dict(type='auth',ticket=ticket)));welcome=json.loads(await ws.recv());assert welcome['version']==10;ids[name]=welcome['id'];readers.append(asyncio.create_task(watch(name,ws)))
         await wait(lambda:len(states)==3)
         await send('A','party_invite',ids['B']);await wait(lambda:len(states['B']['social']['invitations'])==1)
         await send('B','party_accept',ids['A']);await wait(lambda:states['A']['social']['party'] is not None and len(states['A']['social']['party']['members'])==2)
