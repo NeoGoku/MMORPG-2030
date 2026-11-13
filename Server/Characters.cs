@@ -4,8 +4,8 @@ using System.Text.Json;
 namespace MMORPG.Server;
 
 public sealed class GameRuleException(string message) : Exception(message);
-public sealed class SkillDef { public string Id {get;set;}="";public string Name {get;set;}=""; public string Kind {get;set;}="";public double Power {get;set;} public double Range {get;set;} public int Cost {get;set;} public double Cooldown {get;set;} public bool Enabled {get;set;} public int MinLevel {get;set;}=1;public double Radius {get;set;}public double Duration {get;set;}=8;public string Status {get;set;}=""; }
-public sealed class ClassDef { public string Attribute {get;set;}=""; public List<SkillDef> Skills {get;set;}=[]; }
+public sealed class SkillDef {public int FocusCost {get;set;} public string Id {get;set;}="";public string Name {get;set;}=""; public string Kind {get;set;}="";public double Power {get;set;} public double Range {get;set;} public int Cost {get;set;} public double Cooldown {get;set;} public bool Enabled {get;set;} public int MinLevel {get;set;}=1;public double Radius {get;set;}public double Duration {get;set;}=8;public string Status {get;set;}=""; }
+public sealed class ClassDef {public string Resource {get;set;}="Focus";public string Passive {get;set;}="";public int PassiveLevel {get;set;}=5;public int PassiveAttack {get;set;}public int PassiveDefense {get;set;}public int PassiveHeal {get;set;}public int ResourceRegen {get;set;}=2; public string Attribute {get;set;}=""; public List<SkillDef> Skills {get;set;}=[]; }
 public sealed class ItemDef {public int MinLevel {get;set;}=1;public List<string> Classes {get;set;}=[];public string Name {get;set;}="";public int Stack {get;set;}public int Price {get;set;}public string Rarity {get;set;}="Normal"; public string Slot {get;set;}="";public int Attack {get;set;}public int Defense {get;set;}public int Heal {get;set;} }
 public sealed class Recipe {public string Name {get;set;}="";public string Profession {get;set;}="";public Dictionary<string,int> Inputs {get;set;}=[];public string Output {get;set;}="";public int Count {get;set;} }
 public sealed class QuestDef {public int MinLevel {get;set;}=1;public string ClassId {get;set;}="";public bool Daily {get;set;}public int Points {get;set;}public Dictionary<string,int> Rewards {get;set;}=[];public string Id {get;set;}="";public string Name {get;set;}="";public string Type {get;set;}="";public string Event {get;set;}="";public string Item {get;set;}="";public string Prerequisite {get;set;}="";public int Required {get;set;}public int Coins {get;set;}public int Exp {get;set;} }
@@ -29,6 +29,7 @@ public sealed class PetState {public string Id {get;set;}="";public int Hp {get;
 public sealed class CharacterState
 {
     public Dictionary<string,GearState> Gear {get;set;}=[];public Dictionary<string,string> EquippedGear {get;set;}=[];
+    public int Focus {get;set;}=100;
     public int Prestige {get;set;}
     public Dictionary<string,long> DailyClaims {get;set;}=[];
     public bool HousingIntro {get;set;}
@@ -57,8 +58,8 @@ public static class CharacterRules
     public static bool Sell(CharacterState c,string item,GameCatalog g){if(!g.Items.TryGetValue(item,out var d)||c.Inventory.GetValueOrDefault(item)<1||c.Equipment.Values.Contains(item))return false;c.Inventory[item]--;if(c.Inventory[item]==0)c.Inventory.Remove(item);c.Coins=checked(c.Coins+Math.Max(1,d.Price/2));return true;}
     public static bool Equip(CharacterState c,string item,GameCatalog g,string classId=""){if(c.Inventory.GetValueOrDefault(item)<1||!g.Items.TryGetValue(item,out var d)||d.Slot==""||c.Level<d.MinLevel||d.Classes.Count>0&&!d.Classes.Contains(classId))return false;c.EquippedGear.Remove(d.Slot);c.Equipment[d.Slot]=item;return true;}
     public static bool Craft(CharacterState c,string recipe,GameCatalog g){if(!g.Recipes.TryGetValue(recipe,out var r)||r.Inputs.Any(i=>c.Inventory.GetValueOrDefault(i.Key)<i.Value))return false;var copy=new Dictionary<string,int>(c.Inventory);foreach(var i in r.Inputs){c.Inventory[i.Key]-=i.Value;if(c.Inventory[i.Key]==0)c.Inventory.Remove(i.Key);}if(!Add(c,r.Output,r.Count,g)){c.Inventory=copy;return false;}c.Professions[r.Profession]=c.Professions.GetValueOrDefault(r.Profession)+g.ProfessionCraftXp;c.FarmXp=(BigInteger.Parse(c.FarmXp)+25).ToString();return true;}
-    public static int Attack(CharacterRecord c,GameCatalog g)=>g.BaseAttack+Math.Min(c.State.Prestige,100)+c.State.Attributes.GetValueOrDefault(g.Classes[c.ClassId].Attribute)+c.State.Equipment.Values.Sum(i=>g.Items[i].Attack)+GearRules.Bonus(c.State,g,true);
-    public static int Defense(CharacterRecord c,GameCatalog g)=>c.State.Attributes.GetValueOrDefault("armor")+c.State.Equipment.Values.Sum(i=>g.Items[i].Defense)+GearRules.Bonus(c.State,g,false);
+    public static int Attack(CharacterRecord c,GameCatalog g)=>g.BaseAttack+ClassRules.Attack(c,g)+Math.Min(c.State.Prestige,100)+c.State.Attributes.GetValueOrDefault(g.Classes[c.ClassId].Attribute)+c.State.Equipment.Values.Sum(i=>g.Items[i].Attack)+GearRules.Bonus(c.State,g,true);
+    public static int Defense(CharacterRecord c,GameCatalog g)=>ClassRules.Defense(c,g)+c.State.Attributes.GetValueOrDefault("armor")+c.State.Equipment.Values.Sum(i=>g.Items[i].Defense)+GearRules.Bonus(c.State,g,false);
     public static int MaxHp(CharacterRecord c,GameCatalog g)=>g.BaseHp+c.State.Attributes.GetValueOrDefault("vitality")*g.VitalityHp;
     public static long Day=>DateTimeOffset.UtcNow.ToUnixTimeSeconds()/86400;
     public static bool QuestOpen(CharacterState c,QuestDef q)=>c.Level>=q.MinLevel&&(q.Prerequisite==""||c.ClaimedQuests.Contains(q.Prerequisite))&&(!c.ClaimedQuests.Contains(q.Id)||q.Daily&&c.DailyClaims.GetValueOrDefault(q.Id)!=Day);

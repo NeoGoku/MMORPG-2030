@@ -42,3 +42,6 @@ Implemented with focused tests: guild-only chat, leader hall release, auction pa
 
 ## Continuation package 1
 Appearance editing and public avatar reconciliation (gender/face/body/hair/skin/tattoo choices), distinct gear instances with equip/unequip/condition/repair and actual damage contributions. Existing pristine item stacks stay valid; explicit unpack converts one stack item to one unique instance without deleting legacy saves. Instance transfer/storage is addressed separately before claiming full economy integration. Models remain procedural, not final semi-realistic art. PR #8 unavailable (404); continuation uses latest available #6.
+
+## Continuation package 2
+Eight configurable class resources with skill expenditure, passive unlocks affecting attack/defense/healing/summons, normal-hit resource gain/regeneration and resource visibility. Monster threat now accumulates damage instead of every hit replacing the target; explicit taunts retain priority. Class-specific PvP skill balancing remains open; arena still isolates normalized match values. Formulas are provisional game.json data.

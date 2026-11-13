@@ -84,15 +84,15 @@ public sealed partial class World
     {
         if(ArenaOf(p.Id) is not null){p.Message="Arena verwendet normierte Match-Angriffe; PvE-Skills sind hier gesperrt.";return true;}
         var skill=Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id&&s.Enabled&&p.Level>=s.MinLevel);
-        if(skill is null||p.Mana<skill.Cost||p.Cooldowns.GetValueOrDefault(id)>time){p.Message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv.";return true;}
+        if(skill is null||p.Data.State.Focus<skill.FocusCost||p.Mana<skill.Cost||p.Cooldowns.GetValueOrDefault(id)>time){p.Message="Skill noch nicht freigeschaltet, Mana fehlt oder Cooldown aktiv.";return true;}
         var needsTarget=skill.Kind is "damage" or "dot" or "slow" or "break" or "drain" or "taunt";
         monsters.TryGetValue(p.Target,out var enemy);
         if(needsTarget&&(enemy is null||enemy.Hp<=0||Distance(p.X,p.Z,enemy.X,enemy.Z)>skill.Range)){p.Message="Lebendes Ziel außerhalb der Skill-Reichweite.";return true;}
         if(skill.Kind=="explode"&&!summons.ContainsKey(p.Id)){p.Message="Zuerst eine eigene Kreatur beschwören.";return true;}
-        p.Mana-=skill.Cost;p.Cooldowns[id]=time+skill.Cooldown;p.SkillSerial++;p.AttackSerial++;CharacterRules.Progress(p.Data.State,"skill",id,Catalog);
+        p.Data.State.Focus-=skill.FocusCost;p.Mana-=skill.Cost;p.Cooldowns[id]=time+skill.Cooldown;p.SkillSerial++;p.AttackSerial++;CharacterRules.Progress(p.Data.State,"skill",id,Catalog);
         switch(skill.Kind){
-            case "heal":p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+(int)skill.Power+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
-            case "party_heal":foreach(var ally in FriendlyTargets(p,15))ally.Hp=Math.Min(CharacterRules.MaxHp(ally.Data,Catalog),ally.Hp+(int)skill.Power+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
+            case "heal":p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+(int)skill.Power+ClassRules.Healing(p.Data,Catalog)+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
+            case "party_heal":foreach(var ally in FriendlyTargets(p,15))ally.Hp=Math.Min(CharacterRules.MaxHp(ally.Data,Catalog),ally.Hp+(int)skill.Power+ClassRules.Healing(p.Data,Catalog)+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
             case "buff":p.BuffUntil=time+skill.Duration;break;
             case "party_buff":foreach(var ally in FriendlyTargets(p,15))ally.BuffUntil=time+skill.Duration;break;
             case "hot":p.Cooldowns["status:hot"]=time+skill.Duration;break;
@@ -141,7 +141,7 @@ public sealed partial class World
     {
         var c=CharacterRules.Clone(Export(p)).State;
         return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,appearance=p.Data.Appearance,gear=c.Gear,equippedGear=c.EquippedGear,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
-            mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
+            focus=c.Focus,resource=Catalog.Classes[p.Data.ClassId].Resource,passive=Catalog.Classes[p.Data.ClassId].Passive,passiveActive=p.Level>=Catalog.Classes[p.Data.ClassId].PassiveLevel,mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }
 }

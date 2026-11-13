@@ -25,7 +25,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     private sealed class Monster(Spawn spawn, int hp)
     {
         public Spawn Spawn=spawn;
-        public double WarningUntil,WarningX,WarningZ,NextWave;public Dictionary<string,double> Contributors=[];
+        public double WarningUntil,WarningX,WarningZ,NextWave;public Dictionary<string,double> Contributors=[];public Dictionary<string,double> Threat=[];
         public double X=spawn.X,Z=spawn.Z, NextAttack, Respawn;
         public int Hp=hp, AttackSerial, HurtSerial, LastDamage;
         public string DotOwner="",ForcedTarget="";public double DotUntil,NextDot,SlowUntil,BreakUntil,TauntUntil,HardTauntUntil;public int DotPower;
@@ -103,10 +103,11 @@ public sealed partial class World(District district, GameCatalog? game = null, I
                     var range=Distance(p.X,p.Z,m.X,m.Z);
                     if(!moving&&range<=R.AttackRange&&time>=p.NextAttack) {
                         p.Yaw=Math.Atan2(p.X-m.X,p.Z-m.Z);p.NextAttack=time+R.AttackSeconds/(p.Cooldowns.GetValueOrDefault("status:haste")>time?1.4:1);p.AttackSerial++;if(tick%10==0)GearRules.Wear(p.Data.State);
-                        HitMonster(p,m,Damage(p));
+                        p.Data.State.Focus=Math.Min(100,p.Data.State.Focus+8);HitMonster(p,m,Damage(p));
                     }
                 } else if(!monsters.TryGetValue(p.Target,out var selected)||selected.Hp<=0) {p.Attacking=false;p.Target="";}
                 if(p.Z>2&&!monsters.Values.Any(m=>m.Hp>0&&Distance(p.X,p.Z,m.X,m.Z)<8)&&tick%20==0)p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+5);
+                if(tick%20==0)p.Data.State.Focus=Math.Min(100,p.Data.State.Focus+Catalog.Classes[p.Data.ClassId].ResourceRegen);
                 if(tick%20==0)p.Mana=Math.Min(Catalog.BaseMana+p.Data.State.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,p.Mana+Catalog.ManaRegen);
                 TickPet(p,dt);
             }

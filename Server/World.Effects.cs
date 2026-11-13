@@ -9,7 +9,7 @@ public sealed partial class World
         public int Hp=60;
     }
     private readonly Dictionary<string,Summon> summons=[];
-    private Monster CloneMonster(Monster m)=>new(m.Spawn,m.Hp){X=m.X,Z=m.Z,WarningUntil=m.WarningUntil,WarningX=m.WarningX,WarningZ=m.WarningZ,NextWave=m.NextWave,Contributors=new(m.Contributors),NextAttack=m.NextAttack,Respawn=m.Respawn,AttackSerial=m.AttackSerial,HurtSerial=m.HurtSerial,LastDamage=m.LastDamage,DotOwner=m.DotOwner,DotUntil=m.DotUntil,NextDot=m.NextDot,DotPower=m.DotPower,SlowUntil=m.SlowUntil,BreakUntil=m.BreakUntil,ForcedTarget=m.ForcedTarget,TauntUntil=m.TauntUntil,HardTauntUntil=m.HardTauntUntil};
+    private Monster CloneMonster(Monster m)=>new(m.Spawn,m.Hp){X=m.X,Z=m.Z,WarningUntil=m.WarningUntil,WarningX=m.WarningX,WarningZ=m.WarningZ,NextWave=m.NextWave,Threat=new(m.Threat),Contributors=new(m.Contributors),NextAttack=m.NextAttack,Respawn=m.Respawn,AttackSerial=m.AttackSerial,HurtSerial=m.HurtSerial,LastDamage=m.LastDamage,DotOwner=m.DotOwner,DotUntil=m.DotUntil,NextDot=m.NextDot,DotPower=m.DotPower,SlowUntil=m.SlowUntil,BreakUntil=m.BreakUntil,ForcedTarget=m.ForcedTarget,TauntUntil=m.TauntUntil,HardTauntUntil=m.HardTauntUntil};
     private Dictionary<string,Summon> CloneSummons()=>summons.ToDictionary(s=>s.Key,s=>new Summon(s.Value.Owner,s.Value.Kind,s.Value.X,s.Value.Z,s.Value.Until){NextAttack=s.Value.NextAttack,Hp=s.Value.Hp});
     private void HitMonster(Player p,Monster m,int raw)
     {
@@ -18,7 +18,7 @@ public sealed partial class World
         if(m.Spawn.Boss&&m.Contributors.Count<2)raw=Math.Max(1,raw/2);
         var amount=Math.Max(1,raw+(m.BreakUntil>time?Catalog.StatusPenalty:0));
         m.Hp=Math.Max(0,m.Hp-amount);m.HurtSerial++;m.LastDamage=amount;
-        if(m.HardTauntUntil<=time){m.ForcedTarget=p.Id;m.TauntUntil=Math.Max(m.TauntUntil,time+5);}
+        m.Threat[p.Id]=Math.Min(1000000,m.Threat.GetValueOrDefault(p.Id)+amount);
         if(m.Hp==0)RewardKill(p,m);
     }
     private int MaxMonsterHp(Monster m)=>m.Spawn.Hp>0?m.Spawn.Hp:R.MonsterHp;
@@ -41,7 +41,7 @@ public sealed partial class World
     private Player? MonsterTarget(Monster m)
     {
         if(m.TauntUntil>time&&players.TryGetValue(m.ForcedTarget,out var forced)&&forced.Hp>0&&Distance(forced.X,forced.Z,m.Spawn.X,m.Spawn.Z)<18)return forced;
-        return players.Values.Where(p=>p.Hp>0&&Distance(p.X,p.Z,m.X,m.Z)<R.AggroRange&&Distance(p.X,p.Z,m.Spawn.X,m.Spawn.Z)<12).OrderBy(p=>Distance(p.X,p.Z,m.X,m.Z)).FirstOrDefault();
+        return players.Values.Where(p=>p.Hp>0&&Distance(p.X,p.Z,m.X,m.Z)<R.AggroRange&&Distance(p.X,p.Z,m.Spawn.X,m.Spawn.Z)<12).OrderByDescending(p=>m.Threat.GetValueOrDefault(p.Id)).ThenBy(p=>Distance(p.X,p.Z,m.X,m.Z)).FirstOrDefault();
     }
     private void EffectsTick(double dt)
     {
@@ -58,7 +58,7 @@ public sealed partial class World
                 if(time>=s.NextAttack&&Distance(s.X,s.Z,m.X,m.Z)<=4){
                     s.NextAttack=time+2;
                     if(s.Kind=="wisp")p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+8);
-                    else {HitMonster(p,m,s.Kind=="wolf"?9:5);if(s.Kind=="golem"&&m.HardTauntUntil<=time){m.ForcedTarget=p.Id;m.TauntUntil=time+4;}}
+                    else {HitMonster(p,m,(s.Kind=="wolf"?9:5)+ClassRules.Attack(p.Data,Catalog));if(s.Kind=="golem"&&m.HardTauntUntil<=time){m.ForcedTarget=p.Id;m.TauntUntil=time+4;}}
                 }
             }else if(s.Kind=="wisp"&&time>=s.NextAttack){s.NextAttack=time+3;p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+8);}
             var dist=Distance(s.X,s.Z,tx,tz);if(dist>20){s.X=p.X;s.Z=p.Z;}

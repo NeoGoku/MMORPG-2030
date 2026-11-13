@@ -87,6 +87,7 @@ func _rebuild() -> void:
             save.pressed.connect(func():intent.emit("appearance","%s|%d|%d|%d|%d|%d"%[choices[0].get_item_text(choices[0].selected),choices[1].selected,choices[2].selected,choices[3].selected,choices[4].selected,choices[5].selected]))
             content.add_child(save)
         "Skills":
+            _text("%s: %d / 100 · Passiv: %s (%s)"%[info.get("resource","Fokus"),info.get("focus",100),info.get("passive",""),"aktiv" if info.get("passiveActive",false) else "ab Stufe 5"])
             _text("Acht aktive Skills. Level schaltet frei; sechs Plätze sind gleichzeitig sichtbar.")
             var slot_picker:=OptionButton.new()
             for i in range(6):slot_picker.add_item("Zielplatz %d"%(i+1))

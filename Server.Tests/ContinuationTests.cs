@@ -8,6 +8,8 @@ public static class ContinuationTests
   var id=c.State.Gear.Keys.Single();Check(!c.State.Inventory.ContainsKey("iron_sword")&&GearRules.Equip(c,id,g),"owned compatible gear equips");
   c.State.Gear[id].Condition=0;var damaged=CharacterRules.Attack(c,g);c.State.Coins=100;
   Check(GearRules.Repair(c.State,id,g)&&CharacterRules.Attack(c,g)>damaged,"repair restores actual gear contribution");
+  c.State.Level=5;Check(ClassRules.Defense(c,g)>0,"shield class passive contributes defense at unlock level");
+  c.ClassId="Healer";Check(!GearRules.Equip(c,id,g)||g.Items[c.State.Gear[id].Item].Classes.Count==0,"class requirements are authoritative");
   Check(AppearanceRules.Valid("female|2|1|3|2|1" )&&!AppearanceRules.Valid("bad|99|0|0|0|0"),"appearance bounds reject malformed choices");
  }
 }
