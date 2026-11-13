@@ -29,6 +29,8 @@ var hud = HUD.new()
 var avatars: Dictionary = {}
 var monsters: Dictionary = {}
 var loot_nodes: Dictionary = {}
+var tracked_quest:=""
+var quest_marker:=Label3D.new()
 var world: Dictionary = {}
 var local_id := "local"
 var online := false
@@ -43,6 +45,7 @@ var practice_time := 0.0
 var npc
 
 func _ready() -> void:
+    quest_marker.font_size=36;quest_marker.pixel_size=.016;quest_marker.billboard=BaseMaterial3D.BILLBOARD_ENABLED;quest_marker.modulate=Color("f4dc87");quest_marker.visible=false;add_child(quest_marker)
     add_child(network)
     add_child(practice)
     var layer := CanvasLayer.new()
@@ -189,6 +192,7 @@ func _receive_world(state: Dictionary) -> void:
                 for actor_state in state.players:
                     if actor_state.id==owner:all_summons.append({"owner":owner,"kind":"wolf","x":actor_state.x+1,"z":actor_state.z,"hp":60,"maxHp":60,"remaining":10})
     _sync_summons(all_summons)
+    _update_tracking()
     minimap.update_world(state,local_player)
     social_panel.update_state(state,online)
     community_panel.update_state(state,online)
@@ -309,6 +313,7 @@ func _notification(what: int) -> void:
         network.direction = Vector2.ZERO
 
 func _intent(kind: String,target_id: String) -> void:
+    if kind=="track":tracked_quest=target_id;_update_tracking();return
     if kind=="layout":hud.move_layout(target_id);return
     if local_player.is_empty():return
     if online: network.action(kind,target_id)
@@ -426,3 +431,22 @@ func _sync_summons(states: Array) -> void:
         summon_nodes[state.owner].hp_label.text="%d HP · %.0fs"%[state.hp,state.remaining]
     for key in summon_nodes.keys():
         if not seen.has(key):summon_nodes[key].queue_free();summon_nodes.erase(key)
+
+func _update_tracking() -> void:
+    var goal: Dictionary={}
+    var label: String=""
+    if tracked_quest=="mira" and world.get("self",{}).get("quest","")!="complete":
+        goal={"x":-3.0,"z":6.0};label="Mira · Auftrag"
+        if world.self.quest=="active":
+            goal={"x":0.0,"z":-10.0};label="Miras Drohnenauftrag"
+            for monster in world.get("monsters",[]):
+                if str(monster.id).begins_with("drone-") and not monster.dead:goal={"x":monster.x,"z":monster.z};break
+    else:
+        for q in world.get("self",{}).get("character",{}).get("quests",[]):
+            if q.id==tracked_quest and not q.claimed and q.unlocked and q.get("navigation") is Dictionary:goal=q.navigation;label=q.name
+    quest_marker.visible=not goal.is_empty() and not local_player.is_empty()
+    minimap.destination=Vector2.INF
+    if quest_marker.visible:
+        minimap.destination=Vector2(goal.x,goal.z);quest_marker.position=Vector3(goal.x,3.8,goal.z)
+        quest_marker.text="▼ "+label+" · %d m"%Vector2(local_player.x-goal.x,local_player.z-goal.z).length()
+    minimap.queue_redraw()

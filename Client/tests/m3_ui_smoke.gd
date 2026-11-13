@@ -47,6 +47,9 @@ func run() -> void:
     if not check(scene.camera.far==75,"Mobile low profile changes actual render distance"):return
     scene.graphics_options.apply_profile(1)
     if not check(scene.minimap.state.players.size()>0,"Minimap consumes real world entities"):return
+    scene._intent("track","mira")
+    if not check(scene.quest_marker.visible and scene.minimap.destination!=Vector2.INF,"Quest tracking connects log to real world marker/minimap"):return
+    scene._intent("track","")
     var original: Vector2=scene.hud.skill_buttons[0].position
     scene.hud.move_layout("skill1|left")
     if not check(scene.hud.skill_buttons[0].position.x==original.x-12,"User can reposition skill touch control"):return

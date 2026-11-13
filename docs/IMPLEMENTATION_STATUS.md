@@ -63,3 +63,6 @@ North-up minimap with real player/monster/service positions, equipment overlays 
 
 ## Issue #8 — durable-play/creation batch
 Actual base is PR #7; #3–#7 remain open, #1/#2 merged. The main-only autonomous protocol/queue are included without reverting gameplay. Guild instance storage now accepts unequipped gear, limits withdrawal to officers/leader and preserves identity/condition through the existing shared-world transaction. New memory/PostgreSQL scenarios reopen the store around guild storage and auction escrow, reject full inventory without money/item loss and reject duplicate withdrawal/purchase. Creation API validates appearance and the online lobby offers the same choices with a live isolated 3D preview. These are character previews, not housing instances. Final DB/render/CI evidence belongs to the batch PR.
+
+## Issue #8 — quest navigation
+Data-driven quest navigation coordinates now accompany valid quest snapshots; completed objectives point to the reward NPC. Quest-log tracking drives a private world marker, distance label and minimap direction; Mira's preserved main-hunt adapter can also be tracked. This is guidance, not automatic obstacle-aware navigation. Locked/claimed objectives hide their markers. Local practice mirrors target selection.

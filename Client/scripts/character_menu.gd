@@ -123,8 +123,11 @@ func _rebuild() -> void:
                 _text("%s · St. %d · %d EXP"%[profession,1+experience/int(catalog.professionLevelXp),experience])
         "Quests":
             _text("Miras Hauptauftrag bleibt rechts im HUD. Zusatzaufträge laufen automatisch bei passenden Tätigkeiten.")
+            _action("Miras Hauptauftrag auf Karte verfolgen","track","mira")
+            _action("Zielverfolgung ausblenden","track","")
             for q in info.quests:
                 _text("%s [%s] · %d / %d · %s"%[q.name,q.type,q.progress,q.required,"abgegeben" if q.claimed else ("offen" if q.unlocked else "Voraussetzung fehlt")])
+                if not q.claimed and q.unlocked and q.get("navigation") is Dictionary:_action("Auf Karte verfolgen: "+q.name,"track",q.id)
                 if not q.claimed:_action("Beim Händler abgeben","claim",q.id)
         "Pet":
             _text("Arkaner Funke · Stufe %d · %d EXP · Modus: %s\nEin aktiver Begleiter · Entwicklung und Zucht an der Werkbank."%[info.pet.level,info.pet.exp,info.pet.mode])
