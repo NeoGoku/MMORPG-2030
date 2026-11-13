@@ -19,3 +19,5 @@ Continuation: original procedural boar/forest-spirit/tree-boss meshes, additiona
 Issue #8: creation preview reuses the original class/appearance Actor in a UI-only SubViewport. New tables/shelves/lamps and named stand canopy/counter meshes are original procedural geometry/materials in community_city.gd. No external pack, texture, model, font or audio license is introduced.
 
 M7: `world_regions.gd` adds original material-batched laboratory/shrine walls, courtyard props, ash trees, field-service humanoids, transit pads and road geometry. It reuses existing actor/boss animation families. No external model, image, texture or paid asset was added; these remain stylized procedural assets rather than final semi-realistic art.
+
+M8: original procedural stair sections, upper-floor cutaway apartment shells, forge, loom and distillation furniture meshes/materials. Existing actor animation/appearance reused; no third-party model, texture, paid service or new asset license. These are stylized assets, not final semi-realistic production art.

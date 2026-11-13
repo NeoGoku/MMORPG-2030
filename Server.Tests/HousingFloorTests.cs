@@ -25,6 +25,7 @@ public static class HousingFloorTests
         Act("home_stairs","1");Act("home_remove",upstairs);Act("home_remove",upstairs);
         Check(store.Get(owner.Id)!.State.Inventory.GetValueOrDefault("oak_chair")==1,"upper-floor furniture returns once");
         Act("home_visit",visitor.Id+"|remove");Check(world.View(visitor.Id).Players.Single(p=>p.Id==visitor.Id).Floor==0,"revoked upper-floor visitor is ejected to ground world");
+        world.Leave(visitor.Id);Act("home_visit",visitor.Id+"|allow");var lower=store.Get(visitor.Id)!;lower.State.X=33;lower.State.Z=37;store.Save(lower);world.JoinCharacter(lower);
         world.Act(owner.Id,++seq,"trade_open",visitor.Id);Check(System.Text.Json.JsonSerializer.Serialize(world.View(owner.Id).Social).Contains("\"trade\":null"),"cross-floor trade cannot use overlapping XZ");
         world.Leave(owner.Id);world.Leave(visitor.Id);world=new World(district,catalog,store);world.JoinCharacter(store.Get(owner.Id)!);
         Check(world.View(owner.Id).Players.Single().Floor==1&&store.LoadWorld().Homes["home-1"].Floors==3,"restart restores floor occupancy and expanded home");
