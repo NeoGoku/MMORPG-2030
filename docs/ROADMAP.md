@@ -41,3 +41,6 @@ Guild chat/hall lifecycle, quest/reward/endgame and paged expiring auctions inte
 
 ## Seven-package continuation
 Completed consecutive code integrations: appearance/instanced gear → class resources/passives/threat → connected forest/open ruins/phased boss/cells → mastery recipes/class+profession quest chains → gear/pet economy → normalized class arena skills/farming → minimap/quality profiles/monster silhouettes. PR #8 could not be retrieved (404); latest accessible base was PR #6. Next priority: full end-to-end instance economy PostgreSQL/restart acceptance, appearance creation-screen presets, legacy gear conversion UX and class-specific PvP balance. Housing floors, production catalogue/stalls, NPC navigation/factions, broad city content/streaming and measured device/load qualification remain open.
+
+## Issue #8 queue batch
+Reconciled actual PRs/main docs, added guild instance storage and actual store-reopen evidence, creation preview, quest guidance, physical escrow stalls and conservative furniture catalogue. Hardened vendor purchase authority. Next: crash/restore drill + queued persistence, physical floors/production, richer class/PvP and device qualification. Full alpha remains partial. DEVELOPMENT_QUEUE.md is now the current task source; Issue #8 is a resumable entrypoint, not a scheduler.

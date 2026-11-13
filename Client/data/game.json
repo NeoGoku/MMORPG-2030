@@ -1074,32 +1074,37 @@
       "name": "Eisenerz",
       "stack": 99,
       "price": 2,
-      "rarity": "Normal"
+      "rarity": "Normal",
+      "vendor": false
     },
     "herb": {
       "name": "Heilkraut",
       "stack": 99,
       "price": 2,
-      "rarity": "Normal"
+      "rarity": "Normal",
+      "vendor": false
     },
     "wood": {
       "name": "Holz",
       "stack": 99,
       "price": 2,
-      "rarity": "Normal"
+      "rarity": "Normal",
+      "vendor": false
     },
     "scrap": {
       "name": "Drohnenschrott",
       "stack": 99,
       "price": 1,
-      "rarity": "Normal"
+      "rarity": "Normal",
+      "vendor": false
     },
     "potion": {
       "name": "Heiltrank",
       "stack": 20,
       "price": 8,
       "rarity": "Normal",
-      "heal": 35
+      "heal": 35,
+      "vendor": true
     },
     "iron_sword": {
       "name": "Eisenwaffe",
@@ -1107,7 +1112,8 @@
       "price": 25,
       "rarity": "Uncommon",
       "slot": "weapon",
-      "attack": 6
+      "attack": 6,
+      "vendor": true
     },
     "guard_coat": {
       "name": "Wachmantel",
@@ -1115,7 +1121,8 @@
       "price": 20,
       "rarity": "Normal",
       "slot": "chest",
-      "defense": 3
+      "defense": 3,
+      "vendor": true
     },
     "woven_coat": {
       "name": "Gewebter Mantel",
@@ -1125,7 +1132,8 @@
       "slot": "chest",
       "attack": 0,
       "defense": 4,
-      "heal": 0
+      "heal": 0,
+      "vendor": false
     },
     "arcane_lens": {
       "name": "Arkane Linse",
@@ -1135,7 +1143,8 @@
       "slot": "ring",
       "attack": 3,
       "defense": 0,
-      "heal": 0
+      "heal": 0,
+      "vendor": false
     },
     "ration": {
       "name": "Kräuterration",
@@ -1145,7 +1154,8 @@
       "slot": "",
       "attack": 0,
       "defense": 0,
-      "heal": 25
+      "heal": 25,
+      "vendor": false
     },
     "oak_chair": {
       "name": "Eichenstuhl",
@@ -1155,7 +1165,10 @@
       "slot": "",
       "attack": 0,
       "defense": 0,
-      "heal": 0
+      "heal": 0,
+      "vendor": false,
+      "furnitureKind": "chair",
+      "furnitureRadius": 0.5
     },
     "pet_feed": {
       "name": "Begleiterfutter",
@@ -1165,7 +1178,8 @@
       "slot": "",
       "attack": 0,
       "defense": 0,
-      "heal": 0
+      "heal": 0,
+      "vendor": false
     },
     "pet_egg": {
       "name": "Begleitereischale",
@@ -1175,7 +1189,8 @@
       "slot": "",
       "attack": 0,
       "defense": 0,
-      "heal": 0
+      "heal": 0,
+      "vendor": false
     },
     "evolution_shard": {
       "name": "Evolutionssplitter",
@@ -1185,19 +1200,22 @@
       "slot": "",
       "attack": 0,
       "defense": 0,
-      "heal": 0
+      "heal": 0,
+      "vendor": false
     },
     "arena_token": {
       "name": "Arenamarke",
       "stack": 99,
       "price": 0,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "boss_core": {
       "name": "AUR-IX-Kern",
       "stack": 20,
       "price": 40,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "ward_blade": {
       "name": "Kernwächterklinge",
@@ -1211,37 +1229,43 @@
         "Shield Sword",
         "Dual Swords",
         "Tank"
-      ]
+      ],
+      "vendor": false
     },
     "reset_stone": {
       "name": "Seltener Resetstein",
       "stack": 20,
       "price": 80,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "ancient_ore": {
       "name": "Altes Erz",
       "stack": 99,
       "price": 12,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "moon_herb": {
       "name": "Mondkraut",
       "stack": 99,
       "price": 12,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "heartwood": {
       "name": "Herzholz",
       "stack": 99,
       "price": 12,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "root_core": {
       "name": "Wurzelkern",
       "stack": 99,
       "price": 12,
-      "rarity": "Rare"
+      "rarity": "Rare",
+      "vendor": false
     },
     "arcane_staff": {
       "name": "Arkanstab",
@@ -1257,7 +1281,8 @@
       "rarity": "Rare",
       "minLevel": 5,
       "stack": 1,
-      "price": 100
+      "price": 100,
+      "vendor": false
     },
     "ranger_bow": {
       "name": "Jägerbogen",
@@ -1270,7 +1295,8 @@
       "rarity": "Rare",
       "minLevel": 5,
       "stack": 1,
-      "price": 100
+      "price": 100,
+      "vendor": false
     },
     "iron_helm": {
       "name": "Eisenhelm",
@@ -1281,7 +1307,8 @@
       "rarity": "Rare",
       "minLevel": 5,
       "stack": 1,
-      "price": 100
+      "price": 100,
+      "vendor": false
     },
     "trail_boots": {
       "name": "Pfadstiefel",
@@ -1292,7 +1319,8 @@
       "rarity": "Rare",
       "minLevel": 5,
       "stack": 1,
-      "price": 100
+      "price": 100,
+      "vendor": false
     },
     "moon_ring": {
       "name": "Mondring",
@@ -1303,7 +1331,8 @@
       "rarity": "Epic",
       "minLevel": 10,
       "stack": 1,
-      "price": 100
+      "price": 100,
+      "vendor": false
     },
     "root_blade": {
       "name": "Wurzelklinge",
@@ -1318,7 +1347,35 @@
       "rarity": "Legendary",
       "minLevel": 15,
       "stack": 1,
-      "price": 100
+      "price": 100,
+      "vendor": false
+    },
+    "oak_table": {
+      "name": "Eichentisch",
+      "stack": 10,
+      "price": 20,
+      "rarity": "Uncommon",
+      "furnitureKind": "table",
+      "furnitureRadius": 1,
+      "vendor": false
+    },
+    "oak_shelf": {
+      "name": "Wohnregal",
+      "stack": 10,
+      "price": 20,
+      "rarity": "Uncommon",
+      "furnitureKind": "shelf",
+      "furnitureRadius": 0.8,
+      "vendor": false
+    },
+    "arcane_lamp": {
+      "name": "Arkanlampe",
+      "stack": 10,
+      "price": 20,
+      "rarity": "Uncommon",
+      "furnitureKind": "lamp",
+      "furnitureRadius": 0.4,
+      "vendor": false
     }
   },
   "professions": [
@@ -1501,6 +1558,39 @@
       "output": "root_blade",
       "count": 1,
       "minProfessionLevel": 5
+    },
+    "oak_table": {
+      "name": "Eichentisch",
+      "profession": "building",
+      "inputs": {
+        "wood": 5,
+        "ore": 1
+      },
+      "output": "oak_table",
+      "count": 1,
+      "minProfessionLevel": 1
+    },
+    "oak_shelf": {
+      "name": "Wohnregal",
+      "profession": "building",
+      "inputs": {
+        "wood": 4,
+        "ore": 2
+      },
+      "output": "oak_shelf",
+      "count": 1,
+      "minProfessionLevel": 1
+    },
+    "arcane_lamp": {
+      "name": "Arkanlampe",
+      "profession": "building",
+      "inputs": {
+        "ore": 2,
+        "herb": 2
+      },
+      "output": "arcane_lamp",
+      "count": 1,
+      "minProfessionLevel": 1
     }
   },
   "services": {
@@ -1584,7 +1674,11 @@
       "required": 3,
       "prerequisite": "",
       "coins": 12,
-      "exp": 15
+      "exp": 15,
+      "navigation": {
+        "x": 8,
+        "z": 24
+      }
     },
     {
       "id": "class_training",
@@ -1595,7 +1689,11 @@
       "required": 2,
       "prerequisite": "",
       "coins": 10,
-      "exp": 20
+      "exp": 20,
+      "navigation": {
+        "x": -7,
+        "z": -9
+      }
     },
     {
       "id": "artisan",
@@ -1606,7 +1704,11 @@
       "required": 1,
       "prerequisite": "herbs",
       "coins": 15,
-      "exp": 25
+      "exp": 25,
+      "navigation": {
+        "x": -8,
+        "z": 6
+      }
     },
     {
       "id": "deep_sentinel",
@@ -1617,7 +1719,11 @@
       "required": 2,
       "coins": 20,
       "exp": 80,
-      "prerequisite": ""
+      "prerequisite": "",
+      "navigation": {
+        "x": -7,
+        "z": -65
+      }
     },
     {
       "id": "core_guardian",
@@ -1628,7 +1734,11 @@
       "required": 1,
       "coins": 40,
       "exp": 150,
-      "prerequisite": ""
+      "prerequisite": "",
+      "navigation": {
+        "x": 0,
+        "z": -76
+      }
     },
     {
       "id": "daily_herbs",
@@ -1643,7 +1753,11 @@
       "coins": 10,
       "exp": 25,
       "points": 1,
-      "rewards": {}
+      "rewards": {},
+      "navigation": {
+        "x": 8,
+        "z": 24
+      }
     },
     {
       "id": "reset_trial",
@@ -1658,6 +1772,10 @@
       "exp": 100,
       "rewards": {
         "reset_stone": 1
+      },
+      "navigation": {
+        "x": 0,
+        "z": -76
       }
     },
     {
@@ -1675,6 +1793,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1692,6 +1814,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1709,6 +1835,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1726,6 +1856,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1743,6 +1877,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1760,6 +1898,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1777,6 +1919,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1794,6 +1940,10 @@
       "points": 1,
       "rewards": {
         "potion": 2
+      },
+      "navigation": {
+        "x": -7,
+        "z": -9
       }
     },
     {
@@ -1809,6 +1959,10 @@
       "exp": 150,
       "rewards": {
         "ancient_ore": 2
+      },
+      "navigation": {
+        "x": -9,
+        "z": 104
       }
     },
     {
@@ -1824,6 +1978,10 @@
       "exp": 300,
       "rewards": {
         "moon_ring": 1
+      },
+      "navigation": {
+        "x": 0,
+        "z": 130
       }
     },
     {
@@ -1840,6 +1998,10 @@
       "points": 1,
       "rewards": {
         "heartwood": 1
+      },
+      "navigation": {
+        "x": -8,
+        "z": 6
       }
     },
     {
@@ -1856,6 +2018,10 @@
       "points": 1,
       "rewards": {
         "heartwood": 1
+      },
+      "navigation": {
+        "x": -8,
+        "z": 6
       }
     },
     {
@@ -1872,6 +2038,10 @@
       "points": 1,
       "rewards": {
         "heartwood": 1
+      },
+      "navigation": {
+        "x": -8,
+        "z": 6
       }
     },
     {
@@ -1888,6 +2058,10 @@
       "points": 1,
       "rewards": {
         "heartwood": 1
+      },
+      "navigation": {
+        "x": -8,
+        "z": 6
       }
     }
   ],
@@ -1957,5 +2131,7 @@
   "prestigeLevel": 100,
   "deathExpPercent": 5,
   "auctionDays": 7,
-  "marketPageSize": 20
+  "marketPageSize": 20,
+  "maxStalls": 100,
+  "stallSeconds": 86400
 }

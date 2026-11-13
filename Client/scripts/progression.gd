@@ -127,7 +127,7 @@ func action(kind: String, target: String) -> bool:
                 equipment[catalog.items[target].slot] = target
                 ok = true
         "buy":
-            if near("merchant") and catalog.items.has(target) and p.coins >= catalog.items[target].price and add(target,1):
+            if near("merchant") and catalog.items.has(target) and catalog.items[target].get("vendor",false) and p.coins >= catalog.items[target].price and add(target,1):
                 p.coins -= catalog.items[target].price
                 ok = true
         "sell":
@@ -408,6 +408,7 @@ func view() -> Dictionary:
     var quests: Array = catalog.quests.duplicate(true)
     for q in quests:
         q.progress = quest_progress.get(q.id,0)
+        q.navigation=catalog.services.merchant.duplicate() if q.progress>=q.required else q.get("navigation",{}).duplicate()
         q.claimed = claimed.has(q.id)
         q.unlocked = q.prerequisite=="" or claimed.has(q.prerequisite)
     return {"id":"local","name":nickname,"classId":class_id,"prestige":prestige,"attributes":attributes.duplicate(),"inventory":inventory.duplicate(),"equipment":equipment.duplicate(),"professions":professions.duplicate(),"quests":quests,"focus":int(focus),"resource":catalog.classes[class_id].get("resource","Focus"),"passive":catalog.classes[class_id].get("passive",""),"passiveActive":sim.player.level>=5,"mana":int(mana),"nextLevelExp":sim.player.level*catalog.levelExpBase,"maxMana":catalog.baseMana+attributes.wisdom*catalog.wisdomMana,"attack":attack(),"defense":defense(),"farmXp":str(farm_xp),"farmCost":str(farm_cost()),"automation":automation.duplicate(true),"pet":pet.duplicate(true),"ownedPets":owned_pets.duplicate(true),"persistent":false,"skills":skills,"skillbook":book}

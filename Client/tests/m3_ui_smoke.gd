@@ -5,6 +5,14 @@ func _initialize() -> void:
 func check(ok: bool,message: String) -> bool:
     if not ok:push_error(message);quit(1)
     return ok
+func go_to(point: Vector2) -> bool:
+    for i in range(600):
+        var player: Dictionary=scene.local_player
+        var delta:=point-Vector2(player.get("x",0),player.get("z",0))
+        if delta.length()<.25:scene.hud.joystick.reset();return true
+        scene.hud.joystick.direction=delta.normalized()
+        await physics_frame
+    scene.hud.joystick.reset();return false
 func run() -> void:
     scene=load("res://scenes/main.tscn").instantiate()
     root.add_child(scene)
@@ -19,8 +27,14 @@ func run() -> void:
     scene.lobby.slots.select(1)
     var keys: Array=scene.lobby.catalog.classes.keys()
     scene.lobby.classes.select(keys.find("Healer"))
+    scene.lobby.creator.open_for_class("Healer")
+    scene.lobby.creator.selectors[1].select(2)
+    scene.lobby.creator.update_preview()
+    scene.lobby.creation_appearance=scene.lobby.creator.value()
+    scene.lobby.creator.hide()
     await scene.lobby._create()
     if not check(scene.lobby.characters.size()==1,"Lobby creates selected owned slot"):return
+    if not check(scene.lobby.characters[0].appearance==scene.lobby.creation_appearance,"Creation API persists selected preview appearance"):return
     await scene.lobby._play()
     for i in range(300):
         if scene.world.get("self",{}).get("character",{}).get("classId","")=="Healer":break
@@ -41,6 +55,9 @@ func run() -> void:
     if not check(scene.camera.far==75,"Mobile low profile changes actual render distance"):return
     scene.graphics_options.apply_profile(1)
     if not check(scene.minimap.state.players.size()>0,"Minimap consumes real world entities"):return
+    scene._intent("track","mira")
+    if not check(scene.quest_marker.visible and scene.minimap.destination!=Vector2.INF,"Quest tracking connects log to real world marker/minimap"):return
+    scene._intent("track","")
     var original: Vector2=scene.hud.skill_buttons[0].position
     scene.hud.move_layout("skill1|left")
     if not check(scene.hud.skill_buttons[0].position.x==original.x-12,"User can reposition skill touch control"):return
@@ -92,6 +109,29 @@ func run() -> void:
     if not check(scene.community_city.chunks.has("home-1"),"Physical housing chunk is actually created"):return
     scene.community_city.update_world(scene.world,Vector3(-80,0,-80))
     if not check(not scene.community_city.chunks.has("home-1"),"Distant housing chunk is unloaded"):return
+    scene.community_panel.hide()
+    if not check(await go_to(Vector2(0,24)),"Online movement reaches trade route"):return
+    if not check(await go_to(Vector2(30,24)),"Online movement reaches shared register"):return
+    if not check(await go_to(Vector2(30,18)),"Online movement reaches permitted stall zone"):return
+    scene.community_panel.tab="Stände";scene.community_panel.show();scene.community_panel.rebuild();scene.community_panel.names.text="UI Handel"
+    for button in scene.community_panel.content.get_children():
+        if button is Button and button.text.begins_with("Stand hier eröffnen"):button.pressed.emit();break
+    for i in range(150):
+        if scene.world.community.get("ownStall") is Dictionary:break
+        await physics_frame
+    if not check(scene.world.community.get("ownStall") is Dictionary and scene.community_city.stalls.has(scene.local_id),"Touch-created stall synchronizes a real world prop"):return
+    for button in scene.community_panel.content.get_children():
+        if button is Button and button.text.begins_with("Auswahl am eigenen Stand einstellen"):button.pressed.emit();break
+    for i in range(150):
+        if scene.world.self.character.inventory.get("potion",0)==1:break
+        await physics_frame
+    if not check(scene.world.self.character.inventory.get("potion",0)==1,"Touch stall listing escrows actual owned stock"):return
+    for button in scene.community_panel.content.get_children():
+        if button is Button and button.text.begins_with("Eigenen Stand schließen"):button.pressed.emit();break
+    for i in range(150):
+        if scene.world.community.get("ownStall")==null:break
+        await physics_frame
+    if not check(scene.world.community.get("ownStall")==null and scene.world.community.ownAuctions.size()==1,"Closing retains sellable escrow at exchange"):return
     scene.community_panel.hide()
     scene.menu.tab="Skills";scene.menu.show();scene.menu._rebuild()
     await RenderingServer.frame_post_draw

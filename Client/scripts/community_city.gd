@@ -3,8 +3,10 @@ extends Node3D
 var data: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/district.json"))
 var chunks: Dictionary={}
 var furniture: Dictionary={}
+var catalogue: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/game.json"))
 var room_dividers: Dictionary={}
 var danger: Dictionary={}
+var stalls: Dictionary={}
 var last_refresh:=0.0
 
 func box(parent: Node3D,pos: Vector3,scale_value: Vector3,color: Color,collision: bool=false) -> MeshInstance3D:
@@ -78,6 +80,16 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
             danger[enemy.id].position=Vector3(enemy.warningX,.3,enemy.warningZ)
     for id in danger.keys():
         if not warned.has(id):danger[id].queue_free();danger.erase(id)
+    var visible_stalls: Dictionary={}
+    for stand in community.get("stalls",[]):
+        visible_stalls[stand.id]=true
+        if not stalls.has(stand.id):
+            var node:=Node3D.new();add_child(node);box(node,Vector3(0,.9,0),Vector3(2,.2,1.2),Color("8b7052"));box(node,Vector3(0,2.2,0),Vector3(2.6,.18,1.7),Color("607f89"));sign_text(node,stand.title,Vector3(0,2.8,0));stalls[stand.id]=node
+        stalls[stand.id].position=Vector3(stand.x,.2,stand.z)
+        for label in stalls[stand.id].get_children():
+            if label is Label3D:label.text=stand.title
+    for id in stalls.keys():
+        if not visible_stalls.has(id):stalls[id].queue_free();stalls.erase(id)
     var seen: Dictionary={}
     for home in community.get("homes",[]):
         if room_dividers.has(home.id):room_dividers[home.id].visible=home.rooms==1 and not home.guildHall
@@ -92,6 +104,18 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
                 box(chair,Vector3(0,1.05,.45),Vector3(1.1,.8,.16),Color("a37b51"))
                 for x in [-.4,.4]:
                     for z in [-.35,.35]:box(chair,Vector3(x,.3,z),Vector3(.13,.6,.13),Color("514a40"))
+                var kind: String=catalogue.items[item.item].get("furnitureKind","chair")
+                if kind!="chair":
+                    for part in chair.get_children():part.queue_free()
+                    if kind=="table":
+                        box(chair,Vector3(0,.9,0),Vector3(1.8,.2,1.4),Color("927151"))
+                        for x in [-.7,.7]:
+                            for z in [-.5,.5]:box(chair,Vector3(x,.4,z),Vector3(.15,.8,.15),Color("514a40"))
+                    elif kind=="shelf":
+                        for x in [-.7,.7]:box(chair,Vector3(x,1,0),Vector3(.15,2,.55),Color("796047"))
+                        for y in [.2,.8,1.4,1.9]:box(chair,Vector3(0,y,0),Vector3(1.5,.12,.55),Color("947a5b"))
+                    else:
+                        box(chair,Vector3(0,1,0),Vector3(.12,2,.12),Color("62777f"));box(chair,Vector3(0,2,0),Vector3(.6,.4,.6),Color("a9decf"))
                 furniture[item.id]=chair
             furniture[item.id].position=Vector3(item.x,.2,item.z);furniture[item.id].rotation.y=item.yaw
     for id in furniture.keys():

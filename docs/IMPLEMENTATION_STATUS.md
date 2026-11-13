@@ -60,3 +60,17 @@ Arena class skill intents now spend separate normalized energy and use fixed con
 
 ## Continuation package 7
 North-up minimap with real player/monster/service positions, equipment overlays and appearance variations, forest/ruin geometry, and persistent low/balanced/far graphics profiles controlling 3D scale, frame cap, shadows and actor sight. Six equipped skill buttons dispatch normalized class skills during arena matches. No measured device-performance or semi-realistic production-art claim.
+
+## Issue #8 — durable-play/creation batch
+Actual base is PR #7; #3–#7 remain open, #1/#2 merged. The main-only autonomous protocol/queue are included without reverting gameplay. Guild instance storage now accepts unequipped gear, limits withdrawal to officers/leader and preserves identity/condition through the existing shared-world transaction. New memory/PostgreSQL scenarios reopen the store around guild storage and auction escrow, reject full inventory without money/item loss and reject duplicate withdrawal/purchase. Creation API validates appearance and the online lobby offers the same choices with a live isolated 3D preview. These are character previews, not housing instances. Final DB/render/CI evidence belongs to the batch PR.
+
+## Issue #8 — quest navigation
+Data-driven quest navigation coordinates now accompany valid quest snapshots; completed objectives point to the reward NPC. Quest-log tracking drives a private world marker, distance label and minimap direction; Mira's preserved main-hunt adapter can also be tracked. This is guidance, not automatic obstacle-aware navigation. Locked/claimed objectives hide their markers. Local practice mirrors target selection.
+
+## Issue #8 — physical player stalls
+Players can place named persistent stalls in the marked trade zone, escrow stack items or unique gear, inspect nearby stock and buy only within range. Purchases/proceeds use the existing atomic auction transaction; equipped gear/capacity/replay protections remain. Closing moves unsold offers back into the ordinary exchange; expiry preserves seller escrow. Stalls are shared world props, not a separate channel or paid convenience. Pet listings remain at the auction exchange.
+
+## Issue #8 — furniture and vendor authority
+Building recipes now produce placeable tables, shelves and lamps as well as chairs, with stored item kind, model, footprint/door/occupant checks and conserved removal. NPC purchase is now explicitly catalogue-whitelisted: only listed vendor stock may be bought, preventing crafted/boss/zero-price reward items from being minted through forged buy intents. Expired stalls no longer permanently exhaust the active-stand cap; escrow remains recoverable.
+
+Issue #8 verification update: actual PostgreSQL reopen cases for guild gear/offline auctions passed locally; rendered creation-preview/quest guidance and touch stall open→list→close journey passed. Final source uses protocol v8; platform/network evidence and exact source commit will be recorded in the batch PR. Physical-device acceptance deferred per issue. Full alpha remains partial.
