@@ -44,6 +44,8 @@ public sealed partial class World
             case "slot":
                 var binding=target.Split('|');
                 if(binding.Length==2&&int.TryParse(binding[0],out var index)&&index>=0&&index<6&&Catalog.Classes[p.Data.ClassId].Skills.Any(s=>s.Id==binding[1])){while(c.SkillBar.Count<6)c.SkillBar.Add("skill1");c.SkillBar[index]=binding[1];ok=true;}break;
+            case "reset_stats":ok=CharacterRules.Reset(c,Catalog);break;
+            case "prestige":ok=Near(p,"merchant")&&CharacterRules.PrestigeUp(c,Catalog);break;
             case "stat":ok=CharacterRules.Allocate(c,target,Catalog);break;
             case "farm_stat":ok=CharacterRules.FarmPoint(c,Catalog);break;
             case "buy":ok=Near(p,"merchant")&&CharacterRules.Buy(c,target,Catalog);break;
@@ -55,7 +57,7 @@ public sealed partial class World
                 if(node is not null&&Distance(p.X,p.Z,node.X,node.Z)<=3&&p.Cooldowns.GetValueOrDefault("gather:"+target)<=time&&CharacterRules.Add(c,node.Item,1,Catalog)){
                     p.Cooldowns["gather:"+target]=time+5;c.Professions[node.Profession]=c.Professions.GetValueOrDefault(node.Profession)+Catalog.ProfessionGatherXp;c.FarmXp=(BigInteger.Parse(c.FarmXp)+10).ToString();CharacterRules.Progress(c,"gather",target,Catalog);ok=true;
                 }break;
-            case "claim":ok=Near(p,"merchant")&&CharacterRules.Claim(c,target,Catalog);break;
+            case "claim":ok=Near(p,"merchant")&&CharacterRules.Claim(c,target,Catalog,p.Data.ClassId);break;
             case "use":if(target=="potion"&&c.Inventory.GetValueOrDefault(target)>0&&p.Hp<CharacterRules.MaxHp(p.Data,Catalog)&&p.Cooldowns.GetValueOrDefault("potion")<=time){c.Inventory[target]--;if(c.Inventory[target]==0)c.Inventory.Remove(target);p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+Catalog.Items[target].Heal);p.Cooldowns["potion"]=time+3;ok=true;}break;
             case "pet":if(target is "combat" or "heal" or "loot" or "tank" or "buff" or "gather"){c.Pet.Active=c.Pet.TrainingUntil<=0;c.Pet.Mode=target;p.PetX=p.X+1;p.PetZ=p.Z+1;ok=true;}else if(target=="off"){c.Pet.Active=false;ok=true;}break;
             case "pet_hatch":ok=Near(p,"workbench")&&PetRules.Hatch(c,Catalog);break;
@@ -132,7 +134,7 @@ public sealed partial class World
     private object CharacterView(Player p)
     {
         var c=CharacterRules.Clone(Export(p)).State;
-        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id),unlocked=q.Prerequisite==""||c.ClaimedQuests.Contains(q.Prerequisite)}).ToArray(),
+        return new{id=p.Id,name=p.Data.Name,classId=p.Data.ClassId,prestige=c.Prestige,attributes=c.Attributes,inventory=c.Inventory,equipment=c.Equipment,professions=c.Professions,quests=Catalog.Quests.Select(q=>new{q.Id,q.Name,q.Type,q.Required,progress=c.QuestProgress.GetValueOrDefault(q.Id),claimed=c.ClaimedQuests.Contains(q.Id)&&(!q.Daily||c.DailyClaims.GetValueOrDefault(q.Id)==CharacterRules.Day),unlocked=CharacterRules.QuestOpen(c,q)&&(q.ClassId==""||q.ClassId==p.Data.ClassId)}).ToArray(),
             mana=p.Mana,nextLevelExp=c.Level*Catalog.LevelExpBase,maxMana=Catalog.BaseMana+c.Attributes.GetValueOrDefault("wisdom")*Catalog.WisdomMana,attack=Damage(p),defense=CharacterRules.Defense(p.Data,Catalog),farmXp=c.FarmXp,farmCost=CharacterRules.FarmCost(c,Catalog).ToString(),pet=c.Pet,ownedPets=c.OwnedPets.ToArray(),persistent=p.Data.AccountId!=""&&Store.Durable,
             skillbook=Catalog.Classes[p.Data.ClassId].Skills.Select(s=>SkillView(p,s)).ToArray(),automation=FarmView(p),skills=c.SkillBar.Take(6).Select(id=>Catalog.Classes[p.Data.ClassId].Skills.FirstOrDefault(s=>s.Id==id)??Catalog.Classes[p.Data.ClassId].Skills[0]).Select(s=>SkillView(p,s)).ToArray()};
     }

@@ -103,6 +103,7 @@ jobs:
           timeout 30s godot --headless --path Client --script res://tests/m3_smoke.gd 2>&1 | tee logs/m3.log
           timeout 30s godot --headless --path Client --script res://tests/m4_smoke.gd 2>&1 | tee logs/m4.log
           timeout 30s godot --headless --path Client --script res://tests/m5_smoke.gd 2>&1 | tee logs/m5.log
+          timeout 30s godot --headless --path Client --script res://tests/m6_smoke.gd 2>&1 | tee logs/m6.log
           timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/scene_smoke.gd 2>&1 | tee logs/scene.log
           timeout 45s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/online_scene_smoke.gd 2>&1 | tee logs/online-scene.log
           timeout 60s xvfb-run -a godot --path Client --audio-driver Dummy --rendering-driver opengl3 --script res://tests/m3_ui_smoke.gd 2>&1 | tee logs/m3-ui.log

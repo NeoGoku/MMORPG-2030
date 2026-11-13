@@ -37,12 +37,12 @@ func _ready() -> void:
     group_box=VBoxContainer.new();group_box.custom_minimum_size.x=830;group_scroll.add_child(group_box)
     history=TextEdit.new();history.editable=false;history.position=Vector2(18,150);history.size=Vector2(860,225);history.add_theme_font_size_override("font_size",16);add_child(history)
     channel=OptionButton.new();channel.position=Vector2(18,390);channel.size=Vector2(180,42)
-    for label in ["Lokal","Gruppe","Privat"]:channel.add_item(label)
+    for label in ["Lokal","Gruppe","Privat","Gilde"]:channel.add_item(label)
     add_child(channel)
     message=LineEdit.new();message.position=Vector2(210,390);message.size=Vector2(520,42);message.max_length=240;message.placeholder_text="Nachricht …";add_child(message)
     var send=_button("Senden",Rect2(744,390,134,42),func():
         if online and not message.text.is_empty():
-            intent.emit(["chat_local","chat_party","chat_private"][channel.selected],_peer(),message.text)
+            intent.emit(["chat_local","chat_party","chat_private","chat_guild"][channel.selected],_peer(),message.text)
             message.text="")
     send.name="SendChat"
     trade_box=Control.new();trade_box.position=Vector2(18,150);trade_box.size=Vector2(860,330);add_child(trade_box)

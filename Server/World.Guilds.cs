@@ -16,6 +16,7 @@ public sealed partial class World
         }
         Need(g is not null,"Keine Gilde.");var guild=g!;var leader=guild.Leader==c.Id;var officer=leader||guild.Members[c.Id]=="officer";
         switch(kind){
+            case "guild_release":Need(leader,"Nur die Leitung darf das Haus freigeben.");guild.Hall="";return "Gildenhaus freigegeben; Lager bleibt erhalten.";
             case "guild_invite":Need(officer&&Store.Get(target) is not null&&GuildOf(w,target) is null,"Einladung nur durch Leitung/Offizier an gildenlosen Charakter.");foreach(var expired in guild.Invitations.Where(i=>i.Value<=Utc).Select(i=>i.Key).ToArray())guild.Invitations.Remove(expired);
                 Need(guild.Invitations.Count<50||guild.Invitations.ContainsKey(target),"Zu viele Einladungen.");guild.Invitations[target]=Utc+86400;return "Gildeneinladung gespeichert (24 Stunden).";
             case "guild_kick":Need(officer&&target!=guild.Leader&&guild.Members.ContainsKey(target)&&(leader||guild.Members[target]=="member"),"Keine Berechtigung.");guild.Members.Remove(target);return "Mitglied entfernt.";

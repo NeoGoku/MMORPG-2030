@@ -8,12 +8,14 @@ public sealed class SkillDef { public string Id {get;set;}="";public string Name
 public sealed class ClassDef { public string Attribute {get;set;}=""; public List<SkillDef> Skills {get;set;}=[]; }
 public sealed class ItemDef {public string Name {get;set;}="";public int Stack {get;set;}public int Price {get;set;}public string Rarity {get;set;}="Normal"; public string Slot {get;set;}="";public int Attack {get;set;}public int Defense {get;set;}public int Heal {get;set;} }
 public sealed class Recipe {public string Name {get;set;}="";public string Profession {get;set;}="";public Dictionary<string,int> Inputs {get;set;}=[];public string Output {get;set;}="";public int Count {get;set;} }
-public sealed class QuestDef {public string Id {get;set;}="";public string Name {get;set;}="";public string Type {get;set;}="";public string Event {get;set;}="";public string Item {get;set;}="";public string Prerequisite {get;set;}="";public int Required {get;set;}public int Coins {get;set;}public int Exp {get;set;} }
+public sealed class QuestDef {public int MinLevel {get;set;}=1;public string ClassId {get;set;}="";public bool Daily {get;set;}public int Points {get;set;}public Dictionary<string,int> Rewards {get;set;}=[];public string Id {get;set;}="";public string Name {get;set;}="";public string Type {get;set;}="";public string Event {get;set;}="";public string Item {get;set;}="";public string Prerequisite {get;set;}="";public int Required {get;set;}public int Coins {get;set;}public int Exp {get;set;} }
 public sealed class ResourceNode : Point {public string Id {get;set;}="";public string Name {get;set;}="";public string Profession {get;set;}="";public string Item {get;set;}="";}
 public sealed class GameCatalog
 {
     public List<string> Attributes {get;set;}=[];public Dictionary<string,ClassDef> Classes {get;set;}=[]; public Dictionary<string,ItemDef> Items {get;set;}=[];
     public Dictionary<string,Recipe> Recipes {get;set;}=[];public List<string> Professions {get;set;}=[];public List<ResourceNode> Nodes {get;set;}=[];public Dictionary<string,Point> Services {get;set;}=[];public List<QuestDef> Quests {get;set;}=[];
+    public int ResetLevel {get;set;}=10;public int PrestigeLevel {get;set;}=100;public int DeathExpPercent {get;set;}=5;
+    public int AuctionDays {get;set;}=7;public int MarketPageSize {get;set;}=20;
     public int BaseAttack {get;set;}=14;public int BaseHp {get;set;}=100;public int VitalityHp {get;set;}=8;public int BaseMana {get;set;}=100;public int WisdomMana {get;set;}=3;public int ManaRegen {get;set;}=3;public int BuffAttack {get;set;}=5;public int BuffDefense {get;set;}=3;public int BuffSeconds {get;set;}=8;public int PetDamage {get;set;}=4;public int PetHeal {get;set;}=4;public int PetInterval {get;set;}=3;public int PetRange {get;set;}=10;public int PetExpPerLevel {get;set;}=50;public int LevelExpBase {get;set;}=100;
     public int FarmRadius {get;set;}=14;public int FarmSeconds {get;set;}=60;public int DaySeconds {get;set;}=600;public int WeatherSeconds {get;set;}=120;
     public int MaxOwnedPets {get;set;}=10;public int PetBreedLevel {get;set;}=2;public int PetEvolutionLevel {get;set;}=5;public int PetTrainingSeconds {get;set;}=300;public int PetTrainingExp {get;set;}=50;
@@ -25,6 +27,8 @@ public sealed class GameCatalog
 public sealed class PetState {public string Id {get;set;}="";public int Hp {get;set;}=100;public double RecoveryUntil {get;set;}public double TrainingUntil {get;set;}public Dictionary<string,int> Traits {get;set;}=new(){{"strength",1},{"affinity",1},{"vitality",1}};public Dictionary<string,int> Inventory {get;set;}=[];public bool Active {get;set;} public string Mode {get;set;}="combat";public int Level {get;set;}=1;public int Exp {get;set;}public int Evolution {get;set;}public List<string> Parents {get;set;}=[];}
 public sealed class CharacterState
 {
+    public int Prestige {get;set;}
+    public Dictionary<string,long> DailyClaims {get;set;}=[];
     public bool HousingIntro {get;set;}
     public int Level {get;set;}=1;public int Exp {get;set;}public int StatPoints {get;set;}public int Coins {get;set;}=20;public int Scrap {get;set;}public int Kills {get;set;}public string Quest {get;set;}="available";
     public int Hp {get;set;}=100;public Dictionary<string,double> Timers {get;set;}=[];public double BuffExpires {get;set;}
@@ -51,9 +55,19 @@ public static class CharacterRules
     public static bool Sell(CharacterState c,string item,GameCatalog g){if(!g.Items.TryGetValue(item,out var d)||c.Inventory.GetValueOrDefault(item)<1||c.Equipment.Values.Contains(item))return false;c.Inventory[item]--;if(c.Inventory[item]==0)c.Inventory.Remove(item);c.Coins=checked(c.Coins+Math.Max(1,d.Price/2));return true;}
     public static bool Equip(CharacterState c,string item,GameCatalog g){if(c.Inventory.GetValueOrDefault(item)<1||!g.Items.TryGetValue(item,out var d)||d.Slot=="")return false;c.Equipment[d.Slot]=item;return true;}
     public static bool Craft(CharacterState c,string recipe,GameCatalog g){if(!g.Recipes.TryGetValue(recipe,out var r)||r.Inputs.Any(i=>c.Inventory.GetValueOrDefault(i.Key)<i.Value))return false;var copy=new Dictionary<string,int>(c.Inventory);foreach(var i in r.Inputs){c.Inventory[i.Key]-=i.Value;if(c.Inventory[i.Key]==0)c.Inventory.Remove(i.Key);}if(!Add(c,r.Output,r.Count,g)){c.Inventory=copy;return false;}c.Professions[r.Profession]=c.Professions.GetValueOrDefault(r.Profession)+g.ProfessionCraftXp;c.FarmXp=(BigInteger.Parse(c.FarmXp)+25).ToString();return true;}
-    public static int Attack(CharacterRecord c,GameCatalog g)=>g.BaseAttack+c.State.Attributes.GetValueOrDefault(g.Classes[c.ClassId].Attribute)+c.State.Equipment.Values.Sum(i=>g.Items[i].Attack);
+    public static int Attack(CharacterRecord c,GameCatalog g)=>g.BaseAttack+Math.Min(c.State.Prestige,100)+c.State.Attributes.GetValueOrDefault(g.Classes[c.ClassId].Attribute)+c.State.Equipment.Values.Sum(i=>g.Items[i].Attack);
     public static int Defense(CharacterRecord c,GameCatalog g)=>c.State.Attributes.GetValueOrDefault("armor")+c.State.Equipment.Values.Sum(i=>g.Items[i].Defense);
     public static int MaxHp(CharacterRecord c,GameCatalog g)=>g.BaseHp+c.State.Attributes.GetValueOrDefault("vitality")*g.VitalityHp;
-    public static void Progress(CharacterState c,string kind,string item,GameCatalog g){foreach(var q in g.Quests.Where(q=>q.Event==kind&&(q.Item==""||q.Item==item)&&!c.ClaimedQuests.Contains(q.Id)&&(q.Prerequisite==""||c.ClaimedQuests.Contains(q.Prerequisite))))c.QuestProgress[q.Id]=Math.Min(q.Required,c.QuestProgress.GetValueOrDefault(q.Id)+1);}
-    public static bool Claim(CharacterState c,string id,GameCatalog g){var q=g.Quests.FirstOrDefault(q=>q.Id==id);if(q is null||c.ClaimedQuests.Contains(id)||c.QuestProgress.GetValueOrDefault(id)<q.Required)return false;c.ClaimedQuests.Add(id);c.Coins+=q.Coins;c.Exp+=q.Exp;while(c.Level<100&&c.Exp>=c.Level*g.LevelExpBase){c.Exp-=c.Level*g.LevelExpBase;c.Level++;c.StatPoints++;}return true;}
+    public static long Day=>DateTimeOffset.UtcNow.ToUnixTimeSeconds()/86400;
+    public static bool QuestOpen(CharacterState c,QuestDef q)=>c.Level>=q.MinLevel&&(q.Prerequisite==""||c.ClaimedQuests.Contains(q.Prerequisite))&&(!c.ClaimedQuests.Contains(q.Id)||q.Daily&&c.DailyClaims.GetValueOrDefault(q.Id)!=Day);
+    public static void Progress(CharacterState c,string kind,string item,GameCatalog g){foreach(var q in g.Quests.Where(q=>QuestOpen(c,q)&&q.Event==kind&&(q.Item==""||q.Item==item))){if(q.Daily&&c.DailyClaims.GetValueOrDefault(q.Id,-1)!=Day){c.QuestProgress[q.Id]=0;c.DailyClaims[q.Id]=Day;c.ClaimedQuests.Remove(q.Id);}c.QuestProgress[q.Id]=Math.Min(q.Required,c.QuestProgress.GetValueOrDefault(q.Id)+1);}}
+    public static bool Claim(CharacterState c,string id,GameCatalog g,string classId=""){
+        var q=g.Quests.FirstOrDefault(q=>q.Id==id);if(q is null||!QuestOpen(c,q)||q.ClassId!=""&&q.ClassId!=classId||c.QuestProgress.GetValueOrDefault(id)<q.Required||q.Daily&&c.DailyClaims.GetValueOrDefault(id,-1)!=Day)return false;
+        if((long)c.Coins+q.Coins>int.MaxValue||(long)c.StatPoints+q.Points>int.MaxValue)return false;
+        var inventory=new Dictionary<string,int>(c.Inventory);foreach(var item in q.Rewards)if(!Add(c,item.Key,item.Value,g)){c.Inventory=inventory;return false;}
+        c.ClaimedQuests.Add(id);if(q.Daily)c.DailyClaims[id]=Day;c.Coins+=q.Coins;c.StatPoints+=q.Points;c.Exp+=q.Exp;
+        while(c.Level<100&&c.Exp>=c.Level*g.LevelExpBase){c.Exp-=c.Level*g.LevelExpBase;c.Level++;c.StatPoints++;}return true;
+    }
+    public static bool Reset(CharacterState c,GameCatalog g){if(c.Level<g.ResetLevel||c.Inventory.GetValueOrDefault("reset_stone")<1)return false;var points=c.Attributes.Values.Sum(v=>(long)v);if(points+c.StatPoints>int.MaxValue)return false;c.Inventory["reset_stone"]--;if(c.Inventory["reset_stone"]==0)c.Inventory.Remove("reset_stone");c.StatPoints+=(int)points;foreach(var key in c.Attributes.Keys.ToArray())c.Attributes[key]=0;return true;}
+    public static bool PrestigeUp(CharacterState c,GameCatalog g){if(c.Level<g.PrestigeLevel||c.Inventory.GetValueOrDefault("boss_core")<1||c.Prestige==int.MaxValue)return false;c.Inventory["boss_core"]--;if(c.Inventory["boss_core"]==0)c.Inventory.Remove("boss_core");c.Prestige++;return true;}
 }

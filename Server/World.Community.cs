@@ -10,7 +10,8 @@ public sealed partial class World
     {
         if(!(kind.StartsWith("home_")||kind.StartsWith("guild_")||kind.StartsWith("market_")))return false;
         if(p.Data.AccountId==""){p.Message="Diese persistenten Systeme benötigen einen eigenen Online-Charakter.";return true;}
-        if(kind=="market_search"){p.MarketSearch=text.Trim()[..Math.Min(40,text.Trim().Length)];return true;}
+        if(kind=="market_page"){if(int.TryParse(target,out var page))p.MarketPage=Math.Clamp(page,0,199);return true;}
+        if(kind=="market_search"){p.MarketPage=0;p.MarketSearch=text.Trim()[..Math.Min(40,text.Trim().Length)];return true;}
         try{
             var w=SharedWorld.Copy(Shared);var c=CharacterRules.Clone(Export(p));
             var message=kind.StartsWith("home_")?HousingAction(w,c,kind,target,text):kind.StartsWith("guild_")?GuildAction(w,c,kind,target,text):MarketAction(w,c,kind,target,text);
@@ -39,7 +40,7 @@ public sealed partial class World
     }
     private object CommunityView(Player p)
     {
-        var w=Shared;var guild=GuildOf(w,p.Id);var search=p.MarketSearch;
+        var w=Shared;var guild=GuildOf(w,p.Id);var search=p.MarketSearch;var offers=w.Auctions.Where(a=>a.Value.Created+Catalog.AuctionDays*86400L>Utc&&(search.Length==0||Catalog.Items[a.Value.Item].Name.Contains(search,StringComparison.OrdinalIgnoreCase))).OrderByDescending(a=>a.Value.Created).ThenBy(a=>a.Key).ToArray();var pageSize=Math.Clamp(Catalog.MarketPageSize,1,40);var pages=Math.Max(1,(offers.Length+pageSize-1)/pageSize);p.MarketPage=Math.Min(p.MarketPage,pages-1);
         return new{
             housingIntro=p.Data.State.HousingIntro,
             homes=district.Homes.Select(d=>{
@@ -49,8 +50,9 @@ public sealed partial class World
                     storage=mine?h?.Storage:null,visitors=mine?h?.Visitors:null,guildVisitors=mine&&h!.GuildVisitors,harvestAt=mine?h?.HarvestAt:0};}).ToArray(),
             guild=guild is null?null:new{name=guild.Name,leader=guild.Leader,members=guild.Members,level=1+guild.Exp/100,exp=guild.Exp,quest=guild.Quest,influence=guild.Influence,storage=guild.Storage,buffUntil=guild.BuffUntil,hall=guild.Hall},
             guildInvites=w.Guilds.Where(g=>g.Value.Invitations.GetValueOrDefault(p.Id)>Utc).Select(g=>new{id=g.Key,name=g.Value.Name}).ToArray(),
-            auctions=w.Auctions.Where(a=>search.Length==0||Catalog.Items[a.Value.Item].Name.Contains(search,StringComparison.OrdinalIgnoreCase)).OrderByDescending(a=>a.Value.Created).Take(40).Select(a=>new{id=a.Key,seller=a.Value.Seller,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price}).ToArray(),
-            ownAuctions=w.Auctions.Where(a=>a.Value.Seller==p.Id).Select(a=>new{id=a.Key,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price}).ToArray(),
+            marketPage=p.MarketPage,marketPages=pages,
+            auctions=offers.Skip(p.MarketPage*pageSize).Take(pageSize).Select(a=>new{id=a.Key,seller=a.Value.Seller,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price}).ToArray(),
+            ownAuctions=w.Auctions.Where(a=>a.Value.Seller==p.Id).Select(a=>new{id=a.Key,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price,expired=a.Value.Created+Catalog.AuctionDays*86400L<=Utc}).ToArray(),
             proceeds=w.Proceeds.GetValueOrDefault(p.Id),marketSearch=search,serverUtc=Utc
         };
     }

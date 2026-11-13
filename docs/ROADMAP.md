@@ -35,3 +35,6 @@ No later GDD feature is dropped. Housing, guilds, PvP and dungeon/boss remain un
 Integrated finite physical apartments/rooms/chairs/rights/storage/workshop/garden/rent, durable guilds/storage/tasks/buff/hall, transactional escrow auctions, normalized consensual arena duels/ready teams, connected industrial/dungeon/boss content and partial housing geometry streaming. Stack on verified PR #4; M3/M4 remain unmerged at task start. Exact evidence/artifacts belong to the new PR.
 
 Next integration: housing floors/stairs and furniture catalogue/production; guildhall release/transfer and guild chat/quest variety; complete class-skill PvP balance and multi-device team/war qualification; repairs/stalls and auction pagination/expiry; full async city/NPC streaming and semi-realistic assets. Preserve priority on queued persistence/leases/outage/load testing, physical Android/Windows/Web acceptance and production operations. No milestone is declared production-complete by this package.
+
+## M6 integration continuation
+Guild chat/hall lifecycle, quest/reward/endgame and paged expiring auctions integrated. Next: unique equipment instances and reversible legacy migration → repair/class equipment → appearance/passives/resources/PvP skills. Full Phase A–G alpha remains partial; detailed next tasks, restore strategy and evidence are in DEVELOPMENT_HANDOFF.md and M6 PR.

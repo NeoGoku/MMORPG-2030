@@ -46,13 +46,15 @@ public sealed partial class World
             case "party_promote":
                 if(party is null||party.Leader!=p.Id||!party.Members.ContainsKey(target)||!players.ContainsKey(target)){p.Message="Keine Berechtigung oder Spieler offline.";break;}
                 party.Leader=target;p.Message="Gruppenleitung übertragen.";break;
-            case "chat_local":case "chat_private":case "chat_party":
+            case "chat_local":case "chat_private":case "chat_party":case "chat_guild":
                 text=new string(text.Where(c=>!char.IsControl(c)).ToArray()).Trim();
                 if(text.Length is <1 or >240||chatDeadlines.GetValueOrDefault(p.Id)>time){p.Message="Chat zu schnell oder Nachricht ungültig.";break;}
                 HashSet<string> recipients;
                 if(kind=="chat_private"){
                     if(!players.ContainsKey(target)){p.Message="Empfänger offline.";break;}
                     recipients=[p.Id,target];
+                }else if(kind=="chat_guild"){
+                    var guild=GuildOf(Shared,p.Id);if(guild is null){p.Message="Keine Gilde.";break;}recipients=guild.Members.Keys.Where(players.ContainsKey).ToHashSet();
                 }else if(kind=="chat_party"){
                     if(party is null){p.Message="Keine Gruppe.";break;}
                     recipients=party.Members.Keys.Where(players.ContainsKey).ToHashSet();
