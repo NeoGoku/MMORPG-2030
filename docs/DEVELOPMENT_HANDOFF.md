@@ -1,6 +1,6 @@
 # M6 development handoff — 2026-11-13
 
-This is an integration package toward alpha, **not completion of the M6 master directive**. M1–M5 are preserved. Base commit: d7db0e921ea4def3d0230fcb4970c3e28b302af2 (PR #5); PRs #3 → #4 → #5 were open at task start. New M6 commit/PR, final CI checks and artifact links are recorded in the M6 PR. No unsupported background continuation is scheduled.
+This is an integration package toward alpha, **not completion of the M6 master directive**. M1–M5 are preserved. Base commit: d7db0e921ea4def3d0230fcb4970c3e28b302af2 (PR #5); PRs #3 → #4 → #5 were open at task start. M6 code commit: 5803314854446fb313b736363169b586f2d5bb61, PR #6. Client build run 43383141149; server/PostgreSQL run 43383141083. Final check outcomes and artifact links are recorded in PR #6; this documentation-only follow-up does not change the verified code. No unsupported background continuation is scheduled.
 
 Implemented in this package: private guild chat recipients, leader-only physical hall release (storage conserved), paged auction search and seven-day expiry with retained seller escrow, authoritative quest level/class/prerequisite checks, UTC daily objectives with one-time stat-point rewards, atomic item quest rewards/full-inventory rollback, rare stat reset consuming an earned item, core-funded prestige at level cap (+1 PvE attack per prestige, capped 100 bonus), configurable one-time death EXP loss, and touch controls. Matching protocol v6 required. New JSON fields are additive; no SQL migration beyond M5's migrations is needed.
 
