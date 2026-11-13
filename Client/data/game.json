@@ -1086,6 +1086,12 @@
       "rarity": "Rare",
       "slot": "weapon",
       "attack": 12
+    },
+    "reset_stone": {
+      "name": "Seltener Resetstein",
+      "stack": 20,
+      "price": 80,
+      "rarity": "Rare"
     }
   },
   "professions": [
@@ -1302,6 +1308,36 @@
       "coins": 40,
       "exp": 150,
       "prerequisite": ""
+    },
+    {
+      "id": "daily_herbs",
+      "name": "Täglich: Versorgung",
+      "type": "daily",
+      "event": "gather",
+      "item": "herb",
+      "required": 5,
+      "prerequisite": "",
+      "daily": true,
+      "minLevel": 2,
+      "coins": 10,
+      "exp": 25,
+      "points": 1,
+      "rewards": {}
+    },
+    {
+      "id": "reset_trial",
+      "name": "Kernhüter: Vergessene Erinnerungen",
+      "type": "side",
+      "event": "kill",
+      "item": "worldboss-1",
+      "required": 3,
+      "prerequisite": "core_guardian",
+      "minLevel": 10,
+      "coins": 0,
+      "exp": 100,
+      "rewards": {
+        "reset_stone": 1
+      }
     }
   ],
   "pet": {
@@ -1365,5 +1401,10 @@
   "farmRadius": 14,
   "farmSeconds": 60,
   "daySeconds": 600,
-  "weatherSeconds": 120
+  "weatherSeconds": 120,
+  "resetLevel": 10,
+  "prestigeLevel": 100,
+  "deathExpPercent": 5,
+  "auctionDays": 7,
+  "marketPageSize": 20
 }

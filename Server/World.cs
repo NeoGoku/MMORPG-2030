@@ -14,7 +14,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         public string Id = id; public double X=x, Z=z, Yaw, Dx, Dz, LastInput=-10, NextAttack, Respawn;
         public int Hp=hp, Level=1, Exp, StatPoints, Coins, Scrap, Kills, AttackSerial, HurtSerial, LastDamage;
         public long Sequence=-1;
-        public string MarketSearch="";
+        public string MarketSearch="";public int MarketPage;
         public string Target="", Quest="available", Message="Sprich mit Mira bei der Stadtwache.";
         public bool Attacking;
         public CharacterRecord Data = new();
@@ -95,7 +95,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         lock(gate) {
             time+=dt;tick++;
             foreach(var p in players.Values) {
-                if(p.Hp<=0){StopFarm(p);if(time>=p.Respawn){p.Hp=CharacterRules.MaxHp(p.Data,Catalog);p.X=district.Spawn.X;p.Z=district.Spawn.Z;p.Message="An der Stadtwache wiederbelebt.";}continue;}
+                if(p.Hp<=0){StopFarm(p);if(p.Cooldowns.GetValueOrDefault("death:charged")!=p.Respawn){p.Exp=Math.Max(0,p.Exp-p.Exp*Math.Clamp(Catalog.DeathExpPercent,0,100)/100);p.Cooldowns["death:charged"]=p.Respawn;}if(time>=p.Respawn){p.Hp=CharacterRules.MaxHp(p.Data,Catalog);p.X=district.Spawn.X;p.Z=district.Spawn.Z;p.Message="An der Stadtwache wiederbelebt.";}continue;}
                 FarmTick(p,dt);
                 var moving=time-p.LastInput<=.25&&(Math.Abs(p.Dx)+Math.Abs(p.Dz)>.01);
                 if(moving){Move(p,p.Dx*R.Speed*dt,p.Dz*R.Speed*dt);p.Yaw=Math.Atan2(-p.Dx,-p.Dz);}

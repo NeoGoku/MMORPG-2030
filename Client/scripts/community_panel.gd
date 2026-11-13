@@ -125,6 +125,7 @@ func rebuild() -> void:
                 for config in [["Einladen","guild_invite",""],["Entfernen","guild_kick",""],["Offizier","guild_rank","officer"],["Mitglied","guild_rank","member"],["Leitung übertragen","guild_rank","leader"]]:
                     var kind: String=config[1];var value: String=config[2]
                     button(config[0]+": ausgewählter Spieler",func():emit_action(kind,selected(peers),value))
+                button("Gildenhaus freigeben (nur Leitung, Lager bleibt)",func():emit_action("guild_release"))
                 button("Gilde verlassen",func():emit_action("guild_leave"))
                 button("Versorgungsauftrag: 3 Holz + 2 Erz → 25 Gilden-EXP / 5 Münzen",func():emit_action("guild_quest"))
                 button("Gildensegen aktivieren: 25 Gildenenergie",func():emit_action("guild_buff"))
@@ -143,6 +144,9 @@ func rebuild() -> void:
             button("Verbindlich einstellen",func():emit_action("market_list","",selected(items)+"|%d|%d"%[amount.value,price.value]))
             text("Offene Erlöse: %d Münzen"%community.get("proceeds",0))
             button("Verkaufserlöse abholen",func():emit_action("market_claim"))
+            text("Seite %d / %d"%[community.get("marketPage",0)+1,community.get("marketPages",1)])
+            button("Vorherige Seite, danach aktualisieren",func():emit_action("market_page",str(maxi(0,int(community.get("marketPage",0))-1))))
+            button("Nächste Seite, danach aktualisieren",func():emit_action("market_page",str(int(community.get("marketPage",0))+1)))
             for offer in community.get("auctions",[]):
                 var listing_id: String=offer.id
                 button("Kaufen: %s × %d · %d Münzen"%[catalog.items[offer.item].name,offer.count,offer.price],func():emit_action("market_buy",listing_id))

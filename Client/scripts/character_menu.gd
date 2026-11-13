@@ -72,6 +72,9 @@ func _rebuild() -> void:
             for key in catalog.attributes:_action("%s: %d  [+1 Statpunkt]"%[key,info.attributes.get(key,0)],"stat",key)
             _text("Farm-EXP %s / %s (Kosten wachsen exponentiell)"%[info.farmXp,info.farmCost])
             _action("Zusätzlichen Statpunkt verdienen","farm_stat","")
+            _text("Prestige: "+str(info.get("prestige",0)))
+            _action("Stat-Reset: Stufe 10 + seltener Resetstein","reset_stats","")
+            _action("Prestige: Stufe 100 + Bosskern (beim Händler)","prestige","")
             _text("Ausrüstung: "+str(info.equipment))
         "Skills":
             _text("Acht aktive Skills. Level schaltet frei; sechs Plätze sind gleichzeitig sichtbar.")

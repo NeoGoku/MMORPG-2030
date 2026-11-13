@@ -11,7 +11,7 @@ public sealed partial class World
                 Need(w.Auctions.Count<200&&w.Auctions.Values.Count(a=>a.Seller==c.Id)<10,"Angebotslimit erreicht.");Need(!s.Equipment.Values.Contains(item),"Ausgerüstetes Item ablegen.");Take(s,item,count);
                 w.Auctions[Guid.NewGuid().ToString("N")]=new AuctionState{Seller=c.Id,Item=item,Count=count,Price=price,Created=Utc};return "Angebot im persistenten Escrow. 5 % Verkaufsgebühr, mindestens 1 Münze.";
             case "market_buy":
-                Need(w.Auctions.TryGetValue(target,out var listing)&&listing.Seller!=c.Id,"Angebot nicht mehr verfügbar oder eigenes Angebot.");var offer=listing!;
+                Need(w.Auctions.TryGetValue(target,out var listing)&&listing.Seller!=c.Id&&listing.Created+Catalog.AuctionDays*86400L>Utc,"Angebot nicht mehr verfügbar oder eigenes Angebot.");var offer=listing!;
                 var net=offer.Price-Math.Max(1,(offer.Price+19)/20);Need((long)w.Proceeds.GetValueOrDefault(offer.Seller)+net<=int.MaxValue,"Verkäufer-Erlöslimit erreicht.");
                 Coins(s,-offer.Price);Give(s,offer.Item,offer.Count);w.Proceeds[offer.Seller]=w.Proceeds.GetValueOrDefault(offer.Seller)+net;w.Auctions.Remove(target);return "Kauf atomar abgeschlossen; Erlös für Verkäufer abrufbar.";
             case "market_cancel":Need(w.Auctions.TryGetValue(target,out var mine)&&mine.Seller==c.Id,"Kein eigenes aktives Angebot.");Give(s,mine!.Item,mine.Count);w.Auctions.Remove(target);return "Angebot zurückgenommen; Item einmalig zurückgegeben.";

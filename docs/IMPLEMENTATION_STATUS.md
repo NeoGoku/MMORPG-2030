@@ -36,3 +36,6 @@ One authoritative server process per DB remains required. Shared state is bounde
 - Physical Android/Windows runtime acceptance for this package, browser/multi-device crossplay, sustained team/guild load, 50–100-player capacity and production security/operations are unqualified.
 
 All remaining GDD goals remain on the roadmap. No menu or data definition alone is counted as a finished system.
+
+## M6 integration update (2026-11-13)
+Implemented with focused tests: guild-only chat, leader hall release, auction pagination/expiry retaining escrow, gated item/stat-point quest rewards and UTC daily objectives, consumable rare stat reset, level-cap prestige and configurable death EXP loss. Touch controls connect the online actions; local reset/prestige are temporary. Protocol v6. See DEVELOPMENT_HANDOFF.md for rule proposals, exact continuation and qualification categories. This does not declare the full MMORPG alpha complete; all M5 gaps not explicitly replaced remain open.

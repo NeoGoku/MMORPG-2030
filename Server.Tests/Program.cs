@@ -70,3 +70,5 @@ M5Tests.Run();
 M5ArenaTests.Run();
 M5WorldTests.Run();
 M5ReviewTests.Run();
+
+M6Tests.Run();

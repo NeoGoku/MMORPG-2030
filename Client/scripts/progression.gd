@@ -11,6 +11,8 @@ var equipment: Dictionary = {}
 var professions: Dictionary = {}
 var quest_progress: Dictionary = {}
 var claimed: Array = []
+var prestige := 0
+var daily_claims: Dictionary={}
 var farm_xp := 0
 var farmed := 0
 var cooldowns: Dictionary = {}
@@ -34,7 +36,7 @@ func _init(owner_sim) -> void:
         professions[key] = 0
 
 func attack() -> int:
-    var value: int = int(catalog.baseAttack) + int(attributes[catalog.classes[class_id].attribute]) + (int(catalog.buffAttack) if buff > 0 else 0) - (int(catalog.statusPenalty) if effects.get("weaken",0)>0 else 0)
+    var value: int = int(catalog.baseAttack) + mini(prestige,100) + int(attributes[catalog.classes[class_id].attribute]) + (int(catalog.buffAttack) if buff > 0 else 0) - (int(catalog.statusPenalty) if effects.get("weaken",0)>0 else 0)
     for item in equipment.values():
         value += int(catalog.items[item].get("attack",0))
     return value
@@ -62,6 +64,9 @@ func add(item: String, count: int) -> bool:
 
 func progress(kind: String, item: String) -> void:
     for q in catalog.quests:
+        if sim.player.level<q.get("minLevel",1):continue
+        if q.get("daily",false) and daily_claims.get(q.id,-1)!=int(Time.get_unix_time_from_system()/86400):
+            claimed.erase(q.id);quest_progress[q.id]=0;daily_claims[q.id]=int(Time.get_unix_time_from_system()/86400)
         if q.event == kind and (q.item == "" or q.item == item) and not claimed.has(q.id) and (q.prerequisite == "" or claimed.has(q.prerequisite)):
             quest_progress[q.id] = mini(q.required,int(quest_progress.get(q.id,0))+1)
 
@@ -76,6 +81,17 @@ func action(kind: String, target: String) -> bool:
     if p.hp <= 0: return true
     var ok := false
     match kind:
+        "reset_stats":
+            if p.level>=catalog.resetLevel and inventory.get("reset_stone",0)>0:
+                for key in attributes:p.statPoints+=attributes[key];attributes[key]=0
+                inventory.reset_stone-=1
+                if inventory.reset_stone==0:inventory.erase("reset_stone")
+                ok=true
+        "prestige":
+            if near("merchant") and p.level>=catalog.prestigeLevel and inventory.get("boss_core",0)>0:
+                inventory.boss_core-=1
+                if inventory.boss_core==0:inventory.erase("boss_core")
+                prestige+=1;ok=true
         "farm_start":
             var radius:=int(target) if target.is_valid_int() else 0
             var safe: bool=p.z>=2 and p.hp>=p.maxHp*.6
@@ -145,7 +161,13 @@ func action(kind: String, target: String) -> bool:
                     ok = true
         "claim":
             for q in catalog.quests:
-                if near("merchant") and q.id == target and not claimed.has(target) and quest_progress.get(target,0) >= q.required:
+                if near("merchant") and q.id == target and p.level>=q.get("minLevel",1) and (q.prerequisite=="" or claimed.has(q.prerequisite)) and not claimed.has(target) and quest_progress.get(target,0) >= q.required:
+                    var old_inventory: Dictionary=inventory.duplicate()
+                    var reward_ok:=true
+                    for item in q.get("rewards",{}):
+                        if not add(item,q.rewards[item]):reward_ok=false
+                    if not reward_ok:inventory=old_inventory;continue
+                    p.statPoints+=q.get("points",0)
                     claimed.append(target)
                     p.coins += q.coins
                     sim._exp(q.exp)
@@ -384,7 +406,7 @@ func view() -> Dictionary:
         q.progress = quest_progress.get(q.id,0)
         q.claimed = claimed.has(q.id)
         q.unlocked = q.prerequisite=="" or claimed.has(q.prerequisite)
-    return {"id":"local","name":nickname,"classId":class_id,"attributes":attributes.duplicate(),"inventory":inventory.duplicate(),"equipment":equipment.duplicate(),"professions":professions.duplicate(),"quests":quests,"mana":int(mana),"nextLevelExp":sim.player.level*catalog.levelExpBase,"maxMana":catalog.baseMana+attributes.wisdom*catalog.wisdomMana,"attack":attack(),"defense":defense(),"farmXp":str(farm_xp),"farmCost":str(farm_cost()),"automation":automation.duplicate(true),"pet":pet.duplicate(true),"ownedPets":owned_pets.duplicate(true),"persistent":false,"skills":skills,"skillbook":book}
+    return {"id":"local","name":nickname,"classId":class_id,"prestige":prestige,"attributes":attributes.duplicate(),"inventory":inventory.duplicate(),"equipment":equipment.duplicate(),"professions":professions.duplicate(),"quests":quests,"mana":int(mana),"nextLevelExp":sim.player.level*catalog.levelExpBase,"maxMana":catalog.baseMana+attributes.wisdom*catalog.wisdomMana,"attack":attack(),"defense":defense(),"farmXp":str(farm_xp),"farmCost":str(farm_cost()),"automation":automation.duplicate(true),"pet":pet.duplicate(true),"ownedPets":owned_pets.duplicate(true),"persistent":false,"skills":skills,"skillbook":book}
 
 func pets() -> Array:
     return [{"owner":"local","x":pet_position.x,"z":pet_position.y,"level":pet.level,"mode":pet.mode,"hp":pet.hp,"evolution":pet.evolution}] if pet.active else []
