@@ -54,3 +54,9 @@ Recipe mastery requirements/tool hook, advanced resource nodes tied to gathering
 
 ## Continuation package 5
 Distinct equipment condition/identity now survives direct two-confirmation trade, auction escrow and owner housing storage. Equipped instances are rejected for transfer; capacity is revalidated and the existing atomic save boundaries are used. Inactive, unselected pets without training can be auctioned with identity/traits/lineage intact; duplicate purchases cannot mint a second pet. Housing floors/expanded furniture catalogue and stalls remain open.
+
+## Continuation package 6
+Arena class skill intents now spend separate normalized energy and use fixed configurable PvP damage, cooldowns, heals/group heals, buffs/guard, DoT/slow/cleanse, movement and temporary summon attacks/explosion. These reuse match ownership/range/team checks, never PvE farm stats. Farming selects affordable class damage/AoE/DoT/drain skills. Territory wars/rankings and comprehensive live balance remain incomplete.
+
+## Continuation package 7
+North-up minimap with real player/monster/service positions, equipment overlays and appearance variations, forest/ruin geometry, and persistent low/balanced/far graphics profiles controlling 3D scale, frame cap, shadows and actor sight. Six equipped skill buttons dispatch normalized class skills during arena matches. No measured device-performance or semi-realistic production-art claim.

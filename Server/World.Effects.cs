@@ -72,7 +72,7 @@ public sealed partial class World
         if(pet.Active&&pet.Mode=="tank"&&pet.Hp>0&&Distance(p.PetX,p.PetZ,p.X,p.Z)<6){pet.Hp=Math.Max(0,pet.Hp-damage);if(pet.Hp==0)pet.RecoveryUntil=DateTimeOffset.UtcNow.ToUnixTimeSeconds()+15;return true;}
         return false;
     }
-    private object SkillView(Player p,SkillDef s)=>new{id=s.Id,name=s.Name,kind=s.Kind,enabled=s.Enabled&&p.Level>=s.MinLevel,minLevel=s.MinLevel,cost=s.Cost,cooldown=Math.Max(0,p.Cooldowns.GetValueOrDefault(s.Id)-time)};
+    private object SkillView(Player p,SkillDef s)=>new{id=s.Id,name=s.Name,kind=s.Kind,enabled=s.Enabled&&(p.Level>=s.MinLevel||ArenaOf(p.Id) is not null),minLevel=s.MinLevel,cost=s.Cost,cooldown=Math.Max(0,p.Cooldowns.GetValueOrDefault(s.Id)-time)};
     private SummonView[] SummonViews(Player viewer)=>summons.Values.Where(s=>Distance(viewer.X,viewer.Z,s.X,s.Z)<=Catalog.InterestRadius).Select(s=>new SummonView(s.Owner,s.Kind,s.X,s.Z,s.Hp,60,Math.Max(0,s.Until-time))).ToArray();
 }
 public sealed record SummonView(string Owner,string Kind,double X,double Z,int Hp,int MaxHp,double Remaining);

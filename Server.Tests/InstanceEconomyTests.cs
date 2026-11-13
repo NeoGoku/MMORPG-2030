@@ -9,6 +9,8 @@ public static class InstanceEconomyTests
   var world=new World(District.Load("Client/data/district.json"),g,store);world.JoinCharacter(a);world.JoinCharacter(b);long sa=0,sb=0;
   world.Act(a.Id,++sa,"trade_open",b.Id);world.Act(a.Id,++sa,"trade_offer","",gear+"|1|0");world.Act(a.Id,++sa,"trade_confirm","");world.Act(b.Id,++sb,"trade_confirm","");
   Check(!store.Get(a.Id)!.State.Gear.ContainsKey(gear)&&store.Get(b.Id)!.State.Gear[gear].Condition==17,"direct trade preserves gear identity and condition");
+  world.Act(b.Id,++sb,"market_list","",gear+"|1|12");var gearListing=store.LoadWorld().Auctions.Single().Key;world.Act(a.Id,++sa,"market_buy",gearListing);
+  Check(store.Get(a.Id)!.State.Gear[gear].Condition==17&&!store.Get(b.Id)!.State.Gear.ContainsKey(gear),"auction preserves equipment identity and wear");
   world.Act(a.Id,++sa,"market_pet",petId,"10");var listing=store.LoadWorld().Auctions.Single().Key;world.Act(b.Id,++sb,"market_buy",listing);world.Act(b.Id,++sb,"market_buy",listing);
   Check(store.Get(b.Id)!.State.OwnedPets.Count(p=>p.Id==petId)==1&&!store.Get(a.Id)!.State.OwnedPets.Any(p=>p.Id==petId),"pet escrow preserves identity without repeated purchase");world.Leave(a.Id);world.Leave(b.Id);
  }

@@ -178,5 +178,9 @@ func rebuild() -> void:
             button("Auswahl zum Arenaduell fordern",func():emit_action("arena_invite",selected(peers)))
             button("Duellanfrage der Auswahl annehmen",func():emit_action("arena_accept",selected(peers)))
             button("Auswahl angreifen (nur aktives Match / Reichweite)",func():emit_action("arena_hit",selected(peers)))
+            var class_id: String=state.get("self",{}).get("character",{}).get("classId","Shield Sword")
+            for skill in catalog.classes[class_id].skills:
+                var skill_id: String=skill.id
+                button("Arena-Skill: "+skill.name+" · 20 Energie",func():emit_action("arena_skill",skill_id,selected(peers)))
             button("Match aufgeben",func():emit_action("arena_leave"))
             text(str(state.get("arena",{})))

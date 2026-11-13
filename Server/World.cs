@@ -68,7 +68,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         lock(gate) {
             cellsDirty=true;
             if(!Accept(id,seq,out var p)||p.Hp<=0)return;
-            if(ArenaAction(p,kind,target))return;
+            if(ArenaAction(p,kind,target,text))return;
             if(CommunityAction(p,kind,target,text))return;
             if(SocialAction(p,kind,target,text)||TradeAction(p,kind,target,text))return;
             var backup=CharacterRules.Clone(Export(p));var oldHp=p.Hp;var oldPeers=players.Values.Where(v=>v.Id!=p.Id&&PartyOf(v.Id)?.Id==PartyOf(p.Id)?.Id&&PartyOf(p.Id) is not null).ToDictionary(v=>v.Id,v=>CharacterRules.Clone(Export(v)));var oldLoot=new Dictionary<string,Drop>(loot);
@@ -105,7 +105,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
                 if(p.Hp<=0){StopFarm(p);if(p.Cooldowns.GetValueOrDefault("death:charged")!=p.Respawn){p.Exp=Math.Max(0,p.Exp-p.Exp*Math.Clamp(Catalog.DeathExpPercent,0,100)/100);p.Cooldowns["death:charged"]=p.Respawn;}if(time>=p.Respawn){p.Hp=CharacterRules.MaxHp(p.Data,Catalog);p.X=district.Spawn.X;p.Z=district.Spawn.Z;p.Message="An der Stadtwache wiederbelebt.";}continue;}
                 FarmTick(p,dt);
                 var moving=time-p.LastInput<=.25&&(Math.Abs(p.Dx)+Math.Abs(p.Dz)>.01);
-                if(moving){Move(p,p.Dx*R.Speed*dt,p.Dz*R.Speed*dt);p.Yaw=Math.Atan2(-p.Dx,-p.Dz);}
+                if(moving){Move(p,p.Dx*R.Speed*ArenaSpeed(p)*dt,p.Dz*R.Speed*ArenaSpeed(p)*dt);p.Yaw=Math.Atan2(-p.Dx,-p.Dz);}
                 if(p.Attacking&&monsters.TryGetValue(p.Target,out var m)&&m.Hp>0) {
                     var range=Distance(p.X,p.Z,m.X,m.Z);
                     if(!moving&&range<=R.AttackRange&&time>=p.NextAttack) {
