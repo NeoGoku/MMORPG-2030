@@ -45,3 +45,6 @@ Appearance editing and public avatar reconciliation (gender/face/body/hair/skin/
 
 ## Continuation package 2
 Eight configurable class resources with skill expenditure, passive unlocks affecting attack/defense/healing/summons, normal-hit resource gain/regeneration and resource visibility. Monster threat now accumulates damage instead of every hit replacing the target; explicit taunts retain priority. Class-specific PvP skill balancing remains open; arena still isolates normalized match values. Formulas are provisional game.json data.
+
+## Continuation package 3
+Connected Grünsaum forest/bridge/open root ruins with four level-10–15 encounters and a second worldboss, gated fast travel with unrestricted return, vegetation/ruin presentation. Boss below half HP uses stronger/faster warned blasts. Player/monster snapshot candidates use a reusable 24 m spatial cell index, retaining exact distance checks and one shared world. This is not a measured 100-player capacity claim or complete async asset streaming.

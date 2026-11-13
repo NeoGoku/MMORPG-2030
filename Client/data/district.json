@@ -1,6 +1,6 @@
 {
   "name": "Nordtor",
-  "bounds": 90,
+  "bounds": 140,
   "spawn": {
     "x": 0,
     "z": 10
@@ -435,6 +435,48 @@
       "level": 8,
       "speed": 1,
       "reach": 3,
+      "boss": true
+    },
+    {
+      "id": "wild-1",
+      "name": "Mutierter Keiler",
+      "x": -9,
+      "z": 104,
+      "hp": 230,
+      "level": 10,
+      "speed": 2.3,
+      "reach": 2
+    },
+    {
+      "id": "wild-2",
+      "name": "Verdorbener Waldgeist",
+      "x": 10,
+      "z": 110,
+      "hp": 270,
+      "level": 11,
+      "speed": 1.3,
+      "reach": 6,
+      "damageType": "arcane"
+    },
+    {
+      "id": "ruin-1",
+      "name": "Aschenwächter",
+      "x": -8,
+      "z": 122,
+      "hp": 350,
+      "level": 13,
+      "speed": 1.5,
+      "reach": 3
+    },
+    {
+      "id": "worldboss-forest",
+      "name": "Wurzelherz",
+      "x": 0,
+      "z": 130,
+      "hp": 1400,
+      "level": 15,
+      "speed": 0.9,
+      "reach": 4,
       "boss": true
     }
   ]

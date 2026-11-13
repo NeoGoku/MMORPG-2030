@@ -154,6 +154,7 @@ func rebuild() -> void:
                 var listing_id: String=offer.id
                 button("Eigenes Angebot zurücknehmen: %s × %d"%[catalog.items[offer.item].name,offer.count],func():emit_action("market_cancel",listing_id))
         "Arena":
+            button("Grünsaum-Transit: (0,90), Stufe 10 / Rückweg (0,112)",func():emit_action("forest_transit"))
             button("Tiefwerk-Transit benutzen: bei (0,-40), St. 5 + Miras Auftrag",func():emit_action("transit"))
             text("PvP ist ausschließlich in der markierten Arena möglich. Normierte Match-HP und Angriffe sind vom PvE-Fortschritt getrennt.")
             peers=peer_picker()

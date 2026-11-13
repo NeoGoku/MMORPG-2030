@@ -35,6 +35,16 @@ func _ready() -> void:
     box(self,Vector3(0,.15,-68),Vector3(29,.2,29),Color("4f6269"))
     sign_text(self,"TIEFWERKE · STUFE 5–8\nAUR-IX: WARNKREIS VERLASSEN / ZUSAMMEN ANGREIFEN",Vector3(0,5,-57))
     sign_text(self,"TRANSIT: STUFE 5 + MIRAS AUFTRAG\nWeltmenü → Arena / Welt",Vector3(0,3,-40))
+    box(self,Vector3(0,.12,105),Vector3(6,.15,60),Color("777665"))
+    box(self,Vector3(0,.24,91),Vector3(8,.25,8),Color("8b755d"))
+    box(self,Vector3(0,.13,127),Vector3(26,.2,22),Color("686f66"))
+    for x in [-16,-11,12,18]:
+        for z in [98,106,115,124,133]:
+            box(self,Vector3(x,1.8,z),Vector3(.7,3.6,.7),Color("675343"))
+            box(self,Vector3(x,4,z),Vector3(3.5,3.5,3.5),Color("42664f"))
+    for x in [-13,13]:
+        for z in [120,129,136]:box(self,Vector3(x,2,z),Vector3(1.4,4,1.4),Color("7c8377"))
+    sign_text(self,"GRÜNSAUM · STUFE 10–15\nOffene Wurzelruinen / Wurzelherz",Vector3(0,4,96))
 func make_home(def: Dictionary) -> Node3D:
     var chunk:=Node3D.new();chunk.position=Vector3(def.x,0,def.z);add_child(chunk)
     box(chunk,Vector3(0,.14,0),Vector3(18,.25,12),Color("aa9e8b"))

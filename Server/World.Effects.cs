@@ -29,9 +29,9 @@ public sealed partial class World
         if(target is null){m.WarningUntil=0;return;}
         if(m.WarningUntil>0&&time>=m.WarningUntil){
             var victims=players.Values.Where(p=>p.Hp>0&&Distance(p.X,p.Z,m.WarningX,m.WarningZ)<5).ToArray();
-            foreach(var p in victims){var damage=Math.Max(1,30/Math.Max(1,victims.Length));p.Hp=Math.Max(0,p.Hp-damage);p.HurtSerial++;p.LastDamage=damage;if(p.Hp==0){p.Respawn=time+R.PlayerRespawnSeconds;p.Attacking=false;p.Target="";p.Dx=p.Dz=0;}}
+            foreach(var p in victims){var damage=Math.Max(1,(m.Hp<MaxMonsterHp(m)/2?45:30)/Math.Max(1,victims.Length));p.Hp=Math.Max(0,p.Hp-damage);p.HurtSerial++;p.LastDamage=damage;if(p.Hp==0){p.Respawn=time+R.PlayerRespawnSeconds;p.Attacking=false;p.Target="";p.Dx=p.Dz=0;}}
             m.WarningUntil=0;m.NextWave=time+6;
-        }else if(m.WarningUntil==0&&time>=m.NextWave){m.WarningX=target.X;m.WarningZ=target.Z;m.WarningUntil=time+2.5;}
+        }else if(m.WarningUntil==0&&time>=m.NextWave){m.WarningX=target.X;m.WarningZ=target.Z;m.WarningUntil=time+(m.Hp<MaxMonsterHp(m)/2?1.8:2.5);}
     }
     private IEnumerable<Player> FriendlyTargets(Player caster,double radius)
     {

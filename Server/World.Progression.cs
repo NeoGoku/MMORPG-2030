@@ -10,7 +10,7 @@ public sealed partial class World
     private readonly double wallStart=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()/1000.0;
     public string? JoinCharacter(CharacterRecord record)
     {
-        lock(gate){if(players.Count>=100||players.ContainsKey(record.Id)||pendingSaves.ContainsKey(record.Id))return null;
+        lock(gate){cellsDirty=true;if(players.Count>=100||players.ContainsKey(record.Id)||pendingSaves.ContainsKey(record.Id))return null;
             if(record.AccountId!=""){var latest=Store.Get(record.Id);if(latest is null||latest.AccountId!=record.AccountId)return null;record=latest;}
             PetRules.CompleteAll(record,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);
             var p=new Player(record.Id,record.State.X,record.State.Z,100);Import(p,record);
@@ -72,6 +72,7 @@ public sealed partial class World
             case "pet_train":ok=Near(p,"workbench")&&PetRules.Train(c,DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Catalog);break;
             case "pet_select":ok=PetRules.Select(c,target);break;
             case "pet_take":ok=PetRules.TakeBag(c,Catalog);break;
+            case "forest_transit":if(Distance(p.X,p.Z,0,90)<=3&&p.Level>=10){p.X=0;p.Z=112;ok=true;}else if(Distance(p.X,p.Z,0,112)<=3){p.X=0;p.Z=90;ok=true;}break;
             case "transit":if(Distance(p.X,p.Z,0,-40)<=3&&p.Level>=5&&p.Quest=="complete"){p.X=0;p.Z=-59;ok=true;}else if(Distance(p.X,p.Z,0,-59)<=3){p.X=0;p.Z=-40;ok=true;}break;
             case "teleport":if(Near(p,"teleporter")||Near(p,"return")){p.X=district.Spawn.X;p.Z=p.Z<30?Catalog.Services["return"].Z:district.Spawn.Z;ok=true;}break;
             case "skill":return Cast(p,target);

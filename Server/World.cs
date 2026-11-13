@@ -6,6 +6,8 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     private readonly Dictionary<string, Player> players = new();
     private readonly Dictionary<string, Monster> monsters = district.Monsters.Concat(district.Encounters).ToDictionary(s=>s.Id,s=>new Monster(s,s.Hp>0?s.Hp:district.Rules.MonsterHp));
     private readonly Dictionary<string, Drop> loot = new();
+    private readonly SpatialIndex playerCells=new(),monsterCells=new();
+    private bool cellsDirty=true;
     private double time;
     private long tick;
     private Rules R => district.Rules;
@@ -35,6 +37,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     public string? Join()
     {
         lock(gate) {
+            cellsDirty=true;
             if(players.Count>=100)return null;
             var id=Guid.NewGuid().ToString("N");
             // Small deterministic offset keeps simultaneous arrivals distinguishable.
@@ -44,6 +47,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         }
     }
     public void Leave(string id) { lock(gate) {
+            cellsDirty=true;
         if(players.TryGetValue(id,out var p)&&p.Data.AccountId!="") {
             try { Store.Save(Export(p)); } catch(Exception e) when(e is GameRuleException or Npgsql.NpgsqlException) { pendingSaves[id]=CharacterRules.Clone(Export(p)); }
         }
@@ -53,6 +57,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     public void Input(string id,long seq,double x,double z)
     {
         lock(gate) {
+            cellsDirty=true;
             if(!double.IsFinite(x)||!double.IsFinite(z)||Math.Abs(x)>1000||Math.Abs(z)>1000||!Accept(id,seq,out var p))return;
             if(p.Farm.Active&&Math.Abs(x)+Math.Abs(z)>.01)StopFarm(p);
             var scale=Math.Max(1,Math.Sqrt(x*x+z*z));p.Dx=x/scale;p.Dz=z/scale;p.LastInput=time;
@@ -61,6 +66,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     public void Act(string id,long seq,string kind,string target,string text="")
     {
         lock(gate) {
+            cellsDirty=true;
             if(!Accept(id,seq,out var p)||p.Hp<=0)return;
             if(ArenaAction(p,kind,target))return;
             if(CommunityAction(p,kind,target,text))return;
@@ -93,6 +99,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     public void Step(double dt)
     {
         lock(gate) {
+            cellsDirty=true;
             time+=dt;tick++;
             foreach(var p in players.Values) {
                 if(p.Hp<=0){StopFarm(p);if(p.Cooldowns.GetValueOrDefault("death:charged")!=p.Respawn){p.Exp=Math.Max(0,p.Exp-p.Exp*Math.Clamp(Catalog.DeathExpPercent,0,100)/100);p.Cooldowns["death:charged"]=p.Respawn;}if(time>=p.Respawn){p.Hp=CharacterRules.MaxHp(p.Data,Catalog);p.X=district.Spawn.X;p.Z=district.Spawn.Z;p.Message="An der Stadtwache wiederbelebt.";}continue;}
@@ -142,9 +149,10 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     public WorldView View(string id)
     {
         lock(gate) {
+            if(cellsDirty){playerCells.Rebuild(players.Values.Select(v=>(v.Id,v.X,v.Z)));monsterCells.Rebuild(monsters.Values.Select(v=>(v.Spawn.Id,v.X,v.Z)));cellsDirty=false;}
             var p=players[id];
-            return new("snapshot",tick,players.Values.Where(v=>v.Id==id||Distance(v.X,v.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(v=>new PlayerView(v.Id,v.X,v.Z,v.Yaw,VisibleHp(v),VisibleMaxHp(v),v.Level,v.AttackSerial,v.HurtSerial,v.LastDamage,v.Target,v.Attacking,v.Hp<=0,v.Data.Name,v.Data.ClassId,v.SkillSerial,v.Data.Appearance,v.Data.State.Equipment.Concat(v.Data.State.EquippedGear.Where(e=>v.Data.State.Gear.ContainsKey(e.Value)).Select(e=>new KeyValuePair<string,string>(e.Key,v.Data.State.Gear[e.Value].Item))).GroupBy(e=>e.Key).ToDictionary(e=>e.Key,e=>e.Last().Value))).ToArray(),
-                monsters.Values.Where(m=>Distance(m.X,m.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(m=>new MonsterView(m.Spawn.Id,m.Spawn.Name,m.X,m.Z,m.Hp,MaxMonsterHp(m),m.AttackSerial,m.HurtSerial,m.LastDamage,m.Hp<=0,m.Spawn.Level,m.Spawn.Boss,Math.Max(0,m.WarningUntil-time),m.WarningX,m.WarningZ)).ToArray(),
+            return new("snapshot",tick,playerCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>players[key]).Where(v=>v.Id==id||Distance(v.X,v.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(v=>new PlayerView(v.Id,v.X,v.Z,v.Yaw,VisibleHp(v),VisibleMaxHp(v),v.Level,v.AttackSerial,v.HurtSerial,v.LastDamage,v.Target,v.Attacking,v.Hp<=0,v.Data.Name,v.Data.ClassId,v.SkillSerial,v.Data.Appearance,v.Data.State.Equipment.Concat(v.Data.State.EquippedGear.Where(e=>v.Data.State.Gear.ContainsKey(e.Value)).Select(e=>new KeyValuePair<string,string>(e.Key,v.Data.State.Gear[e.Value].Item))).GroupBy(e=>e.Key).ToDictionary(e=>e.Key,e=>e.Last().Value))).ToArray(),
+                monsterCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>monsters[key]).Where(m=>Distance(m.X,m.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(m=>new MonsterView(m.Spawn.Id,m.Spawn.Name,m.X,m.Z,m.Hp,MaxMonsterHp(m),m.AttackSerial,m.HurtSerial,m.LastDamage,m.Hp<=0,m.Spawn.Level,m.Spawn.Boss,Math.Max(0,m.WarningUntil-time),m.WarningX,m.WarningZ)).ToArray(),
                 loot.Values.Where(l=>l.Owner==id&&Distance(l.X,l.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(l=>new LootView(l.Id,l.MonsterId,l.X,l.Z)).ToArray(),
                 new(p.Quest,p.Kills,p.Exp,p.Level,p.StatPoints,p.Coins,p.Scrap,p.Message,CharacterView(p)),
                 players.Values.Where(v=>v.Data.State.Pet.Active&&(v.Id==id||Distance(v.PetX,v.PetZ,p.X,p.Z)<=Catalog.InterestRadius)).Select(v=>new PetView(v.Id,v.PetX,v.PetZ,v.Data.State.Pet.Level,v.Data.State.Pet.Mode,v.Data.State.Pet.Hp,v.Data.State.Pet.Evolution)).ToArray(),SocialView(p),SummonViews(p),new {phase=(time%Catalog.DaySeconds)/Catalog.DaySeconds,weather=new[]{"klar","Regen","Nebel"}[(int)(time/Catalog.WeatherSeconds)%3]},CommunityView(p),ArenaView(p));
