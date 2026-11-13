@@ -2041,5 +2041,7 @@
   "prestigeLevel": 100,
   "deathExpPercent": 5,
   "auctionDays": 7,
-  "marketPageSize": 20
+  "marketPageSize": 20,
+  "maxStalls": 100,
+  "stallSeconds": 86400
 }

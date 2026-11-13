@@ -8,13 +8,13 @@ public sealed partial class World
     private GuildState? GuildOf(SharedWorld w,string id)=>w.Guilds.Values.FirstOrDefault(g=>g.Members.ContainsKey(id));
     private bool CommunityAction(Player p,string kind,string target,string text)
     {
-        if(!(kind.StartsWith("home_")||kind.StartsWith("guild_")||kind.StartsWith("market_")))return false;
+        if(!(kind.StartsWith("home_")||kind.StartsWith("guild_")||kind.StartsWith("market_")||kind.StartsWith("stall_")))return false;
         if(p.Data.AccountId==""){p.Message="Diese persistenten Systeme benötigen einen eigenen Online-Charakter.";return true;}
         if(kind=="market_page"){if(int.TryParse(target,out var page))p.MarketPage=Math.Clamp(page,0,199);return true;}
         if(kind=="market_search"){p.MarketPage=0;p.MarketSearch=text.Trim()[..Math.Min(40,text.Trim().Length)];return true;}
         try{
             var w=SharedWorld.Copy(Shared);var c=CharacterRules.Clone(Export(p));
-            var message=kind.StartsWith("home_")?HousingAction(w,c,kind,target,text):kind.StartsWith("guild_")?GuildAction(w,c,kind,target,text):MarketAction(w,c,kind,target,text);
+            var message=kind.StartsWith("home_")?HousingAction(w,c,kind,target,text):kind.StartsWith("guild_")?GuildAction(w,c,kind,target,text):kind.StartsWith("stall_")?StallAction(w,c,kind,target,text):MarketAction(w,c,kind,target,text);
             Store.SaveWorld(w,[c]);sharedState=w;Import(p,c);p.Message=message;
             // Revocation/rent changes must eject an already-present unauthorized visitor as well.
             foreach(var visitor in players.Values)if(!HomeAccess(visitor,visitor.X,visitor.Z)){visitor.X=district.Spawn.X;visitor.Z=district.Spawn.Z;visitor.Dx=visitor.Dz=0;visitor.Message="Besuchsrecht fehlt oder wurde widerrufen.";}
@@ -40,8 +40,10 @@ public sealed partial class World
     }
     private object CommunityView(Player p)
     {
-        var w=Shared;var guild=GuildOf(w,p.Id);var search=p.MarketSearch;var offers=w.Auctions.Where(a=>a.Value.Created+Catalog.AuctionDays*86400L>Utc&&(search.Length==0||Catalog.Items[a.Value.Item].Name.Contains(search,StringComparison.OrdinalIgnoreCase))).OrderByDescending(a=>a.Value.Created).ThenBy(a=>a.Key).ToArray();var pageSize=Math.Clamp(Catalog.MarketPageSize,1,40);var pages=Math.Max(1,(offers.Length+pageSize-1)/pageSize);p.MarketPage=Math.Min(p.MarketPage,pages-1);
+        var w=Shared;var guild=GuildOf(w,p.Id);var search=p.MarketSearch;var offers=w.Auctions.Where(a=>a.Value.StallId==""&&a.Value.Created+Catalog.AuctionDays*86400L>Utc&&(search.Length==0||Catalog.Items[a.Value.Item].Name.Contains(search,StringComparison.OrdinalIgnoreCase))).OrderByDescending(a=>a.Value.Created).ThenBy(a=>a.Key).ToArray();var pageSize=Math.Clamp(Catalog.MarketPageSize,1,40);var pages=Math.Max(1,(offers.Length+pageSize-1)/pageSize);p.MarketPage=Math.Min(p.MarketPage,pages-1);
         return new{
+            ownStall=w.Stalls.TryGetValue(p.Id,out var ownStall)?ownStall:null,
+            stalls=w.Stalls.Where(entry=>entry.Value.Until>Utc&&Distance(p.X,p.Z,entry.Value.X,entry.Value.Z)<=Catalog.InterestRadius).Select(entry=>new{id=entry.Key,title=entry.Value.Title,x=entry.Value.X,z=entry.Value.Z,until=entry.Value.Until,offers=w.Auctions.Where(a=>a.Value.StallId==entry.Key&&a.Value.Created+Catalog.AuctionDays*86400L>Utc).Select(a=>new{id=a.Key,item=a.Value.Item,count=a.Value.Count,price=a.Value.Price,condition=a.Value.Gear?.Condition}).ToArray()}).ToArray(),
             housingIntro=p.Data.State.HousingIntro,
             homes=district.Homes.Select(d=>{
                 w.Homes.TryGetValue(d.Id,out var h);var mine=h?.Owner==p.Id;

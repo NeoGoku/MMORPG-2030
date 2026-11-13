@@ -5,6 +5,7 @@ var chunks: Dictionary={}
 var furniture: Dictionary={}
 var room_dividers: Dictionary={}
 var danger: Dictionary={}
+var stalls: Dictionary={}
 var last_refresh:=0.0
 
 func box(parent: Node3D,pos: Vector3,scale_value: Vector3,color: Color,collision: bool=false) -> MeshInstance3D:
@@ -78,6 +79,16 @@ func update_world(state: Dictionary,focus: Vector3) -> void:
             danger[enemy.id].position=Vector3(enemy.warningX,.3,enemy.warningZ)
     for id in danger.keys():
         if not warned.has(id):danger[id].queue_free();danger.erase(id)
+    var visible_stalls: Dictionary={}
+    for stand in community.get("stalls",[]):
+        visible_stalls[stand.id]=true
+        if not stalls.has(stand.id):
+            var node:=Node3D.new();add_child(node);box(node,Vector3(0,.9,0),Vector3(2,.2,1.2),Color("8b7052"));box(node,Vector3(0,2.2,0),Vector3(2.6,.18,1.7),Color("607f89"));sign_text(node,stand.title,Vector3(0,2.8,0));stalls[stand.id]=node
+        stalls[stand.id].position=Vector3(stand.x,.2,stand.z)
+        for label in stalls[stand.id].get_children():
+            if label is Label3D:label.text=stand.title
+    for id in stalls.keys():
+        if not visible_stalls.has(id):stalls[id].queue_free();stalls.erase(id)
     var seen: Dictionary={}
     for home in community.get("homes",[]):
         if room_dividers.has(home.id):room_dividers[home.id].visible=home.rooms==1 and not home.guildHall

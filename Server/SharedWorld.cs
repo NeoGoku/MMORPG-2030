@@ -5,6 +5,7 @@ namespace MMORPG.Server;
 // This is intentionally single-world-server persistence, not a multi-shard architecture.
 public sealed class SharedWorld
 {
+    public Dictionary<string,StallState> Stalls {get;set;}=[];
     public long Version {get;set;}
     public Dictionary<string,HomeState> Homes {get;set;}=[];
     public Dictionary<string,GuildState> Guilds {get;set;}=[];
@@ -40,8 +41,10 @@ public sealed class GuildState
     public long BuffUntil {get;set;}
     public string Hall {get;set;}="";
 }
+public sealed class StallState : Point {public string Title {get;set;}="";public long Until {get;set;}}
 public sealed class AuctionState
 {
+    public string StallId {get;set;}="";
     public PetState? Pet {get;set;}
     public GearState? Gear {get;set;}public string GearId {get;set;}="";
     public string Seller {get;set;}="";public string Item {get;set;}="";

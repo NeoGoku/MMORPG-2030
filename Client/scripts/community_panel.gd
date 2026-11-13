@@ -21,8 +21,8 @@ func _ready() -> void:
     position=Vector2(170,90);size=Vector2(940,520);z_index=20;mouse_filter=Control.MOUSE_FILTER_STOP
     var style:=StyleBoxFlat.new();style.bg_color=Color("102b36");style.set_corner_radius_all(12);add_theme_stylebox_override("panel",style)
     var tabs:=HBoxContainer.new();tabs.position=Vector2(15,12);add_child(tabs)
-    for name in ["Wohnen","Gilde","Auktion","Arena","Schließen"]:
-        var button=TouchAction.new();button.text=name;button.custom_minimum_size=Vector2(177,42);tabs.add_child(button)
+    for name in ["Wohnen","Gilde","Auktion","Stände","Arena","Schließen"]:
+        var button=TouchAction.new();button.text=name;button.custom_minimum_size=Vector2(147,42);tabs.add_child(button)
         button.pressed.connect(func():if name=="Schließen":hide()
         else:tab=name;rebuild())
     details=Label.new();details.position=Vector2(18,62);details.size=Vector2(900,38);details.add_theme_font_size_override("font_size",17);add_child(details)
@@ -173,6 +173,19 @@ func rebuild() -> void:
             for offer in community.get("ownAuctions",[]):
                 var listing_id: String=offer.id
                 button("Eigenes Angebot zurücknehmen: %s × %d"%[catalog.items[offer.item].name,offer.count],func():emit_action("market_cancel",listing_id))
+        "Stände":
+            text("Handelszone x=27–42 / z=16–25. Angebote bleiben im serverseitigen Escrow. Nach Ablauf an der Börse zurücknehmen oder Stand erneuern.")
+            names=input("Standname (3–28 Buchstaben/Ziffern)")
+            button("Stand hier eröffnen / erneuern",func():emit_action("stall_open","",names.text))
+            button("Eigenen Stand schließen; Angebote an Börse belassen",func():emit_action("stall_close"))
+            items=item_picker();amount=spin(1,99,1);price=spin(1,100000,10)
+            button("Auswahl am eigenen Stand einstellen",func():emit_action("stall_list","",selected(items)+"|%d|%d"%[amount.value,price.value]))
+            button("Eigene Erlöse am Stand abholen",func():emit_action("stall_claim"))
+            for stand in community.get("stalls",[]):
+                text("%s · (%.1f, %.1f)"%[stand.title,stand.x,stand.z])
+                for offer in stand.offers:
+                    var listing_id: String=offer.id
+                    button("Am Stand kaufen: %s × %d · %d Münzen"%[catalog.items[offer.item].name,offer.count,offer.price],func():emit_action("stall_buy",listing_id))
         "Arena":
             button("Grünsaum-Transit: (0,90), Stufe 10 / Rückweg (0,112)",func():emit_action("forest_transit"))
             button("Tiefwerk-Transit benutzen: bei (0,-40), St. 5 + Miras Auftrag",func():emit_action("transit"))

@@ -80,3 +80,5 @@ InstanceEconomyTests.Run();
 ContinuationCombatTests.Run();
 
 DurableInstanceTests.Run();
+
+StallTests.Run();

@@ -66,3 +66,6 @@ Actual base is PR #7; #3–#7 remain open, #1/#2 merged. The main-only autonomou
 
 ## Issue #8 — quest navigation
 Data-driven quest navigation coordinates now accompany valid quest snapshots; completed objectives point to the reward NPC. Quest-log tracking drives a private world marker, distance label and minimap direction; Mira's preserved main-hunt adapter can also be tracked. This is guidance, not automatic obstacle-aware navigation. Locked/claimed objectives hide their markers. Local practice mirrors target selection.
+
+## Issue #8 — physical player stalls
+Players can place named persistent stalls in the marked trade zone, escrow stack items or unique gear, inspect nearby stock and buy only within range. Purchases/proceeds use the existing atomic auction transaction; equipped gear/capacity/replay protections remain. Closing moves unsold offers back into the ordinary exchange; expiry preserves seller escrow. Stalls are shared world props, not a separate channel or paid convenience. Pet listings remain at the auction exchange.
