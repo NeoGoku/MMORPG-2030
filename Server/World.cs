@@ -47,6 +47,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
         }
     }
     public void Leave(string id) { lock(gate) {
+        if(ArenaOf(id) is {} abandoned)FinishArena(abandoned,[],"Verbindung beendet");
             cellsDirty=true;
         if(players.TryGetValue(id,out var p)&&p.Data.AccountId!="") {
             try { Store.Save(Export(p)); } catch(Exception e) when(e is GameRuleException or Npgsql.NpgsqlException) { pendingSaves[id]=CharacterRules.Clone(Export(p)); }
@@ -109,7 +110,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
                 if(p.Attacking&&monsters.TryGetValue(p.Target,out var m)&&m.Hp>0) {
                     var range=Distance(p.X,p.Z,m.X,m.Z);
                     if(!moving&&range<=R.AttackRange&&time>=p.NextAttack) {
-                        p.Yaw=Math.Atan2(p.X-m.X,p.Z-m.Z);p.NextAttack=time+R.AttackSeconds/(p.Cooldowns.GetValueOrDefault("status:haste")>time?1.4:1);p.AttackSerial++;if(tick%10==0)GearRules.Wear(p.Data.State);
+                        p.Yaw=Math.Atan2(p.X-m.X,p.Z-m.Z);p.NextAttack=time+R.AttackSeconds/(p.Cooldowns.GetValueOrDefault("status:haste")>time?1.4:1);p.AttackSerial++;GearRules.Use(p.Data.State);
                         p.Data.State.Focus=Math.Min(100,p.Data.State.Focus+8);HitMonster(p,m,Damage(p));
                     }
                 } else if(!monsters.TryGetValue(p.Target,out var selected)||selected.Hp<=0) {p.Attacking=false;p.Target="";}
@@ -152,7 +153,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
             if(cellsDirty){playerCells.Rebuild(players.Values.Select(v=>(v.Id,v.X,v.Z)));monsterCells.Rebuild(monsters.Values.Select(v=>(v.Spawn.Id,v.X,v.Z)));cellsDirty=false;}
             var p=players[id];
             return new("snapshot",tick,playerCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>players[key]).Where(v=>v.Id==id||Distance(v.X,v.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(v=>new PlayerView(v.Id,v.X,v.Z,v.Yaw,VisibleHp(v),VisibleMaxHp(v),v.Level,v.AttackSerial,v.HurtSerial,v.LastDamage,v.Target,v.Attacking,v.Hp<=0,v.Data.Name,v.Data.ClassId,v.SkillSerial,v.Data.Appearance,v.Data.State.Equipment.Concat(v.Data.State.EquippedGear.Where(e=>v.Data.State.Gear.ContainsKey(e.Value)).Select(e=>new KeyValuePair<string,string>(e.Key,v.Data.State.Gear[e.Value].Item))).GroupBy(e=>e.Key).ToDictionary(e=>e.Key,e=>e.Last().Value))).ToArray(),
-                monsterCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>monsters[key]).Where(m=>Distance(m.X,m.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(m=>new MonsterView(m.Spawn.Id,m.Spawn.Name,m.X,m.Z,m.Hp,MaxMonsterHp(m),m.AttackSerial,m.HurtSerial,m.LastDamage,m.Hp<=0,m.Spawn.Level,m.Spawn.Boss,Math.Max(0,m.WarningUntil-time),m.WarningX,m.WarningZ)).ToArray(),
+                monsterCells.Query(p.X,p.Z,Catalog.InterestRadius).Select(key=>monsters[key]).Where(m=>Distance(m.X,m.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(m=>new MonsterView(m.Spawn.Id,m.Spawn.Name,m.X,m.Z,m.Hp,MaxMonsterHp(m),m.AttackSerial,m.HurtSerial,m.LastDamage,m.Hp<=0,m.Spawn.Level,m.Spawn.Boss,Math.Max(0,m.WarningUntil-time),m.WarningX,m.WarningZ,m.Spawn.Family)).ToArray(),
                 loot.Values.Where(l=>l.Owner==id&&Distance(l.X,l.Z,p.X,p.Z)<=Catalog.InterestRadius).Select(l=>new LootView(l.Id,l.MonsterId,l.X,l.Z)).ToArray(),
                 new(p.Quest,p.Kills,p.Exp,p.Level,p.StatPoints,p.Coins,p.Scrap,p.Message,CharacterView(p)),
                 players.Values.Where(v=>v.Data.State.Pet.Active&&(v.Id==id||Distance(v.PetX,v.PetZ,p.X,p.Z)<=Catalog.InterestRadius)).Select(v=>new PetView(v.Id,v.PetX,v.PetZ,v.Data.State.Pet.Level,v.Data.State.Pet.Mode,v.Data.State.Pet.Hp,v.Data.State.Pet.Evolution)).ToArray(),SocialView(p),SummonViews(p),new {phase=(time%Catalog.DaySeconds)/Catalog.DaySeconds,weather=new[]{"klar","Regen","Nebel"}[(int)(time/Catalog.WeatherSeconds)%3]},CommunityView(p),ArenaView(p));
@@ -161,7 +162,7 @@ public sealed partial class World(District district, GameCatalog? game = null, I
     protected override async Task ExecuteAsync(CancellationToken stoppingToken){using var timer=new PeriodicTimer(TimeSpan.FromMilliseconds(50));while(await timer.WaitForNextTickAsync(stoppingToken))Step(.05);}
 }
 public sealed record PlayerView(string Id,double X,double Z,double Yaw,int Hp,int MaxHp,int Level,int AttackSerial,int HurtSerial,int LastDamage,string Target,bool Attacking,bool Dead,string Name="Reisender",string ClassId="Shield Sword",int SkillSerial=0,string Appearance="default",Dictionary<string,string>? Equipment=null);
-public sealed record MonsterView(string Id,string Name,double X,double Z,int Hp,int MaxHp,int AttackSerial,int HurtSerial,int LastDamage,bool Dead,int Level=1,bool Boss=false,double Warning=0,double WarningX=0,double WarningZ=0);
+public sealed record MonsterView(string Id,string Name,double X,double Z,int Hp,int MaxHp,int AttackSerial,int HurtSerial,int LastDamage,bool Dead,int Level=1,bool Boss=false,double Warning=0,double WarningX=0,double WarningZ=0,string Family="");
 public sealed record LootView(string Id,string MonsterId,double X,double Z);
 public sealed record SelfView(string Quest,int Kills,int Exp,int Level,int StatPoints,int Coins,int Scrap,string Message,object? Character=null);
 public sealed record WorldView(string Type,long Tick,PlayerView[] Players,MonsterView[] Monsters,LootView[] Loot,SelfView Self,PetView[] Pets,object? Social=null,SummonView[]? Summons=null,object? Environment=null,object? Community=null,object? Arena=null);

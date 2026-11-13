@@ -29,6 +29,7 @@ public sealed class PetState {public string Id {get;set;}="";public int Hp {get;
 public sealed class CharacterState
 {
     public Dictionary<string,GearState> Gear {get;set;}=[];public Dictionary<string,string> EquippedGear {get;set;}=[];
+    public int WearCounter {get;set;}
     public int Focus {get;set;}=100;
     public int Prestige {get;set;}
     public Dictionary<string,long> DailyClaims {get;set;}=[];

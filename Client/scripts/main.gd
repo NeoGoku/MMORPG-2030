@@ -207,7 +207,7 @@ func _sync_actors(states: Array, nodes: Dictionary, kind: String, selected: Stri
         if not nodes.has(state.id):
             var actor = Actor.new()
             actor.kind = kind
-            actor.monster_variant="boss" if state.get("boss",false) else ("golem" if state.get("level",1)>1 else "drone")
+            actor.monster_variant=state.get("family","") if state.get("family","") in ["boar","spirit","tree"] else ("boss" if state.get("boss",false) else ("golem" if state.get("level",1)>1 else "drone"))
             actor.class_id=state.get("classId",practice.m3.class_id if state.id==local_id else "Shield Sword")
             actor.tint = Color("58cdb3") if state.id == local_id else Color("719ed4")
             actor.display_name = ("Du · "+state.get("name","Reisender")) if state.id == local_id else (state.get("name","Reisender "+state.id.substr(0,4)) if kind == "player" else state.get("name","Gegner")+" · St. "+str(state.get("level",1)))

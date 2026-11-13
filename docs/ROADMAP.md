@@ -38,3 +38,6 @@ Next integration: housing floors/stairs and furniture catalogue/production; guil
 
 ## M6 integration continuation
 Guild chat/hall lifecycle, quest/reward/endgame and paged expiring auctions integrated. Next: unique equipment instances and reversible legacy migration → repair/class equipment → appearance/passives/resources/PvP skills. Full Phase A–G alpha remains partial; detailed next tasks, restore strategy and evidence are in DEVELOPMENT_HANDOFF.md and M6 PR.
+
+## Seven-package continuation
+Completed consecutive code integrations: appearance/instanced gear → class resources/passives/threat → connected forest/open ruins/phased boss/cells → mastery recipes/class+profession quest chains → gear/pet economy → normalized class arena skills/farming → minimap/quality profiles/monster silhouettes. PR #8 could not be retrieved (404); latest accessible base was PR #6. Next priority: full end-to-end instance economy PostgreSQL/restart acceptance, appearance creation-screen presets, legacy gear conversion UX and class-specific PvP balance. Housing floors, production catalogue/stalls, NPC navigation/factions, broad city content/streaming and measured device/load qualification remain open.

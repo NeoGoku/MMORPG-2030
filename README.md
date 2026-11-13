@@ -52,3 +52,8 @@ Passender **v5-Server** nötig. [M5-Betrieb, Grenzen und vorläufige Regeln](doc
 
 ## M6 integration
 Gildenchat im Chatfenster; Leitung kann das Gildenhaus freigeben, Lager bleibt erhalten. Auktionssuche besitzt Seiten; abgelaufene Angebote bleiben bis Rücknahme sicher im Escrow. Neue tägliche Versorgungsquest ab Stufe 2 verdient einen Statpunkt pro UTC-Tag. Seltenen Resetstein über die Boss-Questkette verdienen; im Charaktermenü ab Stufe 10 nutzen. Prestige ab Stufe 100 beim Händler gegen Bosskern (PvE-Bonus, kein Levelreset). Tod verliert vorläufig 5 % der aktuellen Level-EXP, ohne Levelverlust. Passender v6-Server erforderlich. [Exakter Stand/Fortsetzung](docs/DEVELOPMENT_HANDOFF.md). Die vollständige MMORPG-Alpha ist weiterhin in Entwicklung.
+
+## Zusammenhängende Fortsetzung (v7)
+Im Charakterfenster **Aussehen** anpassen. Im Inventar alte Ausrüstung ablegen und einzeln in eine eindeutige Instanz umwandeln; diese ausrüsten und beim Händler reparieren. Zustand/Identität bleiben bei Handel, Auktion und Wohnungslager erhalten. Nicht ausgewählte inaktive Pets ohne Training lassen sich über die Börse handeln. Klassen besitzen eigene Ressourcen und ab Stufe 5 wirksame Passive. In Arenamatches verwenden die sechs Skillplätze normierte Klasseneffekte mit separater Energie.
+
+Der zusammenhängende Grünsaum liegt südlich bei z=100–138: Waldgegner, Rohstoffe, offene Ruinen und Wurzelherz. Fortgeschrittene Rezepte verlangen Berufslevel und seltene Bossmaterialien; neue Klassen-/Berufs-/Weltquestketten führen weiter. Minimap links zeigt reale Gegner/Mitspieler/Services. **Darstellung** speichert Sparsam/Ausgewogen/Weite Sicht. Diese Profile sind noch keine gemessene Gerätefreigabe. [Exakter Fortsetzungspunkt](docs/DEVELOPMENT_HANDOFF.md).

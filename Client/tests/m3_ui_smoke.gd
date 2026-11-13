@@ -43,9 +43,14 @@ func run() -> void:
     scene.menu.tab="Skills"
     scene.menu._rebuild()
     if not check(scene.menu.info.skillbook.size()==8,"Eight real server skillbook entries reach touch menu"):return
-    var picker=scene.menu.content.get_child(1)
+    var picker: OptionButton
+    var binding: Button
+    for child in scene.menu.content.get_children():
+        if child is OptionButton and picker==null:picker=child
+        if child is Button and not child is OptionButton and child.text=="Auf gewählten Platz legen" and binding==null:binding=child
+    if not check(picker!=null and binding!=null,"Skill binding controls are discoverable"):return
     picker.select(5)
-    scene.menu.content.get_child(3).pressed.emit()
+    binding.pressed.emit()
     for i in range(100):
         if scene.world.self.character.skills[5].id=="skill1":break
         await physics_frame

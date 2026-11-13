@@ -14,7 +14,7 @@ public static class ContinuationCombatTests
    var expected=skill.Kind=="explode"?60:80;if(match.GetProperty("energy").GetProperty(a.Id).GetInt32()!=expected)throw new Exception("Arena effect not executed: "+kit.Key+"/"+skill.Id);
    if(skill.Kind is "damage" or "dot" or "slow" or "break" or "drain" or "taunt" or "aoe")if(match.GetProperty("hp").GetProperty(b.Id).GetInt32()!=100-skill.PvpPower)throw new Exception("PvE stats leaked into PvP damage");
    if(skill.Kind is "heal" or "party_heal" or "hot")if(match.GetProperty("hp").GetProperty(a.Id).GetInt32()<=85)throw new Exception("Arena healing missing");
-   count++;w.Leave(a.Id);w.Leave(b.Id);
+   count++;w.Leave(a.Id);if(JsonSerializer.SerializeToElement(w.View(b.Id).Arena,json).GetProperty("matches").GetArrayLength()!=0)throw new Exception("Disconnect must synchronously close match before effects");w.Act(b.Id,3,"arena_skill",skill.Id,a.Id);w.Leave(b.Id);
   }
   Console.WriteLine("PASS continuation combat: "+count+" normalized class skills spend energy and apply damage/healing without PvE stat leakage");
  }

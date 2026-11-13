@@ -65,6 +65,6 @@ public sealed partial class World
     private object? TradeView(Player p)
     {
         var trade=TradeOf(p.Id);if(trade is null)return null;
-        return new {partner=trade.A==p.Id?trade.B:trade.A,remaining=Math.Max(0,trade.Expires-time),offers=trade.Offers.Select(o=>new {owner=o.Key,item=o.Value.Item,count=o.Value.Count,coins=o.Value.Coins,confirmed=trade.Confirmed.Contains(o.Key)}).ToArray()};
+        return new {partner=trade.A==p.Id?trade.B:trade.A,remaining=Math.Max(0,trade.Expires-time),offers=trade.Offers.Select(o=>new {owner=o.Key,item=o.Value.Gear?.Item??o.Value.Item,instanceId=o.Value.Gear is null?null:o.Value.Item,condition=o.Value.Gear?.Condition,count=o.Value.Count,coins=o.Value.Coins,confirmed=trade.Confirmed.Contains(o.Key)}).ToArray()};
     }
 }

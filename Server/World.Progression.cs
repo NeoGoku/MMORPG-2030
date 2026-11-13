@@ -90,7 +90,7 @@ public sealed partial class World
         monsters.TryGetValue(p.Target,out var enemy);
         if(needsTarget&&(enemy is null||enemy.Hp<=0||Distance(p.X,p.Z,enemy.X,enemy.Z)>skill.Range)){p.Message="Lebendes Ziel außerhalb der Skill-Reichweite.";return true;}
         if(skill.Kind=="explode"&&!summons.ContainsKey(p.Id)){p.Message="Zuerst eine eigene Kreatur beschwören.";return true;}
-        p.Data.State.Focus-=skill.FocusCost;p.Mana-=skill.Cost;p.Cooldowns[id]=time+skill.Cooldown;p.SkillSerial++;p.AttackSerial++;CharacterRules.Progress(p.Data.State,"skill",id,Catalog);
+        GearRules.Use(p.Data.State);p.Data.State.Focus-=skill.FocusCost;p.Mana-=skill.Cost;p.Cooldowns[id]=time+skill.Cooldown;p.SkillSerial++;p.AttackSerial++;CharacterRules.Progress(p.Data.State,"skill",id,Catalog);
         switch(skill.Kind){
             case "heal":p.Hp=Math.Min(CharacterRules.MaxHp(p.Data,Catalog),p.Hp+(int)skill.Power+ClassRules.Healing(p.Data,Catalog)+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;
             case "party_heal":foreach(var ally in FriendlyTargets(p,15))ally.Hp=Math.Min(CharacterRules.MaxHp(ally.Data,Catalog),ally.Hp+(int)skill.Power+ClassRules.Healing(p.Data,Catalog)+p.Data.State.Attributes.GetValueOrDefault("wisdom"));break;

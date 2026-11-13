@@ -32,7 +32,7 @@ public static class Session
             }
             if(id is null){using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(1));await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation,"Authentication required or character already connected",deadline.Token);return;}
             using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
-            await Send(socket, new { type = "welcome", version = 6, id, tickRate = 20 }, lifetime.Token);
+            await Send(socket, new { type = "welcome", version = 7, id, tickRate = 20 }, lifetime.Token);
             var receive = Receive(socket, world, id, lifetime.Token);
             var send = Snapshots(socket, world, id, lifetime.Token);
             await Task.WhenAny(receive, send);

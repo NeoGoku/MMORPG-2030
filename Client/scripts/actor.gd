@@ -36,7 +36,8 @@ func _ready() -> void:
         _part(model,"spirit",SphereMesh.new(),Vector3(0,1.1,0),Vector3(.7,.9,.7),Color("82dccb"),true)
         _part(model,"core",SphereMesh.new(),Vector3(0,1.1,-.3),Vector3(.2,.2,.2),Color("fff2aa"),true)
     elif kind == "monster":
-        if monster_variant=="drone":_drone()
+        if monster_variant in ["boar","spirit","tree"]:_creature()
+        elif monster_variant=="drone":_drone()
         else:_golem()
     else:
         _human()
@@ -111,6 +112,22 @@ func _human() -> void:
     elif not magic and class_id!="Archer":
         _part(model,"shield",BoxMesh.new(),Vector3(-.65,1.18,-.10),Vector3(.13,1.05 if class_id=="Tank" else .75,.7),Color("bca16a"))
         if class_id=="Tank":_part(model,"helmet",BoxMesh.new(),Vector3(0,2.25,.02),Vector3(.58,.25,.53),Color("6b8492"))
+
+func _creature() -> void:
+    if monster_variant=="boar":
+        _part(model,"body",SphereMesh.new(),Vector3(0,.85,0),Vector3(1.4,.9,2),Color("786353"))
+        _part(model,"snout",BoxMesh.new(),Vector3(0,.8,-1),Vector3(.65,.4,.5),Color("a18b74"))
+        for side in [-1,1]:
+            for z in [-.6,.6]:_part(model,"foot",BoxMesh.new(),Vector3(side*.45,.35,z),Vector3(.25,.7,.25),Color("4c4843"))
+            _part(model,"tusk",CylinderMesh.new(),Vector3(side*.3,.9,-1.1),Vector3(.08,.6,.08),Color("ddd0ab"))
+    elif monster_variant=="spirit":
+        _part(model,"spirit",SphereMesh.new(),Vector3(0,1.3,0),Vector3(.9,1.8,.9),Color("78aaa1"),true)
+        for side in [-1,1]:_part(model,"wing",SphereMesh.new(),Vector3(side*.8,1.6,0),Vector3(1,.25,.5),Color("b5d5b8"),true)
+    else:
+        _part(model,"trunk",CylinderMesh.new(),Vector3(0,1.5,0),Vector3(1.2,3,1.2),Color("6b6650"))
+        _part(model,"crown",SphereMesh.new(),Vector3(0,3.4,0),Vector3(3,2.2,2.5),Color("48765f"))
+        for side in [-1,1]:_part(model,"root",BoxMesh.new(),Vector3(side*.9,.5,0),Vector3(1.7,.5,1),Color("79745a"))
+        _part(model,"heart",SphereMesh.new(),Vector3(0,1.8,-.6),Vector3(.5,.6,.3),Color("b8dd89"),true)
 
 func _golem() -> void:
     var boss: bool=monster_variant=="boss"

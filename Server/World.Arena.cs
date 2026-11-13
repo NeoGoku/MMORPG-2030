@@ -96,11 +96,14 @@ public sealed partial class World
         }catch(Exception e)when(e is GameRuleException or Npgsql.NpgsqlException){foreach(var id in winners.Where(players.ContainsKey))players[id].Message="Arena gewonnen; Belohnung nicht gespeichert: "+(e is GameRuleException?e.Message:"Datenbankfehler");}
     }
     private void ArenaTick(){foreach(var match in arenaMatches.ToArray()){
+        if(time>=match.Until||match.Hp.Keys.Any(id=>!players.TryGetValue(id,out var p)||!InArena(p)||p.Hp<=0)){FinishArena(match,[],"Zone / Verbindung / Zeitlimit");continue;}
+
         if(tick%20==0)foreach(var id in match.Hp.Keys.ToArray()){
             match.Energy[id]=Math.Min(100,match.Energy[id]+5);
             if(match.Hp[id]>0&&match.Effects.GetValueOrDefault("dot:"+id)>time)match.Hp[id]=Math.Max(0,match.Hp[id]-3);
             if(match.Hp[id]>0&&match.Effects.GetValueOrDefault("summon:"+id)>time){var enemies=match.A.Contains(id)?match.B:match.A;var target=enemies.FirstOrDefault(e=>match.Hp[e]>0&&players.ContainsKey(e)&&players.ContainsKey(id)&&Distance(players[e].X,players[e].Z,players[id].X,players[id].Z)<=12);if(target is not null)match.Hp[target]=Math.Max(0,match.Hp[target]-4);}
         }
+        if(match.Hp.Values.All(hp=>hp==0)){FinishArena(match,[],"Unentschieden");continue;}
         if(match.A.All(id=>match.Hp[id]==0)){FinishArena(match,match.B,"Sieg");continue;}if(match.B.All(id=>match.Hp[id]==0)){FinishArena(match,match.A,"Sieg");continue;}
         var a=match.A.All(id=>players.TryGetValue(id,out var p)&&InArena(p));var b=match.B.All(id=>players.TryGetValue(id,out var p)&&InArena(p));
         if(!a||!b||time>=match.Until)FinishArena(match,!a?match.B:match.A,"Zone verlassen / Verbindung / Zeitlimit");
